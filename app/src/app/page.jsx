@@ -44,24 +44,26 @@ function MyMap() {
     }
   }, [])
 
-  return (
-<MapContainer
-  center={position}
-  zoom={20}
-  style={{ height: '100vh', width: '100%' }}
-  maxBounds={[
-    [12.0, -86.35],
-    [12.25, -86.15]
-  ]}
-  maxBoundsViscosity={1.0}
->
-  <TileLayer
-    attribution='&copy; OpenStreetMap contributors'
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  />
-  <SearchBarControl />
-  <Square center={[12.1364, -86.2514]} size={5000} />
-</MapContainer>
+return (
+      <MapContainer
+      center={position}
+      zoom={20}
+      style={{ height: '100vh', width: '100%' }}
+      maxBounds={[
+        [12.0, -86.35],
+        [12.25, -86.15]
+      ]}
+      maxBoundsViscosity={1.0}
+    >
+      <TileLayer
+        attribution='&copy; OpenStreetMap contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+
+      <SearchBarControl />
+       <Square center={[12.1364, -86.2514]} size={5000} />
+
+    </MapContainer>
   )
 }
 
