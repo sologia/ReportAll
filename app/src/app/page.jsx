@@ -28,24 +28,24 @@ const center = [51.505, -0.09]
 
 function MyMap() {
 
-    const [position, setPosition] = useState([12.1364, -86.2514]) // fallback: Managua
+  const [position, setPosition] = useState([12.1364, -86.2514]) // fallback: Managua
 
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords
-          setPosition([latitude, longitude])
-        },
-        (err) => {
-          console.warn('Error obteniendo ubicación:', err)
-        }
-      )
-    }
+          (pos) => {
+            const { latitude, longitude } = pos.coords
+            setPosition([latitude, longitude])
+          },
+          (err) => {
+            console.warn('Error obteniendo ubicación:', err)
+          }
+        )
+      }
   }, [])
 
-return (
-      <MapContainer
+  return (
+    <MapContainer
       center={position}
       zoom={20}
       style={{ height: '100vh', width: '100%' }}
@@ -55,13 +55,14 @@ return (
       ]}
       maxBoundsViscosity={1.0}
     >
+
       <TileLayer
         attribution='&copy; OpenStreetMap contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
       <SearchBarControl />
-       <Square center={[12.1364, -86.2514]} size={5000} />
+      <Square center={[12.1364, -86.2514]} size={5000} />
 
     </MapContainer>
   )
