@@ -3,10 +3,11 @@ import MyMap from '@/app/page'
 
 const ViewReportClient = () => {
   return (
-    <div>
+    <div className='rounded-2xl '>
         <ButtonBack/>
         
-        <div className='rounded-2xl h-screen w-full'>
+        <div className=''>
+        {/* <div className='rounded-2xl h-screen w-full'> */}
             <MyMap/>
         </div>
 

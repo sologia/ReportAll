@@ -8,7 +8,7 @@ const CrawPage = () => {
 
         <ButtonGroup
             buttons={[
-              { label: "Reportes", href: "/dashboard/enacal" },
+              { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
               { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
               { label: "Menu", href: "/dashboard/enacal" },
             ]}
