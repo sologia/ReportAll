@@ -4,15 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-  "dev": "concurrently \"npm run start --prefix backend\" \"next dev --turbopack\"",    
-  "build": "next build --turbopack",
+    "dev": "concurrently \"npm run start --prefix backend\" \"next dev --turbopack\"",
+    "build": "next build --turbopack",
     "start": "next start",
     "backendrun": ""
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "msnodesqlv8": "^5.1.1",
+    "next": "15.5.6",
+    "node": "^20.19.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.6"
+    "wellknown": "^0.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
