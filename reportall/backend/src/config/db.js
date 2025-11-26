@@ -4,9 +4,10 @@ dotenv.config();
 const DB_AUTH = (process.env.DB_AUTH || 'sql').toLowerCase();
 
 // Cargar el driver adecuado (top-level await, package.json tiene "type":"module")
+import msnodesqlv8 from 'mssql/msnodesqlv8.js';
 let sqlModule;
 if (DB_AUTH === 'windows') {
-  sqlModule = await import('mssql/msnodesqlv8');
+  sqlModule = msnodesqlv8;
 } else {
   sqlModule = await import('mssql');
 }
