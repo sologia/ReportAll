@@ -94,17 +94,18 @@ export async function update(req, res, next) {
 
         const pool = await poolPromise;
         let setParts = [];
+        let setDate = [];
         const request = pool.request().input('id', sql.Int, id);
 
         if (Name_Problem !== undefined) {
-            setParts.push('Name_Problem = @Name_Problem');
+            setParts.push('Problem_ID =(Select 1 Problem_ID from Cat_Problems where Name_Problem = @Name_Problem), ');
             request.input('Name_Problem', sql.NVarChar(100), Name_Problem);
         }
         if (Urgency !== undefined) {
-            setParts.push('Urgency = @Urgency');
+            setParts.push('ProblemLevel_ID = select 1 ProblemLevel_ID from Cat_ProblemLevels where Urgency = @Urgency), ');
             request.input('Urgency', sql.NVarChar(200), Urgency);
         }
-        if (GeoM !== undefined) {
+  /*      if (GeoM !== undefined) {
             const parsed = tryParseJSON(GeoM);
             let geomWkt = null;
             if (parsed) {
@@ -114,20 +115,20 @@ export async function update(req, res, next) {
             request.input('GeoM_WKT', sql.NVarChar(sql.MAX), geomWkt);
             setParts.push('GeoM = CASE WHEN @GeoM_WKT IS NOT NULL AND LEN(@GeoM_WKT) > 0 THEN geometry::STGeomFromText(@GeoM_WKT, 4326) ELSE GeoM END');
         }
+            */
         if (BINPhoto !== null) {
-            setParts.push('BINPhoto = @BINPhoto');
             request.input('BINPhoto', sql.VarBinary(sql.MAX), BINPhoto);
         }
         if (Adress !== undefined) {
-            setParts.push('Adress = @Adress');
+            setParts.push('Adress = @Adress, ');
             request.input('Adress', sql.NVarChar(200), Adress);
         }
         if (Name_Sector !== undefined) {
-            setParts.push('Name_Sector = @Name_Sector');
+            setParts.push('Sector_ID = Select 1 Sector_ID from Cat_Sectors where Name_Sector = @Name_Sector)');
             request.input('Name_Sector', sql.NVarChar(200), Name_Sector);
         }
         if (Date_Time !== undefined) {
-            setParts.push('Date_Time = @Date_Time');
+            setDate.push('Date_Time = @Date_Time');
             request.input('Date_Time', sql.DateTime, Date_Time);
         }
 
@@ -135,13 +136,19 @@ export async function update(req, res, next) {
 
         const setClause = setParts.join(', ');
         const sqlQuery = `
-            UPDATE Reports
-            SET ${setClause}
-            WHERE id = @id;
+            
+        insert into Cat_Photos (BINPhoto) values (@BINPhoto)
+        declare @IDPhoto int
+        set @IDPhoto = SCOPE_IDENTITY();
 
-            SELECT id, Name_Problem, Urgency, GeoM, Adress, Name_Sector, Date_Time, ClientID
-            FROM Reports
-            WHERE id = @id;
+            UPDATE Reports
+            SET ${setClause}, Photo_ID = @IDPhoto
+            WHERE Report_ID = @id;
+
+            UPDATE Clients_Reports
+            SET ${setDate}
+            WHERE Report_ID = @id;
+          
         `;
 
         const result = await request.query(sqlQuery);
@@ -160,7 +167,7 @@ export async function remove(req, res, next) {
         const pool = await poolPromise;
         await pool.request()
             .input('id', sql.Int, id)
-            .query('DELETE FROM Reports WHERE id = @id');
+            .query('DELETE FROM Reports WHERE Report_ID = @id');
         res.status(204).end();
     } catch (err) {
         next(err);
