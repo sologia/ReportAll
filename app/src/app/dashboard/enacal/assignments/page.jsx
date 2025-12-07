@@ -1,10 +1,23 @@
+'use client'
+
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SearchBar from '@/app/components/SearchBar'
-import React from 'react'
+import SimpleTable from '@/app/components/SimpleTable'
+import React, { useState } from 'react'
 
 const AssignmentsPage = () => {
+
+  const [data, setData] = useState([]);
+  
+    const columns = [
+      { header: "ID", field: "id" },
+      { header: "Nombre", field: "nombre" },
+      { header: "Estado", field: "estado" },
+      { header: "Fecha", field: "fecha" },
+    ];
+  
   return (
-    <div>
+    <form>
 
         <ButtonGroup
             buttons={[
@@ -24,9 +37,13 @@ const AssignmentsPage = () => {
             ]}
         />
 
+        <div>
+          <SimpleTable columns={ columns } data={ data }/>
+        </div>
+
         
 
-    </div>
+    </form>
   )
 }
 

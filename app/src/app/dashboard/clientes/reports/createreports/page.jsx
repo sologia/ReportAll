@@ -2,32 +2,22 @@
 import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
 import MyMap from '@/app/page';
-import { useRef, useState } from 'react';
+import { useForm } from '@/hooks/useForm';
+
+
+const ReportFields = {
+    tipoReporte: '',
+}
 
 const CreateReportClient = () => {
 
-  const handleSubmit = (e) => {
+  const { tipoReporte, onInputChange: onReportInputChange } = useForm( ReportFields );
+
+
+  const ReportSubmit = (e) => {
     e.preventDefault();
     // Aquí manejas el envío del formulario
-    console.log('Formulario enviado');
-  };
-
-  const [preview, setPreview] = useState(null);
-  const fileInputRef = useRef(null);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
+    console.log(e);
   };
 
 
@@ -38,7 +28,7 @@ const CreateReportClient = () => {
         <ButtonBack/>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={ReportSubmit} className="flex flex-col gap-6">
 
         <div className=' flex flex-col gap-4 ml-15'>
           
@@ -48,11 +38,16 @@ const CreateReportClient = () => {
           </div>
 
           <div className='flex gap-6'>
-            <label form="opciones_problemas" className='w-46'>Selecciona un problema</label>
-            <select name="opciones_problemas" id="opciones_problemas" className='bg-[#b2b1b1] rounded-2xl w-12'>
-              <option value="">Tubo roto de agua potable</option>
-              <option value="">Medidor dañado</option>
-              <option value="">Problemas del sistema de alcantarillado sanitario(manjol rebalsado o sintaba)</option>
+            <label className='w-46'>Selecciona un problema</label>
+            <select 
+              name="tipoReporte" 
+              value={ tipoReporte } 
+              onChange={ onReportInputChange }
+              className='bg-[#b2b1b1] rounded-2xl w-36'
+            >
+              <option value="Tubo roto de agua potable">Tubo roto de agua potable</option>
+              <option value="Medidor dañado">Medidor dañado</option>
+              <option value="Problemas del sistema de alcantarillado sanitario(manjol rebalsado o sintaba)">Problemas del sistema de alcantarillado sanitario(manjol rebalsado o sintaba)</option>
             </select>
           </div>
 
