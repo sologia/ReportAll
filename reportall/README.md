@@ -2,6 +2,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+This repository contains a Next.js frontend and a separate Express backend.
+By default `npm run dev` starts both concurrently (frontend on port 3000 and
+backend on port 3001).
+
+### Environment
+Create a `.env.local` in the project root with the following if you need an
+explicit API base URL for other environments:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+### Development
+
 First, run the development server:
 
 ```bash
@@ -14,6 +28,12 @@ pnpm dev
 bun dev
 ```
 
+The frontend code can make requests to `/api/*` and the `next.config.mjs`
+rewrites proxy those calls to the backend.  When building for production the
+backend serves the static files and handles `/api` requests directly.
+
+```bash
+```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.

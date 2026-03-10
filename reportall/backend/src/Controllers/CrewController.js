@@ -31,16 +31,16 @@ export async function getById(req, res, next) {
 // POST /api/crews
 export async function create(req, res, next) {
     try {
-        const { Availability, Sector, NumVehicle, Num_Crew } = req.body;
+        const { Availability, Sector, Plate, Num_Crew } = req.body;
         const pool = await poolPromise;
 
         const request = pool.request()
             .input('Availability', sql.NVarChar(250), Availability)
             .input('Sector', sql.NVarChar(250), Sector)
-            .input('NumVehicle', sql.Int, NumVehicle)
+            .input('Plate', sql.NVarChar(20), Plate)
             .input('Num_Crew', sql.Int, Num_Crew);
 
-        const result = await request.query('EXEC sp_InsertCrew @Availability, @Sector, @NumVehicle, @Num_Crew');
+        const result = await request.query('EXEC sp_InsertCrew @Availability, @Sector, @Plate, @Num_Crew');
         res.status(201).json(result.recordset && result.recordset[0] ? result.recordset[0] : {});
     } catch (err) {
         next(err);
@@ -53,26 +53,26 @@ export async function update(req, res, next) {
         const id = parseInt(req.params.id, 10);
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
-        const { Availability, Sector, NumVehicle, Num_Crew } = req.body;
+        const { Availability, Sector, Plate, Num_Crew } = req.body;
         const pool = await poolPromise;
         const request = pool.request().input('id', sql.Int, id);
 
         let setParts = [];
         if (Num_Crew !== undefined) {
-            setParts.push('Num_Crew = @Num_Crew, ');
+            setParts.push('Num_Crew = @Num_Crew');
             request.input('Num_Crew', sql.Int, Num_Crew);
         }
         if (Availability !== undefined) {
-            setParts.push('Availability_Crew_ID = (SELECT Availability_Crew_ID FROM Cat_Availabilitys_Crews WHERE Availability_Crew = @Availability), ');
+            setParts.push('Availability_Crew_ID = (SELECT Availability_Crew_ID FROM Cat_Availabilitys_Crews WHERE Availability_Crew = @Availability)');
             request.input('Availability', sql.NVarChar(250), Availability);
         }
         if (Sector !== undefined) {
-            setParts.push('Sector_ID = (SELECT Sector_ID FROM Cat_Sectors WHERE Name_Sector = @Sector), ');
+            setParts.push('Sector_ID = (SELECT Sector_ID FROM Cat_Sectors WHERE Name_Sector = @Sector)');
             request.input('Sector', sql.NVarChar(250), Sector);
         }
-        if (NumVehicle !== undefined) {
-            setParts.push('Vehicle_ID = (SELECT Vehicle_ID FROM Cat_Vehicles WHERE Num_Vehicle = @NumVehicle)');
-            request.input('NumVehicle', sql.Int, NumVehicle);
+        if (Plate !== undefined) {
+            setParts.push('Vehicle_ID = (SELECT Vehicle_ID FROM Cat_Vehicles WHERE Plate = @Plate)');
+            request.input('Plate', sql.NVarChar(20), Plate);
         }
 
         if (setParts.length === 0) return res.status(400).json({ message: 'No updatable fields provided' });
@@ -82,8 +82,6 @@ export async function update(req, res, next) {
             UPDATE Crews
             SET ${setClause}
             WHERE Crew_ID = @id;
-
-           
         `;
 
         const result = await request.query(sqlQuery);

@@ -3,18 +3,28 @@
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SearchBar from '@/app/components/SearchBar'
 import SimpleTable from '@/app/components/SimpleTable'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const AssignmentsPage = () => {
 
   const [data, setData] = useState([]);
   
     const columns = [
-      { header: "ID", field: "id" },
-      { header: "Nombre", field: "nombre" },
-      { header: "Estado", field: "estado" },
-      { header: "Fecha", field: "fecha" },
+      { header: "Nombre del Lider", field: "Name_Leader" },
+      { header: "Numero Cuadrilla", field: "Num_Crew" },
+      { header: "Nombre Ruta", field: "Name_Path" },
+      { header: "Fecha", field: "Date_Time" },
+      { header: "Estado", field: "StateAs" },
     ];
+
+    // load assignments (placeholder) to avoid confusion in UI
+    useEffect(() => {
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      fetch(`${base}/api/assignments`)
+        .then(res => res.json())
+        .then(data => setData(data))
+        .catch(err => console.error('failed loading assignments', err));
+    }, []);
   
   return (
     <form>

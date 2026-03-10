@@ -1,13 +1,50 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
-
+import React, { useEffect, useState } from 'react'
 
 const CreateCraw = () => {
+  const [vehicles, setVehicles] = useState([]);
+  const [sectors, setSectors] = useState([]);
+
+  // disponibilidad fija
+  const defaultAvailability = 'Disponible';
+
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_API_URL || '';
+    fetch(`${base}/api/vehicles`)
+      .then(res => res.json())
+      .then(data => setVehicles(data))
+      .catch(err => console.error('Error cargando vehículos', err));
+
+    fetch(`${base}/api/sectors`)
+      .then(res => res.json())
+      .then(data => setSectors(data))
+      .catch(err => console.error('Error cargando sectores', err));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí manejas el envío del formulario
-    console.log('Formulario enviado');
+    const form = e.target;
+    const payload = {
+      Availability: defaultAvailability,
+      Sector: form.opciones_sectores.value,
+      // Plate string rather 
+      Plate: form.opciones_vehiculos.value,
+      Num_Crew: parseInt(form.num_cuadrilla.value, 10)
+    };
+
+    const base = process.env.NEXT_PUBLIC_API_URL || '';
+    fetch(`${base}/api/crews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Crew created', data);
+        // optionally navigate away or show a message
+      })
+      .catch(err => console.error('Error creating crew', err));
   };
 
   return (
@@ -22,27 +59,48 @@ const CreateCraw = () => {
         <div className=' flex flex-col gap-4 ml-16'>
           
           <div className='flex gap-6 items-center'>
-            <label htmlFor="" className='w-[90px]'>N° Cuadrilla</label>
-            <p>Aca ira un numero que se auto incremente</p>
+            <label htmlFor="num_cuadrilla" className='w-[90px]'>N° Cuadrilla</label>
+            <input
+              type="number"
+              id="num_cuadrilla"
+              name="num_cuadrilla"
+              className="bg-[#b2b1b1] rounded-2xl w-32"
+              required
+            />
           </div>
 
           <div className='flex gap-6'>
-            <label form="opciones_vehiculos" className='w-24'>Vehiculos</label>
-            <select name="opciones_vehiculos" id="opciones_vehiculos" className='bg-[#b2b1b1] rounded-2xl w-12'>
-              <option value="">1</option>
-              <option value="">2</option>
-              <option value="">3</option>
+            <label htmlFor="opciones_vehiculos" className='w-24'>Matrícula</label>
+            <select
+              name="opciones_vehiculos"
+              id="opciones_vehiculos"
+              className='bg-[#b2b1b1] rounded-2xl w-32'
+              required
+            >
+              <option value="">Seleccione</option>
+              {vehicles.map((v, idx) => (
+                <option key={idx} value={v.Plate}>{v.Plate}</option>
+              ))}
             </select>
           </div>
 
           <div className='flex gap-6'>
-            <label form='opciones_sectores' className='w-24'>Sector</label>
-            <select name="opciones_sectores" id="opciones_sectores" className='bg-[#b2b1b1] rounded-2xl w-12'>
-              <option value="">1</option>
-              <option value="">2</option>
-              <option value="">3</option>
+            <label htmlFor='opciones_sectores' className='w-24'>Sector</label>
+            <select
+              name="opciones_sectores"
+              id="opciones_sectores"
+              className='bg-[#b2b1b1] rounded-2xl w-32'
+              required
+            >
+              <option value="">Seleccione</option>
+              {sectors.map((s, idx) => (
+                <option key={idx} value={s.Name_Sector}>{s.Name_Sector}</option>
+              ))}
             </select>
           </div>
+
+          {/* disponibilidad oculta */}
+          <input type="hidden" name="availability" value={defaultAvailability} />
         </div>
 
         <div className='flex flex-col gap-3 mr-16'>

@@ -24,7 +24,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
   lastLayer = layer;
 });
 
-// permite activar una única selección por clic en el mapa
+// permite activar una ï¿½nica selecciï¿½n por clic en el mapa
 export function enableMapClickForMarker() {
   function onClick(e) {
     setMarker(e.latlng.lat, e.latlng.lng);
@@ -57,24 +57,26 @@ export function getGeometryWKT() {
   return wellknown.stringify(geojsonGeometry);
 }
 
-// función que envía datos al backend (usa FormData para adjuntar imagen si hay)
-// mantiene compatibilidad con la versión previa: usa la geometría actualmente dibujada
+// funciï¿½n que envï¿½a datos al backend (usa FormData para adjuntar imagen si hay)
+// mantiene compatibilidad con la versiï¿½n previa: usa la geometrï¿½a actualmente dibujada
 export async function sendReport(formFields, fileInput) {
   const wkt = getGeometryWKT();
   if (!wkt) {
-    throw new Error('Dibuja la geometría en el mapa antes de enviar.');
+    throw new Error('Dibuja la geometrï¿½a en el mapa antes de enviar.');
   }
 
   const fd = new FormData();
   Object.entries(formFields).forEach(([k, v]) => {
     if (v !== undefined && v !== null) fd.append(k, v);
   });
-  fd.append('GeoM', wkt); // el backend esperará WKT
+  fd.append('GeoM', wkt); // el backend esperarï¿½ WKT
   if (fileInput && fileInput.files && fileInput.files[0]) {
     fd.append('BINPhoto', fileInput.files[0]); // campo que espera multer en backend
   }
 
-  const res = await fetch('/api/reports', {
+  // use NEXT_PUBLIC_API_URL for explicit base or rely on rewrites/proxy
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
+  const res = await fetch(`${base}/api/reports`, {
     method: 'POST',
     body: fd
   });
