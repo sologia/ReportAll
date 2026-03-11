@@ -3,13 +3,11 @@ import ButtonBack from '@/app/components/ButtonBack'
 import React, { useEffect, useState } from 'react'
 
 const CreateAssignments = () => {
-
-
 const [numcrew, setNumCrew] = useState([]);
 const [namepath, setNamePath] = useState([]);
 const [stateAs, setStateAs] = useState([]);
- const [crews, setCrews] = useState([]);
- const [leader, setLeader] = useState([]);
+const [leader, setLeader] = useState([]);
+
  useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/api/leaders`)
@@ -18,7 +16,7 @@ const [stateAs, setStateAs] = useState([]);
       .catch(err => console.error('Error cargando lideres', err));
     fetch(`${base}/api/crewsonly`)
       .then(res => res.json())
-      .then(data => setCrews(data))
+      .then(data => setNumCrew(data))
       .catch(err => console.error('Error cargando cuadrillas', err));
         fetch(`${base}/api/states`)
       .then(res => res.json())
@@ -39,13 +37,24 @@ const [stateAs, setStateAs] = useState([]);
       Name_Path: form.opciones_ruta.value,
       Date_Time: form.date.value,
       StateAs: form.opciones_estados.value
-    
-      
     };
     // Aquí manejas el envío del formulario
     console.log('Formulario enviado');
-  };
+ 
+   const base = process.env.NEXT_PUBLIC_API_URL || '';
+    fetch(`${base}/api/assignments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Assignment created', data);
+        // optionally navigate away or show a message
+      })
+      .catch(err => console.error('Error creating assignment', err));
 
+ };
   return (
     <div>
       
@@ -60,7 +69,7 @@ const [stateAs, setStateAs] = useState([]);
           <div className='flex gap-6 items-center'>
             <label htmlFor="date" className='w-[90px]'>Fecha dd/mm/aa </label>
             <input
-              type="text"
+              type="date"
               id="date"
               name="date"
               className="bg-[#b2b1b1] rounded-2xl w-32"
@@ -92,8 +101,8 @@ const [stateAs, setStateAs] = useState([]);
               required
               >
               <option value="">Seleccione</option>
-              {crews.map((c, idx) => (
-                <option key={idx} value={c.Crew_ID}>{c.Crew_ID}</option>
+              {numcrew.map((c, idx) => (
+                <option key={idx} value={c.Num_Crew}>{c.Num_Crew}</option>
               ))}
               </select>
             </div>
