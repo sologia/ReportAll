@@ -3,6 +3,7 @@ import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
 import MyMap from '@/app/page';
 import { useForm } from '@/hooks/useForm';
+import { useState } from 'react';
 
 
 const ReportFields = {
@@ -13,11 +14,25 @@ const CreateReportClient = () => {
 
   const { tipoReporte, onInputChange: onReportInputChange } = useForm( ReportFields );
 
+  const [coords, setCoords] = useState(null);
+
+  const handleMapSelect = ([lat, lng]) => {
+    setCoords([lat, lng]);
+  };
+
+  const handleUseMyLocation = () => {
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => setCoords([coords.latitude, coords.longitude]),
+        (err) => console.warn('Error obteniendo ubicación:', err)
+      );
+    }
+  };
 
   const ReportSubmit = (e) => {
     e.preventDefault();
-    // Aquí manejas el envío del formulario
-    console.log(e);
+    // incluir coords en envío
+    console.log('coords:', coords);
   };
 
 
@@ -64,7 +79,19 @@ const CreateReportClient = () => {
 
         <div className=''>
           <p className='ml-6 text-[20px]'>Seleccione la ubicacion del problema</p>
-          <MyMap/>
+          <div className="ml-6 mb-2">
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+            >
+              Usar mi ubicación
+            </button>
+          </div>
+          <MyMap onSelect={handleMapSelect} selectedPosition={coords} />
+          {coords && (
+            <p className='ml-6'>Lat: {coords[0]}, Lng: {coords[1]}</p>
+          )}
         </div>
 
         <div className='flex mb-6'>
