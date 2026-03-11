@@ -61,29 +61,40 @@ export async function update(req, res, next) {
         const request = pool.request().input('id', sql.Int, id);
 
         let setParts = [];
-        
+
+        // Líder
         if (Name_Leader !== undefined) {
             setParts.push('Leader_Crew_ID = (SELECT Leader_Crew_ID FROM Leader_Crews WHERE Name_Leader = @Name_Leader)');
             request.input('Name_Leader', sql.NVarChar(250), Name_Leader);
         }
+
+        // Cuadrilla
         if (Num_Crew !== undefined) {
             setParts.push('Crew_ID = (SELECT Crew_ID FROM Crews WHERE Num_Crew = @Num_Crew)');
             request.input('Num_Crew', sql.Int, Num_Crew);
         }
+
+        // Ruta
         if (Name_Path !== undefined) {
             setParts.push('Path_ID = (SELECT Path_ID FROM Paths WHERE Name_Path = @Name_Path)');
             request.input('Name_Path', sql.NVarChar(250), Name_Path);
         }
+
+        // Fecha: se inserta nueva y se obtiene el ID
+        let newDateId = null;
         if (Date_Time !== undefined) {
-            // Mejor: obtener o crear el Date_ID
-            setParts.push(`
-                Date_ID = (
-                    SELECT Date_ID FROM Dates 
-                    WHERE CAST(Date_time AS DATE) = CAST(@Date_Time AS DATE)
-                )
-            `);
-            request.input('Date_Time', sql.DateTime, Date_Time);
+            const insertResult = await pool.request()
+                .input('Date_Time', sql.DateTime, Date_Time)
+                .query(`
+                    INSERT INTO Dates (Date_time) VALUES (@Date_Time);
+                    SELECT SCOPE_IDENTITY() AS Date_ID;
+                `);
+            newDateId = insertResult.recordset[0].Date_ID;
+            setParts.push('Date_ID = @NewDate_ID');
+            request.input('NewDate_ID', sql.Int, newDateId);
         }
+
+        // Estado
         if (StateAs !== undefined) {
             setParts.push('State_ID = (SELECT State_ID FROM Cat_States WHERE StateAs = @StateAs)');
             request.input('StateAs', sql.NVarChar(250), StateAs);
@@ -95,7 +106,6 @@ export async function update(req, res, next) {
 
         const setClause = setParts.join(', ');
         
-        // Corregido: Assignment_ID (con 'n') y ahora SELECT después de UPDATE
         const sqlQuery = `
             UPDATE Assigments
             SET ${setClause}
@@ -103,14 +113,9 @@ export async function update(req, res, next) {
         `;
 
         const result = await request.query(sqlQuery);
-        
-        // El resultado actualizado está en la segunda tabla de resultados
         const updated = result.recordsets[1] && result.recordsets[1][0];
-        
-        if (!updated) {
-            return res.status(404).json({ message: 'Assignment not found after update' });
-        }
-        
+
+
         res.json(updated);
     } catch (err) {
         next(err);

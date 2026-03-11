@@ -54,6 +54,8 @@ export async function update(req, res, next) {
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
         const { Availability, Sector, Plate, Num_Crew } = req.body;
+      
+
         const pool = await poolPromise;
         const request = pool.request().input('id', sql.Int, id);
 
@@ -75,7 +77,9 @@ export async function update(req, res, next) {
             request.input('Plate', sql.NVarChar(20), Plate);
         }
 
-        if (setParts.length === 0) return res.status(400).json({ message: 'No updatable fields provided' });
+        if (setParts.length === 0) {
+            return res.status(400).json({ message: 'No updatable fields provided' });
+        }
 
         const setClause = setParts.join(', ');
         const sqlQuery = `
@@ -84,12 +88,18 @@ export async function update(req, res, next) {
             WHERE Crew_ID = @id;
         `;
 
+        console.log('Consulta SQL:', sqlQuery);
         const result = await request.query(sqlQuery);
-        const updated = result.recordset && result.recordset[0] ? result.recordset[0] : null;
-        if (!updated) return res.status(404).json({ message: 'Not found' });
-        res.json(updated);
+        console.log('Resultado:', result);
+
+        if (result.rowsAffected && result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        res.json({ message: 'Updated successfully' });
     } catch (err) {
-        next(err);
+        console.error('Error en update:', err); // ← Esto mostrará el error real en la consola del servidor
+        res.status(500).json({ message: err.message }); // ← Devolvemos el mensaje al cliente
     }
 }
 
