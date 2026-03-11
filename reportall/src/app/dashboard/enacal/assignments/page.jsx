@@ -13,7 +13,7 @@ const AssignmentsPage = () => {
       { header: "Nombre del Lider", field: "Name_Leader" },
       { header: "Numero Cuadrilla", field: "Num_Crew" },
       { header: "Nombre Ruta", field: "Name_Path" },
-      { header: "Fecha", field: "Date_Time" },
+      { header: "Fecha", field: "Dates" },
       { header: "Estado", field: "StateAs" },
     ];
 
