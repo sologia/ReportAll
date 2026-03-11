@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/reports', reportsRouter);
 app.use('/api/crews', crewsRouter);
 app.use('/api/clients', clientsRouter);
-app.use('/api/assignments', assignmentsRouter);
+app.use('/api/assigments', assignmentsRouter);
 app.use('/api/sectors', sectorsRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/leaders', leadersRouter);

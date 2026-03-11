@@ -61,48 +61,61 @@ export async function update(req, res, next) {
         const request = pool.request().input('id', sql.Int, id);
 
         let setParts = [];
+        
         if (Name_Leader !== undefined) {
-            setParts.push('Leader_Crew_ID = (SELECT Leader_Crew_ID FROM Leader_Crews WHERE Name_Leader = @Name_Leader), ');
+            setParts.push('Leader_Crew_ID = (SELECT Leader_Crew_ID FROM Leader_Crews WHERE Name_Leader = @Name_Leader)');
             request.input('Name_Leader', sql.NVarChar(250), Name_Leader);
         }
         if (Num_Crew !== undefined) {
-            setParts.push('Crew_ID = (SELECT Crew_ID FROM Crews WHERE Num_Crew = @Num_Crew), ');
+            setParts.push('Crew_ID = (SELECT Crew_ID FROM Crews WHERE Num_Crew = @Num_Crew)');
             request.input('Num_Crew', sql.Int, Num_Crew);
         }
         if (Name_Path !== undefined) {
-            setParts.push('Path_ID = (SELECT Path_ID FROM Paths WHERE Name_Path = @Name_Path), ');
+            setParts.push('Path_ID = (SELECT Path_ID FROM Paths WHERE Name_Path = @Name_Path)');
             request.input('Name_Path', sql.NVarChar(250), Name_Path);
         }
         if (Date_Time !== undefined) {
-            // Asume que Dates table ya contiene la fecha; ajusta si quieres insertar una nueva fecha
-            setParts.push('Date_ID = (SELECT TOP 1 Date_ID FROM Dates WHERE Date_time = @Date_Time), ');
+            // Mejor: obtener o crear el Date_ID
+            setParts.push(`
+                Date_ID = (
+                    SELECT Date_ID FROM Dates 
+                    WHERE CAST(Date_time AS DATE) = CAST(@Date_Time AS DATE)
+                )
+            `);
             request.input('Date_Time', sql.DateTime, Date_Time);
         }
         if (StateAs !== undefined) {
-            setParts.push('State_ID = (SELECT State_ID FROM Cat_States WHERE StateAs = @StateAs), ');
+            setParts.push('State_ID = (SELECT State_ID FROM Cat_States WHERE StateAs = @StateAs)');
             request.input('StateAs', sql.NVarChar(250), StateAs);
         }
 
-        if (setParts.length === 0) return res.status(400).json({ message: 'No updatable fields provided' });
+        if (setParts.length === 0) {
+            return res.status(400).json({ message: 'No updatable fields provided' });
+        }
 
         const setClause = setParts.join(', ');
+        
+        // Corregido: Assignment_ID (con 'n') y ahora SELECT después de UPDATE
         const sqlQuery = `
             UPDATE Assigments
             SET ${setClause}
             WHERE Assigment_ID = @id;
-
-
         `;
 
         const result = await request.query(sqlQuery);
-        const updated = result.recordset && result.recordset[0] ? result.recordset[0] : null;
-        if (!updated) return res.status(404).json({ message: 'Not found' });
+        
+        // El resultado actualizado está en la segunda tabla de resultados
+        const updated = result.recordsets[1] && result.recordsets[1][0];
+        
+        if (!updated) {
+            return res.status(404).json({ message: 'Assignment not found after update' });
+        }
+        
         res.json(updated);
     } catch (err) {
         next(err);
     }
 }
-
 // DELETE /api/assigments/:id
 export async function remove(req, res, next) {
     try {

@@ -47,6 +47,7 @@ const UpdateCraw = () => {
       .then(res => res.json())
       .then(data => {
         setFormValues({
+          
           Num_Crew: data.Num_Crew || '',
           Plate: data.Plate || '',
           Sector: data.Name_Sector || '',
@@ -66,6 +67,7 @@ const UpdateCraw = () => {
     if (!selectedId) return;
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     const payload = {
+      
       Availability: formValues.Availability,
       Sector: formValues.Sector,
       Plate: formValues.Plate,
