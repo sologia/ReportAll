@@ -25,6 +25,7 @@ const CreateReportClient = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [datest, setDate] = useState('');
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -96,15 +97,15 @@ const CreateReportClient = () => {
       setSubmitMessage('Enviando reporte...');
 
       const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const geometryWKT = `POINT(${coords[1]} ${coords[0]})`;
       const formData = new FormData();
 
       formData.append('Name_Problem', tipoReporte);
       formData.append('Urgency', 'Media');
-      formData.append('GeoM', geometryWKT);
+      formData.append('X', coords[1]);
+      formData.append('Y', coords[0]);
       formData.append('Adress', address);
       formData.append('Name_Sector', selectedSector);
-      formData.append('Date_Time', new Date().toISOString());
+      formData.append('Date_Time', datest);
       formData.append('ClientID', '1');
 
       if (selectedFiles.length > 0 && selectedFiles[0]?.file) {
@@ -192,6 +193,18 @@ const CreateReportClient = () => {
               name="direccion"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
+              required
+            />
+          </div>
+          <div className='flex gap-6 items-center'>
+            <label htmlFor="fecha" className='w-56'>Fecha:</label>
+            <input
+              type="date"
+              id="fecha"
+              name="fecha"
+              value={datest}
+              onChange={(e) => setDate(e.target.value)}
               className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
               required
             />

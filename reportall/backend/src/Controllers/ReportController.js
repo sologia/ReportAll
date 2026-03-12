@@ -43,33 +43,22 @@ export async function getById(req, res, next) {
 // POST /api/reports
 export async function create(req, res, next) {
     try {
-        const { Name_Problem, Urgency, GeoM, Adress, Name_Sector, Date_Time, ClientID } = req.body;
+        const { Name_Problem, Urgency, X, Y, Adress, Name_Sector, Date_Time, ClientID } = req.body;
         const pool = await poolPromise;
         const BINPhoto = req.file ? req.file.buffer : null;
 
-        // GeoM puede ser GeoJSON (objeto o string) o WKT string
-        let geomWkt = null;
-        const parsed = tryParseJSON(GeoM);
-        if (parsed) {
-            if (typeof parsed === 'string') {
-                geomWkt = parsed;
-            } else {
-                geomWkt = wellknown.stringify(parsed.type ? parsed : parsed.geometry || parsed);
-            }
-        }
-
+      
+       
         const query = `
-            DECLARE @g geometry = NULL;
-            IF @GeoM_WKT IS NOT NULL AND LEN(@GeoM_WKT) > 0
-                SET @g = geometry::STGeomFromText(@GeoM_WKT, 4326);
-
-            EXEC sp_InsertReport @Name_Problem, @Urgency, @g, @BINPhoto, @Adress, @Name_Sector, @Date_Time, @ClientID;
+    
+            EXEC sp_InsertReport @Name_Problem, @Urgency, @X, @Y, @BINPhoto, @Adress, @Name_Sector, @Date_Time, @ClientID;
         `;
 
         const request = pool.request()
             .input('Name_Problem', sql.NVarChar(100), Name_Problem)
             .input('Urgency', sql.NVarChar(200), Urgency)
-            .input('GeoM_WKT', sql.NVarChar(sql.MAX), geomWkt)
+            .input('X', sql.Float, X)
+            .input('Y', sql.Float, Y)
             .input('BINPhoto', sql.VarBinary(sql.MAX), BINPhoto)
             .input('Adress', sql.NVarChar(200), Adress)
             .input('Name_Sector', sql.NVarChar(200), Name_Sector)
