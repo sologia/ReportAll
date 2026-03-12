@@ -1,20 +1,36 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
-import MyMap from '@/app/page';
+// import MyMap from '@/app/page';
+import dynamic from 'next/dynamic';
+const MyMap = dynamic(() => import('@/app/components/MyMap'), { ssr: false });
 import { useForm } from '@/hooks/useForm';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 const ReportFields = {
-    tipoReporte: '',
+  tipoReporte: '',
 }
 
 const CreateReportClient = () => {
 
-  const { tipoReporte, onInputChange: onReportInputChange } = useForm( ReportFields );
+  const { tipoReporte, onInputChange: onReportInputChange } = useForm(ReportFields);
 
   const [coords, setCoords] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          const location = [coords.latitude, coords.longitude];
+          setCurrentLocation(location);
+          setCoords(location);
+        },
+        (err) => console.warn('Error obteniendo ubicación:', err)
+      );
+    }
+  }, []);
 
   const handleMapSelect = ([lat, lng]) => {
     setCoords([lat, lng]);
@@ -31,34 +47,33 @@ const CreateReportClient = () => {
 
   const ReportSubmit = (e) => {
     e.preventDefault();
-    // incluir coords en envío
     console.log('coords:', coords);
   };
 
 
   return (
     <div>
-      
+
       <div>
-        <ButtonBack/>
+        <ButtonBack />
       </div>
 
       <form onSubmit={ReportSubmit} className="flex flex-col gap-6">
 
         <div className=' flex flex-col gap-4 ml-15'>
-          
+
           <div className='flex'>
-            {/* <label htmlFor="" className='w-[90px]'>N° Cuadrilla</label> */}
             <p className='m-auto text-[32px] font-bold'>Datos del problema</p>
           </div>
 
-          <div className='flex gap-6'>
-            <label className='w-46'>Selecciona un problema</label>
-            <select 
-              name="tipoReporte" 
-              value={ tipoReporte } 
-              onChange={ onReportInputChange }
-              className='bg-[#b2b1b1] rounded-2xl w-36'
+          <div className="flex gap-6 items-center">
+
+            <label className='w-56'>Selecciona un problema</label>
+            <select
+              name="tipoReporte"
+              value={tipoReporte}
+              onChange={onReportInputChange}
+              className='bg-[#b2b1b1] rounded-2xl w-64'
             >
               <option value="Tubo roto de agua potable">Tubo roto de agua potable</option>
               <option value="Medidor dañado">Medidor dañado</option>
@@ -66,12 +81,34 @@ const CreateReportClient = () => {
             </select>
           </div>
 
-          
-          <div className='flex gap-6'>
+          <div className="flex gap-6 items-center">
+            <label htmlFor='opciones_sectores' className='w-56'>Sector</label>
+            <select
+              name="opciones_sectores"
+              id="opciones_sectores"
+              className='bg-[#b2b1b1] rounded-2xl w-64'
+              required
+            >
+              <option value="">Seleccione</option>
+            </select>
+          </div>
 
-            <label className='w-46'>Subir imagenes/videos</label>
+          <div className='flex gap-6 items-center'>
+            <label htmlFor="num_cuadrilla" className='w-56'>Direccion:</label>
+            <textarea
+              type="text"
+              id="direccion"
+              name="direccion"
+              className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
+              required
+            />
+          </div>
+
+          <div className="flex gap-6 items-start">
+
+            <label className='w-56'>Subir imagenes/videos</label>
             <div>
-              <MultiFileUpload/>
+              <MultiFileUpload />
             </div>
           </div>
 
@@ -79,32 +116,20 @@ const CreateReportClient = () => {
 
         <div className=''>
           <p className='ml-6 text-[20px]'>Seleccione la ubicacion del problema</p>
-          <div className="ml-6 mb-2">
-            <button
-              type="button"
-              onClick={handleUseMyLocation}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-            >
-              Usar mi ubicación
-            </button>
-          </div>
-          <MyMap onSelect={handleMapSelect} selectedPosition={coords} />
-          {coords && (
-            <p className='ml-6'>Lat: {coords[0]}, Lng: {coords[1]}</p>
-          )}
+          <MyMap onSelect={handleMapSelect} selectedPosition={coords} currentLocation={currentLocation} />
+          <p className='ml-6'>Ubicación actual: {currentLocation ? `Lat: ${currentLocation[0]}, Lng: ${currentLocation[1]}` : 'Obteniendo...'} (marcador azul)</p>
+          <p className='ml-6'>Ubicación seleccionada: {coords ? `Lat: ${coords[0]}, Lng: ${coords[1]}` : 'Ninguna'} (marcador rojo)</p>
         </div>
 
         <div className='flex mb-6'>
           <button
-                type="submit"
-              //   value='Login'
-                className="w-70 ml-8 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-                Aceptar
+            type="submit"
+            className="w-70 ml-8 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+          >
+            Aceptar
           </button>
         </div>
       </form>
-      
 
     </div>
   )
