@@ -11,6 +11,7 @@ function simplexample () {
         buttons={[
           { label: "Buscar", href: "/dashboard/clientes/reports/viewreports" },
           { label: "Crear reporte", href: "/dashboard/clientes/reports/createreports" },
+          { label: "Enacal", href: "/dashboard/enacal" },
         ]}
       />
       

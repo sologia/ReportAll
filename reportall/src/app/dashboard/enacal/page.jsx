@@ -11,6 +11,7 @@ const TowExample = () => {
           { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
           { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
           { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
+          { label: "Clientes", href: "/dashboard/clientes" },
         ]}
       />
     </>
