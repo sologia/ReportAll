@@ -18,6 +18,13 @@ const CreateReportClient = () => {
 
   const [coords, setCoords] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [problems, setProblems] = useState([]);
+  const [sectors, setSectors] = useState([]);
+  const [selectedSector, setSelectedSector] = useState('');
+  const [address, setAddress] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -30,24 +37,97 @@ const CreateReportClient = () => {
         (err) => console.warn('Error obteniendo ubicación:', err)
       );
     }
+
+    const loadSectors = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${base}/api/sectors`);
+        if (!response.ok) throw new Error('No se pudieron cargar los sectores');
+        const data = await response.json();
+        setSectors(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error cargando sectores:', error);
+      }
+    };
+
+    const loadProblems = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${base}/api/problems`);
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}));
+          throw new Error(errorBody?.detail || errorBody?.message || 'No se pudieron cargar los problemas');
+        }
+        const data = await response.json();
+        setProblems(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error cargando problemas:', error?.message || error);
+      }
+    };
+
+    loadSectors();
+    loadProblems();
   }, []);
 
   const handleMapSelect = ([lat, lng]) => {
     setCoords([lat, lng]);
   };
 
-  const handleUseMyLocation = () => {
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => setCoords([coords.latitude, coords.longitude]),
-        (err) => console.warn('Error obteniendo ubicación:', err)
-      );
-    }
-  };
-
-  const ReportSubmit = (e) => {
+  const ReportSubmit = async (e) => {
     e.preventDefault();
-    console.log('coords:', coords);
+
+    if (!coords || coords.length !== 2) {
+      setSubmitMessage('Debes seleccionar una ubicación válida en el mapa.');
+      return;
+    }
+
+    if (!selectedSector) {
+      setSubmitMessage('Debes seleccionar un sector.');
+      return;
+    }
+
+    if (!address.trim()) {
+      setSubmitMessage('Debes escribir la dirección.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setSubmitMessage('Enviando reporte...');
+
+      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const geometryWKT = `POINT(${coords[1]} ${coords[0]})`;
+      const formData = new FormData();
+
+      formData.append('Name_Problem', tipoReporte);
+      formData.append('Urgency', 'Media');
+      formData.append('GeoM', geometryWKT);
+      formData.append('Adress', address);
+      formData.append('Name_Sector', selectedSector);
+      formData.append('Date_Time', new Date().toISOString());
+      formData.append('ClientID', '1');
+
+      if (selectedFiles.length > 0 && selectedFiles[0]?.file) {
+        formData.append('BINPhoto', selectedFiles[0].file);
+      }
+
+      const response = await fetch(`${base}/api/reports`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}`);
+      }
+
+      setSubmitMessage('Reporte enviado correctamente.');
+    } catch (error) {
+      console.error('Error enviando reporte:', error);
+      setSubmitMessage('No se pudo enviar el reporte. Verifica los datos e intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -74,10 +154,14 @@ const CreateReportClient = () => {
               value={tipoReporte}
               onChange={onReportInputChange}
               className='bg-[#b2b1b1] rounded-2xl w-64'
+              required
             >
-              <option value="Tubo roto de agua potable">Tubo roto de agua potable</option>
-              <option value="Medidor dañado">Medidor dañado</option>
-              <option value="Problemas del sistema de alcantarillado sanitario(manjol rebalsado o sintaba)">Problemas del sistema de alcantarillado sanitario(manjol rebalsado o sintaba)</option>
+              <option value="">Seleccione</option>
+              {problems.map((problem, idx) => (
+                <option key={problem.Problem_ID || idx} value={problem.Name_Problem}>
+                  {problem.Name_Problem}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -86,10 +170,17 @@ const CreateReportClient = () => {
             <select
               name="opciones_sectores"
               id="opciones_sectores"
+              value={selectedSector}
+              onChange={(e) => setSelectedSector(e.target.value)}
               className='bg-[#b2b1b1] rounded-2xl w-64'
               required
             >
               <option value="">Seleccione</option>
+              {sectors.map((sector, idx) => (
+                <option key={sector.Name_Sector || idx} value={sector.Name_Sector}>
+                  {sector.Name_Sector}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -99,6 +190,8 @@ const CreateReportClient = () => {
               type="text"
               id="direccion"
               name="direccion"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
               required
             />
@@ -108,7 +201,7 @@ const CreateReportClient = () => {
 
             <label className='w-56'>Subir imagenes/videos</label>
             <div>
-              <MultiFileUpload />
+              <MultiFileUpload onFilesSelect={setSelectedFiles} />
             </div>
           </div>
 
@@ -124,11 +217,13 @@ const CreateReportClient = () => {
         <div className='flex mb-6'>
           <button
             type="submit"
+            disabled={isSubmitting}
             className="w-70 ml-8 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            Aceptar
+            {isSubmitting ? 'Enviando...' : 'Aceptar'}
           </button>
         </div>
+        {submitMessage && <p className='ml-8 text-sm'>{submitMessage}</p>}
       </form>
 
     </div>
