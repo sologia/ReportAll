@@ -15,6 +15,8 @@ function DashboardLayout ({ children }) {
 
     if (pathname.includes("/dashboard/enacal/craw"))
       return "Cuadrillas";
+    if (pathname.includes("/dashboard/enacal/path"))
+      return "Path";
 
     return "Menu Principal"; // default
   };
