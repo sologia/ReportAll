@@ -100,9 +100,11 @@ export async function update(req, res, next) {
         `;
 
         const result = await request.query(sqlQuery);
-        const updated = result.recordset && result.recordset[0] ? result.recordset[0] : null;
-        if (!updated) return res.status(404).json({ message: 'Not found' });
-        res.json(updated);
+        if (!result.rowsAffected || result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        res.json({ message: 'Updated successfully' });
     } catch (err) {
         next(err);
     }

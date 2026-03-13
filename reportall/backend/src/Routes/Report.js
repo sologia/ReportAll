@@ -14,6 +14,9 @@ router.get('/options', ctrl.getOptions);
 // GET /api/reports/summary
 router.get('/summary', ctrl.getSummary);
 
+// GET /api/reports/summary-map
+router.get('/summary-map', ctrl.getSummaryMap);
+
 // GET /api/reports/client/:clientId
 router.get('/client/:clientId', ctrl.getByClient);
 

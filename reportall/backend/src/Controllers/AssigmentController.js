@@ -231,11 +231,14 @@ export async function update(req, res, next) {
         `;
 
         const result = await request.query(sqlQuery);
-        const updated = result.recordsets[1] && result.recordsets[1][0];
+        if (!result.rowsAffected || result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Not found' });
+        }
 
-        if (!updated) return res.status(404).json({ message: 'Not found' });
+        const updated = result.recordsets?.[1]?.[0] || null;
+        if (updated) return res.json(updated);
 
-        res.json(updated);
+        res.json({ message: 'Updated successfully' });
     } catch (err) {
         next(err);
     }

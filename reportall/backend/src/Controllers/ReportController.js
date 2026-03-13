@@ -121,6 +121,154 @@ export async function getSummary(req, res, next) {
     }
 }
 
+// GET /api/reports/summary-map?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&state=...&district=...
+export async function getSummaryMap(req, res, next) {
+    try {
+        const { dateFrom, dateTo, date, state, district, sector } = req.query;
+        const pool = await poolPromise;
+        const request = pool.request();
+
+        const metadataResult = await pool.request().query(`
+            SELECT
+                t.name AS TableName,
+                c.name AS ColumnName
+            FROM sys.tables t
+            INNER JOIN sys.columns c ON c.object_id = t.object_id
+            WHERE t.name IN ('Reports', 'GeoProblems')
+        `);
+
+        const reportColumns = new Set(
+            metadataResult.recordset
+                .filter(row => row.TableName === 'Reports')
+                .map(row => row.ColumnName),
+        );
+
+        const geoColumns = new Set(
+            metadataResult.recordset
+                .filter(row => row.TableName === 'GeoProblems')
+                .map(row => row.ColumnName),
+        );
+
+        const geoKeyCandidates = [
+            ['GeoProblem_ID', 'GeoProblem_ID'],
+            ['GeoM_ID', 'GeoM_ID'],
+            ['Geo_ID', 'Geo_ID'],
+            ['Report_ID', 'Report_ID'],
+            ['GeoProblemID', 'GeoProblem_ID'],
+            ['GeoProblem_ID', 'GeoProblemID'],
+        ];
+
+        const geoJoinPair = geoKeyCandidates.find(([reportKey, geoKey]) => (
+            reportColumns.has(reportKey) && geoColumns.has(geoKey)
+        ));
+
+        const hasGeoJoin = Boolean(geoJoinPair);
+        const geoJoinClause = hasGeoJoin
+            ? `LEFT JOIN GeoProblems gp ON gp.${geoJoinPair[1]} = r.${geoJoinPair[0]}`
+            : '';
+
+        const latCandidates = [];
+        const lngCandidates = [];
+
+        if (hasGeoJoin && geoColumns.has('CoordY')) latCandidates.push('TRY_CONVERT(float, gp.CoordY)');
+        if (hasGeoJoin && geoColumns.has('CoordX')) lngCandidates.push('TRY_CONVERT(float, gp.CoordX)');
+
+        if (hasGeoJoin && geoColumns.has('GeoM')) {
+            latCandidates.push('TRY_CONVERT(float, gp.GeoM.STY)');
+            lngCandidates.push('TRY_CONVERT(float, gp.GeoM.STX)');
+        }
+
+        if (reportColumns.has('Y')) latCandidates.push('TRY_CONVERT(float, r.Y)');
+        if (reportColumns.has('X')) lngCandidates.push('TRY_CONVERT(float, r.X)');
+
+        if (reportColumns.has('CoordY')) latCandidates.push('TRY_CONVERT(float, r.CoordY)');
+        if (reportColumns.has('CoordX')) lngCandidates.push('TRY_CONVERT(float, r.CoordX)');
+
+        if (reportColumns.has('GeoM')) {
+            latCandidates.push('TRY_CONVERT(float, r.GeoM.STY)');
+            lngCandidates.push('TRY_CONVERT(float, r.GeoM.STX)');
+        }
+
+        const latExpr = latCandidates.length ? `COALESCE(${latCandidates.join(', ')})` : 'NULL';
+        const lngExpr = lngCandidates.length ? `COALESCE(${lngCandidates.join(', ')})` : 'NULL';
+
+        const whereParts = [
+            `${latExpr} IS NOT NULL`,
+            `${lngExpr} IS NOT NULL`,
+        ];
+
+        if (dateFrom) {
+            whereParts.push('CAST(d.Date_time AS date) >= @dateFrom');
+            request.input('dateFrom', sql.Date, dateFrom);
+        }
+
+        if (dateTo) {
+            whereParts.push('CAST(d.Date_time AS date) <= @dateTo');
+            request.input('dateTo', sql.Date, dateTo);
+        }
+
+        if (date) {
+            whereParts.push('CAST(d.Date_time AS date) = @date');
+            request.input('date', sql.Date, date);
+        }
+
+        if (state) {
+            whereParts.push('ISNULL(st.StateAs, \'Sin estado\') = @state');
+            request.input('state', sql.NVarChar(100), state);
+        }
+
+        if (district) {
+            whereParts.push('cs.Name_Sector = @district');
+            request.input('district', sql.NVarChar(200), district);
+        }
+
+        if (sector) {
+            whereParts.push('cs.Name_Sector = @sector');
+            request.input('sector', sql.NVarChar(200), sector);
+        }
+
+        const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
+
+        const query = `
+            SELECT
+                r.Report_ID,
+                p.Name_Problem,
+                cpr.Urgency,
+                r.Adress,
+                cs.Name_Sector AS District,
+                CAST(d.Date_time AS date) AS Report_Date,
+                ISNULL(st.StateAs, 'Sin estado') AS State,
+                ${lngExpr} AS X,
+                ${latExpr} AS Y,
+                c.Num_Crew,
+                lc.Name_Leader
+            FROM Reports r
+            LEFT JOIN Cat_Problems p ON r.Problem_ID = p.Problem_ID
+            LEFT JOIN Cat_ProblemLevels cpr ON r.ProblemLevel_ID = cpr.ProblemLevel_ID
+            LEFT JOIN Cat_Sectors cs ON r.Sector_ID = cs.Sector_ID
+            ${geoJoinClause}
+            LEFT JOIN Clients_Reports cr ON cr.Report_ID = r.Report_ID
+            LEFT JOIN Dates d ON d.Date_ID = cr.Date_ID
+            OUTER APPLY (
+                SELECT TOP 1 a.Assigment_ID, a.State_ID, a.Crew_ID, a.Leader_Crew_ID
+                FROM Assigments a
+                WHERE a.Report_ID = r.Report_ID
+                ORDER BY a.Assigment_ID DESC
+            ) la
+            LEFT JOIN Cat_States st ON st.State_ID = la.State_ID
+            LEFT JOIN Crews c ON c.Crew_ID = la.Crew_ID
+            LEFT JOIN Leader_Crews lc ON lc.Leader_Crew_ID = la.Leader_Crew_ID
+            ${whereClause}
+            ORDER BY r.Report_ID DESC
+        `;
+
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        next(err);
+    }
+}
+
 // GET /api/reports/client/:clientId
 export async function getByClient(req, res, next) {
     try {
@@ -280,9 +428,11 @@ export async function update(req, res, next) {
         `;
 
         const result = await request.query(sqlQuery);
-        const updated = result.recordset && result.recordset[0] ? result.recordset[0] : null;
-        if (!updated) return res.status(404).json({ message: 'Not found' });
-        res.json(updated);
+        if (!result.rowsAffected || result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        res.json({ message: 'Updated successfully' });
     } catch (err) {
         next(err);
     }
