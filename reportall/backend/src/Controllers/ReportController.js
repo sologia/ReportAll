@@ -32,10 +32,12 @@ export async function getOptions(req, res, next) {
                 r.Report_ID,
                 r.Adress,
                 p.Name_Problem,
-                cpr.Urgency
+                cpr.Urgency,
+                cs.Name_Sector AS District
             FROM Reports r
             LEFT JOIN Cat_Problems p ON r.Problem_ID = p.Problem_ID
             LEFT JOIN Cat_ProblemLevels cpr ON r.ProblemLevel_ID = cpr.ProblemLevel_ID
+            LEFT JOIN Cat_Sectors cs ON r.Sector_ID = cs.Sector_ID
             ORDER BY r.Report_ID DESC
         `);
         res.json(result.recordset);

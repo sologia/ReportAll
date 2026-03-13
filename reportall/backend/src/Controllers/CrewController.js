@@ -65,10 +65,30 @@ export async function getReportsByCrew(req, res, next) {
         const id = parseInt(req.params.id, 10);
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
+        const { problem, state, date } = req.query;
+
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('id', sql.Int, id)
-            .query(`
+        const request = pool.request().input('id', sql.Int, id);
+        const whereParts = ['a.Crew_ID = @id'];
+
+        if (problem) {
+            whereParts.push('p.Name_Problem = @problem');
+            request.input('problem', sql.NVarChar(250), problem);
+        }
+
+        if (state) {
+            whereParts.push('st.StateAs = @state');
+            request.input('state', sql.NVarChar(250), state);
+        }
+
+        if (date) {
+            whereParts.push('CAST(ds.Date_time AS date) = @date');
+            request.input('date', sql.Date, date);
+        }
+
+        const whereClause = `WHERE ${whereParts.join(' AND ')}`;
+
+        const result = await request.query(`
                 SELECT
                     a.Assigment_ID,
                     r.Report_ID,
@@ -85,7 +105,7 @@ export async function getReportsByCrew(req, res, next) {
                 LEFT JOIN Cat_Sectors cs ON cs.Sector_ID = r.Sector_ID
                 LEFT JOIN Dates ds ON ds.Date_ID = a.Date_ID
                 LEFT JOIN Cat_States st ON st.State_ID = a.State_ID
-                WHERE a.Crew_ID = @id
+                ${whereClause}
                 ORDER BY a.Assigment_ID DESC
             `);
 

@@ -78,6 +78,38 @@ export async function create(req, res, next) {
 
         const pool = await poolPromise;
 
+        const districtValidation = await pool.request()
+            .input('Num_Crew', sql.Int, Num_Crew)
+            .input('Report_ID', sql.Int, reportId)
+            .query(`
+                SELECT
+                    crewSector.Name_Sector AS Crew_District,
+                    reportSector.Name_Sector AS Report_District
+                FROM (SELECT TOP 1 Crew_ID, Sector_ID FROM Crews WHERE Num_Crew = @Num_Crew) c
+                LEFT JOIN Cat_Sectors crewSector ON crewSector.Sector_ID = c.Sector_ID
+                LEFT JOIN Reports r ON r.Report_ID = @Report_ID
+                LEFT JOIN Cat_Sectors reportSector ON reportSector.Sector_ID = r.Sector_ID
+            `);
+
+        const districtRow = districtValidation.recordset[0];
+        if (!districtRow) {
+            return res.status(400).json({ message: 'No se pudieron validar los distritos de cuadrilla y reporte' });
+        }
+
+        const crewDistrict = districtRow.Crew_District;
+        const reportDistrict = districtRow.Report_District;
+        if (!crewDistrict || !reportDistrict) {
+            return res.status(400).json({ message: 'Cuadrilla o reporte sin distrito definido' });
+        }
+
+        if (crewDistrict !== reportDistrict) {
+            return res.status(400).json({
+                message: 'Solo se permiten asignaciones cuando cuadrilla y reporte pertenecen al mismo distrito',
+                crewDistrict,
+                reportDistrict,
+            });
+        }
+
         const request = pool.request()
             .input('Name_Leader', sql.NVarChar(250), Name_Leader)
             .input('Num_Crew', sql.Int, Num_Crew)

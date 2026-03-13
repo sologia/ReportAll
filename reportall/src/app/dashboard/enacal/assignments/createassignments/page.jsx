@@ -10,6 +10,8 @@ const CreateAssignments = () => {
     const [crewInfo, setCrewInfo] = useState([])
     const [stateAs, setStateAs] = useState([])
     const [leader, setLeader] = useState([])
+    const [selectedCrew, setSelectedCrew] = useState('')
+    const [submitError, setSubmitError] = useState('')
 
     const base = process.env.NEXT_PUBLIC_API_URL || ''
 
@@ -18,18 +20,26 @@ const CreateAssignments = () => {
         return !isAssigned
     })
 
+    const selectedCrewInfo = numcrew.find((crew) => String(crew.Num_Crew) === String(selectedCrew))
+    const selectedCrewDistrict = selectedCrewInfo?.District || ''
+
+    const allowedReports = selectedCrewDistrict
+        ? unassignedReports.filter((report) => report.District === selectedCrewDistrict)
+        : unassignedReports
+
     const unassignedReportsColumns = [
         { header: 'Reporte ID', field: 'Report_ID' },
         { header: 'Direccion', field: 'Adress' },
         { header: 'Problema', field: 'Name_Problem' },
         { header: 'Urgencia', field: 'Urgency' },
+        { header: 'Distrito', field: 'District' },
     ]
 
     const crewInfoColumns = [
         { header: 'Crew ID', field: 'Crew_ID' },
         { header: 'Numero Cuadrilla', field: 'Num_Crew' },
         { header: 'Disponibilidad', field: 'Availability_Crew' },
-        { header: 'Sector', field: 'Name_Sector' },
+        { header: 'Distrito', field: 'Name_Sector' },
         { header: 'Placa', field: 'Plate' },
     ]
 
@@ -70,6 +80,7 @@ const CreateAssignments = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setSubmitError('')
         const form = e.target
         const payload = {
             Name_Leader: form.opciones_lider.value,
@@ -87,13 +98,16 @@ const CreateAssignments = () => {
             })
 
             if (!response.ok) {
-                throw new Error('No se pudo crear la asignación')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.message || 'No se pudo crear la asignación')
             }
 
             form.reset()
+            setSelectedCrew('')
             await loadData()
         } catch (err) {
             console.error('Error creating assignment', err)
+            setSubmitError(err.message || 'No se pudo crear la asignación')
         }
     }
 
@@ -137,11 +151,17 @@ const CreateAssignments = () => {
                             name="opciones_cuadrillas"
                             id="opciones_cuadrillas"
                             className='bg-[#b2b1b1] rounded-2xl w-32'
+                            value={selectedCrew}
+                            onChange={(e) => {
+                                setSelectedCrew(e.target.value)
+                            }}
                             required
                         >
                             <option value="">Seleccione</option>
                             {numcrew.map((c, idx) => (
-                                <option key={idx} value={c.Num_Crew}>{c.Num_Crew}</option>
+                                <option key={idx} value={c.Num_Crew}>
+                                    {`${c.Num_Crew} - ${c.District || 'Sin distrito'}`}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -155,9 +175,9 @@ const CreateAssignments = () => {
                             required
                         >
                             <option value="">Seleccione</option>
-                            {reports.map((report) => (
+                            {allowedReports.map((report) => (
                                 <option key={report.Report_ID} value={report.Report_ID}>
-                                    {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'}`}
+                                    {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'} (${report.District || 'Sin distrito'})`}
                                 </option>
                             ))}
                         </select>
@@ -190,9 +210,11 @@ const CreateAssignments = () => {
                 </div>
             </form>
 
+            {submitError ? <p className='mt-3 text-red-600'>{submitError}</p> : null}
+
             <div className='mt-10'>
                 <h3 className='text-xl font-semibold'>Reportes no asignados</h3>
-                <SimpleTable columns={unassignedReportsColumns} data={unassignedReports} />
+                <SimpleTable columns={unassignedReportsColumns} data={allowedReports} />
             </div>
 
             <div className='mt-10'>
