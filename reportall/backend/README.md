@@ -20,3 +20,19 @@ PORT=3001
 You may move the `.env` file to the root of `backend/` and adjust
 `dotenv.config()` call in `server.js` accordingly.  Ensure the
 `DB_USER`/`DB_PASSWORD` pair are correct to avoid login errors.
+
+## Migración de registro y login
+
+Ejecuta en SQL Server el script:
+
+`backend/sql/2026-03-13-auth-users.sql`
+
+Este script crea la tabla `Auth_Users` y sus relaciones:
+
+- `Auth_Users.Client_ID -> Clients.Client_ID`
+- `Auth_Users.Leader_Crew_ID -> Leader_Crews.Leader_Crew_ID`
+
+Endpoints habilitados:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`

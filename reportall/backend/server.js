@@ -12,6 +12,7 @@ import availabilityRouter from './src/Routes/Availability.js';
 import leadersRouter from './src/Routes/Leaders.js';
 import crewsonlyRouter from './src/Routes/Crewsonly.js';
 import stateRouter from './src/Routes/stattus.js';
+import authRouter from './src/Routes/Auth.js';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -43,6 +44,7 @@ app.use('/api/leaders', leadersRouter);
 app.use('/api/availabilities', availabilityRouter);
 app.use('/api/crewsonly', crewsonlyRouter);
 app.use('/api/states', stateRouter);
+app.use('/api/auth', authRouter);
 
 // Manejador de errores simple
 app.use((err, req, res, next) => {

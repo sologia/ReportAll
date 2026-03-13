@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
+import Swal from 'sweetalert2';
 
 const UpdateCraw = () => {
   const [crews, setCrews] = useState([]);
@@ -68,11 +69,23 @@ const UpdateCraw = () => {
     e.preventDefault();
     if (!selectedId) {
       setMessage('Por favor selecciona una cuadrilla');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Selecciona una cuadrilla',
+        text: 'Debes elegir una cuadrilla para actualizar.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
     const idNum = Number(selectedId);
     if (isNaN(idNum)) {
       setMessage('El ID seleccionado no es válido');
+      await Swal.fire({
+        icon: 'error',
+        title: 'ID inválido',
+        text: 'El ID seleccionado no es válido.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
 
@@ -101,6 +114,12 @@ const UpdateCraw = () => {
       }
 
       setMessage('¡Cuadrilla actualizada correctamente!');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Cuadrilla actualizada',
+        text: 'Los cambios se guardaron correctamente.',
+        confirmButtonText: 'Aceptar',
+      });
       fetch(`${base}/api/crews`)
         .then(res => res.json())
         .then(data => setCrews(Array.isArray(data) ? data : []))
@@ -108,6 +127,12 @@ const UpdateCraw = () => {
     } catch (err) {
       console.error('Error:', err);
       setMessage(err.message);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: err.message || 'No se pudo actualizar la cuadrilla',
+        confirmButtonText: 'Entendido',
+      });
     } finally {
       setLoading(false);
     }

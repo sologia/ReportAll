@@ -2,6 +2,7 @@
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
 import React, { useEffect, useState } from 'react'
+import Swal from 'sweetalert2'
 
 const CreateAssignments = () => {
     const [numcrew, setNumCrew] = useState([])
@@ -105,9 +106,22 @@ const CreateAssignments = () => {
             form.reset()
             setSelectedCrew('')
             await loadData()
+            await Swal.fire({
+                icon: 'success',
+                title: 'Asignación creada',
+                text: 'La asignación se registró correctamente.',
+                confirmButtonText: 'Aceptar',
+            })
         } catch (err) {
             console.error('Error creating assignment', err)
-            setSubmitError(err.message || 'No se pudo crear la asignación')
+            const errorMessage = err.message || 'No se pudo crear la asignación'
+            setSubmitError(errorMessage)
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error al crear',
+                text: errorMessage,
+                confirmButtonText: 'Entendido',
+            })
         }
     }
 

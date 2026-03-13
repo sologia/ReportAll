@@ -1,22 +1,8 @@
-const USERS_KEY = 'reportall_users';
 const SESSION_KEY = 'reportall_session';
 
-const defaultUsers = [
-  {
-    email: 'trabajador@enacal.com',
-    password: '123456',
-    role: 'trabajador',
-    displayName: 'Trabajador ENACAL',
-    clientId: null,
-  },
-  {
-    email: 'cliente@enacal.com',
-    password: '123456',
-    role: 'cliente',
-    displayName: 'Cliente Demo',
-    clientId: 1,
-  },
-];
+function getApiBase() {
+  return process.env.NEXT_PUBLIC_API_URL || '';
+}
 
 function safeParse(jsonText, fallbackValue) {
   try {
@@ -24,29 +10,6 @@ function safeParse(jsonText, fallbackValue) {
   } catch {
     return fallbackValue;
   }
-}
-
-export function getUsers() {
-  if (typeof window === 'undefined') return defaultUsers;
-
-  const raw = localStorage.getItem(USERS_KEY);
-  if (!raw) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
-    return defaultUsers;
-  }
-
-  const parsed = safeParse(raw, defaultUsers);
-  if (!Array.isArray(parsed) || parsed.length === 0) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
-    return defaultUsers;
-  }
-
-  return parsed;
-}
-
-export function saveUsers(users) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
 export function getSession() {
@@ -66,49 +29,47 @@ export function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-export function loginUser({ email, password, role }) {
-  const users = getUsers();
-  const normalizedEmail = String(email || '').trim().toLowerCase();
+export async function loginUser({ email, password, role }) {
+  try {
+    const base = getApiBase();
+    const response = await fetch(`${base}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const found = users.find(
-    (user) =>
-      String(user.email || '').trim().toLowerCase() === normalizedEmail &&
-      user.password === password &&
-      (!role || user.role === role)
-  );
+    if (!response.ok) {
+      return null;
+    }
 
-  if (!found) return null;
+    const session = await response.json();
+    if (role && session?.role !== role) {
+      return null;
+    }
 
-  const session = {
-    email: found.email,
-    role: found.role,
-    displayName: found.displayName || found.email,
-    clientId: found.clientId ?? null,
-  };
-
-  setSession(session);
-  return session;
+    setSession(session);
+    return session;
+  } catch {
+    return null;
+  }
 }
 
-export function registerUser(userData) {
-  const users = getUsers();
-  const normalizedEmail = String(userData.email || '').trim().toLowerCase();
+export async function registerUser(userData) {
+  try {
+    const base = getApiBase();
+    const response = await fetch(`${base}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
 
-  const exists = users.some((user) => String(user.email || '').trim().toLowerCase() === normalizedEmail);
-  if (exists) {
-    return { ok: false, message: 'Este correo ya está registrado' };
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { ok: false, message: body?.message || 'No se pudo registrar usuario' };
+    }
+
+    return { ok: true, user: body?.user || null };
+  } catch {
+    return { ok: false, message: 'No se pudo conectar con el servidor de autenticación' };
   }
-
-  const nextUser = {
-    email: normalizedEmail,
-    password: userData.password,
-    role: userData.role,
-    displayName: userData.displayName || normalizedEmail,
-    clientId: userData.clientId ?? null,
-  };
-
-  const updated = [...users, nextUser];
-  saveUsers(updated);
-
-  return { ok: true, user: nextUser };
 }

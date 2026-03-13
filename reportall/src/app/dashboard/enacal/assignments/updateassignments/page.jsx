@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
+import Swal from 'sweetalert2';
 
 const UpdateAssignments = () => {
   const [assignments, setAssignments] = useState([]);
@@ -76,13 +77,23 @@ const UpdateAssignments = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     if (!selectedId) {
-      setMessage({ type: 'error', text: 'Debe seleccionar una asignación' });
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Selecciona una asignación',
+        text: 'Debes seleccionar una asignación para actualizar.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
 
     const idNum = Number(selectedId);
     if (isNaN(idNum)) {
-      alert('El ID seleccionado no es válido. Valor recibido: ' + selectedId);
+      await Swal.fire({
+        icon: 'error',
+        title: 'ID inválido',
+        text: `El ID seleccionado no es válido: ${selectedId}`,
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
 
@@ -110,9 +121,22 @@ const UpdateAssignments = () => {
       }
 
       setMessage({ type: 'success', text: 'Asignación actualizada correctamente' });
+      await Swal.fire({
+        icon: 'success',
+        title: 'Asignación actualizada',
+        text: 'Los cambios se guardaron correctamente.',
+        confirmButtonText: 'Aceptar',
+      });
       loadAssignments();
     } catch (err) {
-      setMessage({ type: 'error', text: err?.message || 'No se pudo actualizar la asignación' });
+      const errorMessage = err?.message || 'No se pudo actualizar la asignación';
+      setMessage({ type: 'error', text: errorMessage });
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: errorMessage,
+        confirmButtonText: 'Entendido',
+      });
     } finally {
       setLoading(false);
     }

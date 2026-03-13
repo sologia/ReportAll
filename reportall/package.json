@@ -24,6 +24,7 @@
     "react-dom": "19.1.0",
     "react-icons": "^5.6.0",
     "react-leaflet": "^5.0.0",
+    "sweetalert2": "^11.26.22",
     "wellknown": "^0.5.0"
   },
   "devDependencies": {

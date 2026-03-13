@@ -9,6 +9,7 @@ import { useForm } from '@/hooks/useForm';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@/lib/auth';
+import Swal from 'sweetalert2';
 
 
 const ReportFields = {
@@ -111,16 +112,34 @@ const CreateReportClient = () => {
 
     if (!coords || coords.length !== 2) {
       setSubmitMessage('Debes seleccionar una ubicación válida en el mapa.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Ubicación requerida',
+        text: 'Debes seleccionar una ubicación válida en el mapa.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
 
     if (!selectedSector) {
       setSubmitMessage('Debes seleccionar un sector.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Sector requerido',
+        text: 'Debes seleccionar un sector.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
 
     if (!address.trim()) {
       setSubmitMessage('Debes escribir la dirección.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Dirección requerida',
+        text: 'Debes escribir la dirección.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
 
@@ -154,10 +173,22 @@ const CreateReportClient = () => {
       }
 
       setSubmitMessage('Reporte enviado correctamente.');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Reporte enviado',
+        text: 'El reporte se creó correctamente.',
+        confirmButtonText: 'Aceptar',
+      });
       loadClientReports(clientId);
     } catch (error) {
       console.error('Error enviando reporte:', error);
       setSubmitMessage('No se pudo enviar el reporte. Verifica los datos e intenta de nuevo.');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al enviar',
+        text: error?.message || 'No se pudo enviar el reporte. Verifica los datos e intenta de nuevo.',
+        confirmButtonText: 'Entendido',
+      });
     } finally {
       setIsSubmitting(false);
     }

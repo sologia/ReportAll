@@ -17,9 +17,9 @@ function LoginPage() {
 
     const { loginEmail, loginPassword, loginRole, onInputChange: onLoginInputChange } = useForm(loginFormFields);
 
-    const loginSubmit = (event) => {
+    const loginSubmit = async (event) => {
         event.preventDefault();
-        const session = loginUser({ email: loginEmail, password: loginPassword, role: loginRole });
+        const session = await loginUser({ email: loginEmail, password: loginPassword, role: loginRole });
 
         if (!session) {
             window.alert('Credenciales inválidas o rol incorrecto');

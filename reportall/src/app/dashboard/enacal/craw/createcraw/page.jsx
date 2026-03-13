@@ -2,6 +2,7 @@
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
 import React, { useEffect, useState } from 'react'
+import Swal from 'sweetalert2'
 
 const CreateCraw = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -45,7 +46,7 @@ const CreateCraw = () => {
     loadCrews();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     const payload = {
@@ -56,16 +57,35 @@ const CreateCraw = () => {
       Num_Crew: parseInt(form.num_cuadrilla.value, 10)
     };
 
-    fetch(`${base}/api/crews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(res => res.json())
-      .then(() => {
-        loadCrews();
+    try {
+      const response = await fetch(`${base}/api/crews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
-      .catch(err => console.error('Error creating crew', err));
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'No se pudo crear la cuadrilla')
+      }
+
+      form.reset()
+      loadCrews();
+      await Swal.fire({
+        icon: 'success',
+        title: 'Cuadrilla creada',
+        text: 'La cuadrilla se registró correctamente.',
+        confirmButtonText: 'Aceptar',
+      })
+    } catch (err) {
+      console.error('Error creating crew', err)
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al crear',
+        text: err.message || 'No se pudo crear la cuadrilla',
+        confirmButtonText: 'Entendido',
+      })
+    }
   };
 
   return (

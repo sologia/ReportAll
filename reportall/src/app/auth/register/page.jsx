@@ -38,41 +38,21 @@ function RegisterPage() {
       return;
     }
 
-    let clientId = null;
-
-    if (registerRole === 'cliente') {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL || '';
-        const response = await fetch(`${base}/api/clients`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            FirstName: registerName,
-            SecondName: '',
-            FirstLastName: registerLastName,
-            SecondLastName: '',
-            Numero_NIC: registerNIC,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('No se pudo registrar el cliente en base de datos');
-        }
-
-        const createdClient = await response.json();
-        clientId = createdClient?.Client_ID || null;
-      } catch (error) {
-        window.alert('No se pudo registrar el cliente. Verifica backend y datos.');
-        return;
-      }
-    }
-
-    const registered = registerUser({
+    const registered = await registerUser({
       email: registerEmail,
       password: registerPassword,
       role: registerRole,
       displayName: `${registerName} ${registerLastName}`.trim(),
-      clientId,
+      clientData: {
+        FirstName: registerName,
+        SecondName: '',
+        FirstLastName: registerLastName,
+        SecondLastName: '',
+        Numero_NIC: registerNIC,
+      },
+      workerData: {
+        Name_Leader: `${registerName} ${registerLastName}`.trim(),
+      },
     });
 
     if (!registered.ok) {
@@ -123,7 +103,7 @@ function RegisterPage() {
             value={registerNIC}
             onChange={onRegisterInputChange}
             className="p-3 border rounded-lg w-90 m-auto"
-            required
+            required={registerRole === 'cliente'}
           />
 
           <input
