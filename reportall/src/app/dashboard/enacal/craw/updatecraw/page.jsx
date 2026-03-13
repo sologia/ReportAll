@@ -17,114 +17,109 @@ const UpdateCraw = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // URL base (ajusta según tu entorno)
-  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
 
   // Cargar listas al montar
   useEffect(() => {
-    fetch(`${base}/api/crews`)
-      .then(res => res.json())
-      .then(data => {
-        console.log('Crews cargados:', data);
-        setCrews(data);
+    Promise.all([
+      fetch(`${base}/api/crews`),
+      fetch(`${base}/api/vehicles`),
+      fetch(`${base}/api/sectors`),
+      fetch(`${base}/api/availabilities`),
+    ])
+      .then(async ([crewsRes, vehiclesRes, sectorsRes, availabilitiesRes]) => {
+        const [crewsData, vehiclesData, sectorsData, availabilitiesData] = await Promise.all([
+          crewsRes.json(),
+          vehiclesRes.json(),
+          sectorsRes.json(),
+          availabilitiesRes.json(),
+        ]);
+
+        setCrews(Array.isArray(crewsData) ? crewsData : []);
+        setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
+        setSectors(Array.isArray(sectorsData) ? sectorsData : []);
+        setAvailabilities(Array.isArray(availabilitiesData) ? availabilitiesData : []);
       })
-      .catch(err => console.error('Error cargando crews:', err));
-
-    fetch(`${base}/api/vehicles`)
-      .then(res => res.json())
-      .then(data => setVehicles(data))
-      .catch(err => console.error('Error cargando vehículos:', err));
-
-    fetch(`${base}/api/sectors`)
-      .then(res => res.json())
-      .then(data => setSectors(data))
-      .catch(err => console.error('Error cargando sectores:', err));
-
-    fetch(`${base}/api/availabilities`)
-      .then(res => res.json())
-      .then(data => setAvailabilities(data))
-      .catch(err => console.error('Error cargando disponibilidades:', err));
+      .catch(err => console.error('Error cargando catálogos de cuadrilla:', err));
   }, [base]);
 
   // Cargar detalles de la cuadrilla seleccionada
-useEffect(() => {
-  if (!selectedId) return;
-  fetch(`${base}/api/crews/${selectedId}`)
-    .then(res => res.json())
-    .then(data => {
-      setFormValues({
-        Num_Crew: data.Num_Crew || '',
-        Plate: data.Plate || '',
-        Sector: data.Name_Sector || '',
-        Availability: data.Availability_Crew || 'Disponible'
-      });
-    })
-    .catch(err => console.error(err));
-}, [selectedId]);
+  useEffect(() => {
+    if (!selectedId) return;
+    fetch(`${base}/api/crews/${selectedId}`)
+      .then(res => res.json())
+      .then(data => {
+        setFormValues({
+          Num_Crew: data.Num_Crew || '',
+          Plate: data.Plate || '',
+          Sector: data.Name_Sector || '',
+          Availability: data.Availability_Crew || 'Disponible'
+        });
+      })
+      .catch(err => console.error(err));
+  }, [selectedId]);
 
   const handleChange = e => {
     const { name, value } = e.target;
     setFormValues(v => ({ ...v, [name]: value }));
   };
 
- const handleSubmit = async e => {
-  e.preventDefault();
-  if (!selectedId) {
-    setMessage('Por favor selecciona una cuadrilla');
-    return;
-  }
-  const idNum = Number(selectedId);
-  if (isNaN(idNum)) {
-    setMessage('El ID seleccionado no es válido');
-    return;
-  }
-
-  setLoading(true);
-  setMessage('');
-
-  // Asegurar que ningún campo sea undefined
-  const payload = {
-    Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
-    Plate: formValues.Plate || '',
-    Sector: formValues.Sector || '',
-    Availability: formValues.Availability || 'Disponible'
-  };
-
-  try {
-    const res = await fetch(`${base}/api/crews/${idNum}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Error al actualizar');
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (!selectedId) {
+      setMessage('Por favor selecciona una cuadrilla');
+      return;
+    }
+    const idNum = Number(selectedId);
+    if (isNaN(idNum)) {
+      setMessage('El ID seleccionado no es válido');
+      return;
     }
 
-    setMessage('¡Cuadrilla actualizada correctamente!');
-    console.log('Actualizado:', data);
-    fetch(`${base}/api/crews`)
-      .then(res => res.json())
-      .then(data => setCrews(Array.isArray(data) ? data : []))
-      .catch(err => console.error('Error recargando cuadrillas:', err));
-  } catch (err) {
-    console.error('Error:', err);
-    setMessage(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    setMessage('');
+
+    // Asegurar que ningún campo sea undefined
+    const payload = {
+      Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
+      Plate: formValues.Plate || '',
+      Sector: formValues.Sector || '',
+      Availability: formValues.Availability || 'Disponible'
+    };
+
+    try {
+      const res = await fetch(`${base}/api/crews/${idNum}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al actualizar');
+      }
+
+      setMessage('¡Cuadrilla actualizada correctamente!');
+      fetch(`${base}/api/crews`)
+        .then(res => res.json())
+        .then(data => setCrews(Array.isArray(data) ? data : []))
+        .catch(err => console.error('Error recargando cuadrillas:', err));
+    } catch (err) {
+      console.error('Error:', err);
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div>
       <ButtonBack />
 
       <h2>Modificar Cuadrilla</h2>
       {message && (
-        <div className={`p-2 mb-4 rounded ${
-          message.includes('correctamente') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <div className={`p-2 mb-4 rounded ${message.includes('correctamente') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {message}
         </div>
       )}

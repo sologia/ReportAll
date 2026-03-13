@@ -172,9 +172,7 @@ export async function update(req, res, next) {
             WHERE Crew_ID = @id;
         `;
 
-        console.log('Consulta SQL:', sqlQuery);
         const result = await request.query(sqlQuery);
-        console.log('Resultado:', result);
 
         if (result.rowsAffected && result.rowsAffected[0] === 0) {
             return res.status(404).json({ message: 'Not found' });
@@ -182,8 +180,7 @@ export async function update(req, res, next) {
 
         res.json({ message: 'Updated successfully' });
     } catch (err) {
-        console.error('Error en update:', err); // ← Esto mostrará el error real en la consola del servidor
-        res.status(500).json({ message: err.message }); // ← Devolvemos el mensaje al cliente
+        next(err);
     }
 }
 

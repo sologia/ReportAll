@@ -27,7 +27,7 @@ function RegisterPage() {
     registerPassword,
     registerPassword2,
     registerRole,
-    onInputChange:onRegisterInputChange
+    onInputChange: onRegisterInputChange
   } = useForm(registerFormFields);
 
   const registerSubmit = async (event) => {

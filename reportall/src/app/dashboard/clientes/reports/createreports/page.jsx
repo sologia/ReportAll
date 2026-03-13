@@ -17,6 +17,7 @@ const ReportFields = {
 
 const CreateReportClient = () => {
   const router = useRouter();
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
 
   const { tipoReporte, onInputChange: onReportInputChange } = useForm(ReportFields);
 
@@ -45,7 +46,6 @@ const CreateReportClient = () => {
 
   const loadClientReports = (currentClientId) => {
     if (!currentClientId) return;
-    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     fetch(`${base}/api/reports/client/${currentClientId}`)
       .then(res => res.json())
       .then(data => setClientReports(Array.isArray(data) ? data : []))
@@ -65,7 +65,7 @@ const CreateReportClient = () => {
     }
 
     setClientId(session.clientId);
-  loadClientReports(session.clientId);
+    loadClientReports(session.clientId);
 
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -78,35 +78,28 @@ const CreateReportClient = () => {
       );
     }
 
-    const loadSectors = async () => {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${base}/api/sectors`);
-        if (!response.ok) throw new Error('No se pudieron cargar los sectores');
-        const data = await response.json();
-        setSectors(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Error cargando sectores:', error);
-      }
-    };
-
-    const loadProblems = async () => {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${base}/api/problems`);
-        if (!response.ok) {
-          const errorBody = await response.json().catch(() => ({}));
+    Promise.all([
+      fetch(`${base}/api/sectors`),
+      fetch(`${base}/api/problems`),
+    ])
+      .then(async ([sectorsRes, problemsRes]) => {
+        if (!sectorsRes.ok) throw new Error('No se pudieron cargar los sectores');
+        if (!problemsRes.ok) {
+          const errorBody = await problemsRes.json().catch(() => ({}));
           throw new Error(errorBody?.detail || errorBody?.message || 'No se pudieron cargar los problemas');
         }
-        const data = await response.json();
-        setProblems(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Error cargando problemas:', error?.message || error);
-      }
-    };
 
-    loadSectors();
-    loadProblems();
+        const [sectorsData, problemsData] = await Promise.all([
+          sectorsRes.json(),
+          problemsRes.json(),
+        ]);
+
+        setSectors(Array.isArray(sectorsData) ? sectorsData : []);
+        setProblems(Array.isArray(problemsData) ? problemsData : []);
+      })
+      .catch((error) => {
+        console.error('Error cargando catálogos de reporte:', error?.message || error);
+      });
   }, []);
 
   const handleMapSelect = ([lat, lng]) => {
@@ -135,7 +128,6 @@ const CreateReportClient = () => {
       setIsSubmitting(true);
       setSubmitMessage('Enviando reporte...');
 
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const formData = new FormData();
 
       formData.append('Name_Problem', tipoReporte);

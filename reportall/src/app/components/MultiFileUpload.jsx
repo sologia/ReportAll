@@ -8,10 +8,10 @@ const MultiFileUpload = ({ onFilesSelect }) => {
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles(selectedFiles);
-    
+
     // Convertir archivos a binario y pasar al callback
     if (onFilesSelect) {
-      const filePromises = selectedFiles.map(file => 
+      const filePromises = selectedFiles.map(file =>
         new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -53,7 +53,7 @@ const MultiFileUpload = ({ onFilesSelect }) => {
         onChange={handleFileChange}
         className="hidden"
       />
-      
+
       {/* Botón de upload */}
       <button
         type="button"

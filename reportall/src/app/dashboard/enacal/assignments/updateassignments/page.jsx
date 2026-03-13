@@ -30,22 +30,25 @@ const UpdateAssignments = () => {
   useEffect(() => {
     loadAssignments();
 
-    fetch(`${base}/api/leaders`)
-      .then(res => res.json())
-      .then(data => setNameLeader(data))
-      .catch(err => console.error('failed loading leaders', err));
-    fetch(`${base}/api/crewsonly`)
-      .then(res => res.json())
-      .then(data => setNumCrew(data))
-      .catch(err => console.error('failed loading crewsonly', err));
-    fetch(`${base}/api/reports/options`)
-      .then(res => res.json())
-      .then(data => setReports(data))
-      .catch(err => console.error('failed loading reports', err));
-    fetch(`${base}/api/states`)
-      .then(res => res.json())
-      .then(data => setStateAs(data))
-      .catch(err => console.error('failed loading states', err));
+    Promise.all([
+      fetch(`${base}/api/leaders`),
+      fetch(`${base}/api/crewsonly`),
+      fetch(`${base}/api/reports/options`),
+      fetch(`${base}/api/states`),
+    ])
+      .then(async ([leadersRes, crewRes, reportsRes, statesRes]) => {
+        const [leaders, crews, reportsData, states] = await Promise.all([
+          leadersRes.json(),
+          crewRes.json(),
+          reportsRes.json(),
+          statesRes.json(),
+        ]);
+        setNameLeader(Array.isArray(leaders) ? leaders : []);
+        setNumCrew(Array.isArray(crews) ? crews : []);
+        setReports(Array.isArray(reportsData) ? reportsData : []);
+        setStateAs(Array.isArray(states) ? states : []);
+      })
+      .catch(err => console.error('failed loading form data', err));
   }, []);
 
   useEffect(() => {
@@ -94,8 +97,6 @@ const UpdateAssignments = () => {
       Date_Time: formValues.Fecha
     };
 
-    console.log('update payload', payload);
-
     try {
       const res = await fetch(`${base}/api/assignments/${selectedId}`, {
         method: 'PUT',
@@ -108,7 +109,6 @@ const UpdateAssignments = () => {
         throw new Error(data?.message || 'Error al actualizar asignación');
       }
 
-      console.log('updated', data);
       setMessage({ type: 'success', text: 'Asignación actualizada correctamente' });
       loadAssignments();
     } catch (err) {
@@ -198,15 +198,15 @@ const UpdateAssignments = () => {
               ))}
             </select>
           </div>
-          
+
           {message.text && (
             <div className={`p-2 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {message.text}
             </div>
           )}
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             disabled={loading}
             className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
           >

@@ -2,7 +2,7 @@
 
 import ButtonGroup from "@/app/components/ButtonGroup ";
 
-function simplexample () {
+function simplexample() {
   return (
     <div>
       <ButtonGroup
@@ -13,7 +13,7 @@ function simplexample () {
           { label: "Crear reporte", href: "/dashboard/clientes/reports/createreports" },
         ]}
       />
-      
+
     </div>
   )
 }

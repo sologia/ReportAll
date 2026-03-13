@@ -47,7 +47,7 @@ export async function getOptions(req, res, next) {
 // GET /api/reports/summary?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&state=...&district=...
 export async function getSummary(req, res, next) {
     try {
-        const { dateFrom, dateTo, state, district } = req.query;
+        const { dateFrom, dateTo, date, state, district, sector } = req.query;
         const pool = await poolPromise;
         const request = pool.request();
 
@@ -63,6 +63,11 @@ export async function getSummary(req, res, next) {
             request.input('dateTo', sql.Date, dateTo);
         }
 
+        if (date) {
+            whereParts.push('CAST(d.Date_time AS date) = @date');
+            request.input('date', sql.Date, date);
+        }
+
         if (state) {
             whereParts.push('ISNULL(st.StateAs, \'Sin estado\') = @state');
             request.input('state', sql.NVarChar(100), state);
@@ -73,6 +78,11 @@ export async function getSummary(req, res, next) {
             request.input('district', sql.NVarChar(200), district);
         }
 
+        if (sector) {
+            whereParts.push('cs.Name_Sector = @sector');
+            request.input('sector', sql.NVarChar(200), sector);
+        }
+
         const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
 
         const query = `
@@ -81,6 +91,7 @@ export async function getSummary(req, res, next) {
                 p.Name_Problem,
                 cpr.Urgency,
                 r.Adress,
+                cs.Name_Sector AS Sector,
                 cs.Name_Sector AS District,
                 CAST(d.Date_time AS date) AS Report_Date,
                 ISNULL(st.StateAs, 'Sin estado') AS State

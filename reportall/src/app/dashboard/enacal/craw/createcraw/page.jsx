@@ -10,6 +10,7 @@ const CreateCraw = () => {
 
   // disponibilidad fija
   const defaultAvailability = 'Disponible';
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
 
   const crewColumns = [
     { header: 'Crew ID', field: 'Crew_ID' },
@@ -20,7 +21,6 @@ const CreateCraw = () => {
   ];
 
   const loadCrews = () => {
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/api/crews`)
       .then(res => res.json())
       .then(data => setCrews(Array.isArray(data) ? data : []))
@@ -28,16 +28,19 @@ const CreateCraw = () => {
   }
 
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
-    fetch(`${base}/api/vehicles`)
-      .then(res => res.json())
-      .then(data => setVehicles(data))
-      .catch(err => console.error('Error cargando vehículos', err));
-
-    fetch(`${base}/api/sectors`)
-      .then(res => res.json())
-      .then(data => setSectors(data))
-      .catch(err => console.error('Error cargando sectores', err));
+    Promise.all([
+      fetch(`${base}/api/vehicles`),
+      fetch(`${base}/api/sectors`),
+    ])
+      .then(async ([vehiclesRes, sectorsRes]) => {
+        const [vehiclesData, sectorsData] = await Promise.all([
+          vehiclesRes.json(),
+          sectorsRes.json(),
+        ]);
+        setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
+        setSectors(Array.isArray(sectorsData) ? sectorsData : []);
+      })
+      .catch(err => console.error('Error cargando catálogos de cuadrillas', err));
 
     loadCrews();
   }, []);
@@ -53,15 +56,13 @@ const CreateCraw = () => {
       Num_Crew: parseInt(form.num_cuadrilla.value, 10)
     };
 
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/api/crews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
       .then(res => res.json())
-      .then(data => {
-        console.log('Crew created', data);
+      .then(() => {
         loadCrews();
       })
       .catch(err => console.error('Error creating crew', err));
