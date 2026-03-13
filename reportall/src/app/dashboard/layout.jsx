@@ -1,9 +1,41 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { clearSession, getSession } from '@/lib/auth';
 
 function DashboardLayout ({ children }) {
 
   const pathname = usePathname();
+  const router = useRouter();
+  const [session, setSession] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const currentSession = getSession();
+
+    if (!currentSession) {
+      router.replace('/auth/login');
+      return;
+    }
+
+    if (currentSession.role === 'cliente' && pathname.startsWith('/dashboard/enacal')) {
+      router.replace('/dashboard/clientes');
+      return;
+    }
+
+    if (currentSession.role === 'trabajador' && pathname.startsWith('/dashboard/clientes')) {
+      router.replace('/dashboard/enacal');
+      return;
+    }
+
+    setSession(currentSession);
+    setReady(true);
+  }, [pathname, router]);
+
+  const onLogout = () => {
+    clearSession();
+    router.replace('/auth/login');
+  }
 
   // convertir ruta → nombre bonito
   const getLabel = () => {
@@ -30,6 +62,10 @@ function DashboardLayout ({ children }) {
     if(pathname2.includes("/dashboard/enacal"))
       return "items center"
   }
+
+  if (!ready) {
+    return null;
+  }
   
   return (
     <div className={`min-h-screen w-full flex justify-center bg-[#42B8EA] ${getStyle()}`}>
@@ -46,7 +82,16 @@ function DashboardLayout ({ children }) {
           </div>
 
           <div className='mr-9'>
-            btn de cerrar cesion
+            <div className="flex items-center gap-4">
+              <span>{session?.displayName || 'Usuario'}</span>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+              >
+                Cerrar sesión
+              </button>
+            </div>
 
           </div>
           

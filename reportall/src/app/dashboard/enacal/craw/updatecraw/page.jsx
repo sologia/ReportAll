@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import ButtonBack from '@/app/components/ButtonBack';
 
 const UpdateCraw = () => {
   const [crews, setCrews] = useState([]);
@@ -48,7 +49,6 @@ const UpdateCraw = () => {
   // Cargar detalles de la cuadrilla seleccionada
 useEffect(() => {
   if (!selectedId) return;
-  const base = 'http://localhost:3001';
   fetch(`${base}/api/crews/${selectedId}`)
     .then(res => res.json())
     .then(data => {
@@ -91,7 +91,7 @@ useEffect(() => {
   };
 
   try {
-    const res = await fetch(`http://localhost:3001/api/crews/${idNum}`, {
+    const res = await fetch(`${base}/api/crews/${idNum}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -105,6 +105,10 @@ useEffect(() => {
 
     setMessage('¡Cuadrilla actualizada correctamente!');
     console.log('Actualizado:', data);
+    fetch(`${base}/api/crews`)
+      .then(res => res.json())
+      .then(data => setCrews(Array.isArray(data) ? data : []))
+      .catch(err => console.error('Error recargando cuadrillas:', err));
   } catch (err) {
     console.error('Error:', err);
     setMessage(err.message);
@@ -114,6 +118,8 @@ useEffect(() => {
 };
   return (
     <div>
+      <ButtonBack />
+
       <h2>Modificar Cuadrilla</h2>
       {message && (
         <div className={`p-2 mb-4 rounded ${
@@ -211,6 +217,48 @@ useEffect(() => {
           </button>
         </form>
       )}
+
+      <div className="mt-8 overflow-x-auto rounded-lg shadow-md bg-white">
+        <h3 className="text-xl font-semibold p-4">Cuadrillas existentes</h3>
+        <table className="min-w-full border-collapse">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="py-3 px-4 text-left text-sm font-medium">Crew ID</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">N° Cuadrilla</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Sector</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Estado</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Placa</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {crews.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center py-4 text-gray-500">No hay datos</td>
+              </tr>
+            ) : (
+              crews.map((crew) => (
+                <tr key={crew.Crew_ID} className="border-b hover:bg-blue-50 transition">
+                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Num_Crew}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Name_Sector}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Availability_Crew}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Plate}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(String(crew.Crew_ID))}
+                      className="bg-blue-600 text-white py-1 px-3 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Actualizar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

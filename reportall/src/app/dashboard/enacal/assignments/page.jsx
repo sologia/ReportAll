@@ -12,7 +12,8 @@ const AssignmentsPage = () => {
     const columns = [
       { header: "Nombre del Lider", field: "Name_Leader" },
       { header: "Numero Cuadrilla", field: "Num_Crew" },
-      { header: "Nombre Ruta", field: "Name_Path" },
+      { header: "Reporte", field: "Report_ID" },
+      { header: "Direccion", field: "Report_Adress" },
       { header: "Fecha", field: "Dates" },
       { header: "Estado", field: "StateAs" },
     ];

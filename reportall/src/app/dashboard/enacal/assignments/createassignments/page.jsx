@@ -1,12 +1,35 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
+import SimpleTable from '@/app/components/SimpleTable'
 import React, { useEffect, useState } from 'react'
 
 const CreateAssignments = () => {
 const [numcrew, setNumCrew] = useState([]);
-const [namepath, setNamePath] = useState([]);
+const [reports, setReports] = useState([]);
+const [assignments, setAssignments] = useState([]);
+const [crewInfo, setCrewInfo] = useState([]);
 const [stateAs, setStateAs] = useState([]);
 const [leader, setLeader] = useState([]);
+
+const unassignedReports = reports.filter((report) => {
+  const isAssigned = assignments.some((assignment) => Number(assignment.Report_ID) === Number(report.Report_ID));
+  return !isAssigned;
+});
+
+const unassignedReportsColumns = [
+  { header: 'Reporte ID', field: 'Report_ID' },
+  { header: 'Direccion', field: 'Adress' },
+  { header: 'Problema', field: 'Name_Problem' },
+  { header: 'Urgencia', field: 'Urgency' },
+];
+
+const crewInfoColumns = [
+  { header: 'Crew ID', field: 'Crew_ID' },
+  { header: 'Numero Cuadrilla', field: 'Num_Crew' },
+  { header: 'Disponibilidad', field: 'Availability_Crew' },
+  { header: 'Sector', field: 'Name_Sector' },
+  { header: 'Placa', field: 'Plate' },
+];
 
  useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_URL || '';
@@ -23,10 +46,20 @@ const [leader, setLeader] = useState([]);
       .then(data => setStateAs(data))
       .catch(err => console.error('Error cargando estados', err));
 
-    fetch(`${base}/api/paths`)
+    fetch(`${base}/api/reports/options`)
       .then(res => res.json())
-      .then(data => setNamePath(data))
-      .catch(err => console.error('Error cargando rutas', err));
+      .then(data => setReports(data))
+      .catch(err => console.error('Error cargando reportes', err));
+
+    fetch(`${base}/api/assignments`)
+      .then(res => res.json())
+      .then(data => setAssignments(data))
+      .catch(err => console.error('Error cargando asignaciones', err));
+
+    fetch(`${base}/api/crews`)
+      .then(res => res.json())
+      .then(data => setCrewInfo(data))
+      .catch(err => console.error('Error cargando informacion de cuadrillas', err));
   }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +67,7 @@ const [leader, setLeader] = useState([]);
     const payload = {
       Name_Leader: form.opciones_lider.value,
       Num_Crew: parseInt(form.opciones_cuadrillas.value, 10),
-      Name_Path: form.opciones_ruta.value,
+      Report_ID: parseInt(form.opciones_reporte.value, 10),
       Date_Time: form.date.value,
       StateAs: form.opciones_estados.value
     };
@@ -108,16 +141,18 @@ const [leader, setLeader] = useState([]);
             </div>
 
             <div className='flex gap-6 items-center'>
-              <label form='opciones_ruta' className='w-24'>Nombre Ruta</label>
+              <label form='opciones_reporte' className='w-24'>Reporte</label>
                <select 
-                name="opciones_ruta"
-              id="opciones_ruta"
+                name="opciones_reporte"
+              id="opciones_reporte"
               className='bg-[#b2b1b1] rounded-2xl w-32'
               required
              >
               <option value="">Seleccione</option>
-              {namepath.map((s, idx) => (
-                <option key={idx} value={s.Name_Path}>{s.Name_Path}</option>
+              {reports.map((report) => (
+                <option key={report.Report_ID} value={report.Report_ID}>
+                  {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'}`}
+                </option>
               ))}
               </select>
             </div>
@@ -159,6 +194,16 @@ const [leader, setLeader] = useState([]);
             </button>
         </div>
       </form>
+
+      <div className='mt-10'>
+        <h3 className='text-xl font-semibold'>Reportes no asignados</h3>
+        <SimpleTable columns={unassignedReportsColumns} data={unassignedReports} />
+      </div>
+
+      <div className='mt-10'>
+        <h3 className='text-xl font-semibold'>Informacion de las cuadrillas</h3>
+        <SimpleTable columns={crewInfoColumns} data={crewInfo} />
+      </div>
 
     </div>
   )

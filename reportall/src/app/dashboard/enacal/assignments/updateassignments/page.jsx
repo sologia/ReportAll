@@ -1,32 +1,35 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import ButtonBack from '@/app/components/ButtonBack';
 
 const UpdateAssignments = () => {
   const [assignments, setAssignments] = useState([]);
   const [nameleader, setNameLeader] = useState([]);
   const [numcrew, setNumCrew] = useState([]);
-  const [namepath, setNamePath] = useState([]);
+  const [reports, setReports] = useState([]);
   const [stateas, setStateAs] = useState([]);
   const [selectedId, setSelectedId] = useState('');
   const [formValues, setFormValues] = useState({
     Name_Leader: '',
     Num_Crew: '',
-    Name_Path: '',
+    Report_ID: '',
     StateAs: '',
     Fecha: ''
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const base = process.env.NEXT_PUBLIC_API_URL || '';
+
+  const loadAssignments = () => {
+    fetch(`${base}/api/assignments`)
+      .then(res => res.json())
+      .then(data => setAssignments(Array.isArray(data) ? data : []))
+      .catch(err => console.error('failed loading assignments', err));
+  };
 
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
-fetch(`${base}/api/assignments`)
-  .then(res => res.json())
-  .then(data => {
-    console.log('Datos completos:', data);
-   
-    setAssignments(data);
-  })
+    loadAssignments();
+
     fetch(`${base}/api/leaders`)
       .then(res => res.json())
       .then(data => setNameLeader(data))
@@ -35,10 +38,10 @@ fetch(`${base}/api/assignments`)
       .then(res => res.json())
       .then(data => setNumCrew(data))
       .catch(err => console.error('failed loading crewsonly', err));
-    fetch(`${base}/api/paths`)
+    fetch(`${base}/api/reports/options`)
       .then(res => res.json())
-      .then(data => setNamePath(data))
-      .catch(err => console.error('failed loading paths', err));
+      .then(data => setReports(data))
+      .catch(err => console.error('failed loading reports', err));
     fetch(`${base}/api/states`)
       .then(res => res.json())
       .then(data => setStateAs(data))
@@ -47,16 +50,16 @@ fetch(`${base}/api/assignments`)
 
   useEffect(() => {
     if (!selectedId) return;
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
+
     fetch(`${base}/api/assignments/${selectedId}`)
       .then(res => res.json())
       .then(data => {
         setFormValues({
           Name_Leader: data.Name_Leader || '',
           Num_Crew: data.Num_Crew || '',
-          Name_Path: data.Name_Path || '',
+          Report_ID: data.Report_ID || '',
           StateAs: data.StateAs || '',
-          Fecha: data.Fecha ? data.Fecha.split('T')[0] : '' // formatear fecha si viene como ISO
+          Fecha: data.Date_time ? data.Date_time.split('T')[0] : ''
         });
       })
       .catch(err => console.error('failed loading assignment details', err));
@@ -72,23 +75,23 @@ fetch(`${base}/api/assignments`)
     if (!selectedId) {
       setMessage({ type: 'error', text: 'Debe seleccionar una asignación' });
       return;
-    } 
+    }
+
     const idNum = Number(selectedId);
-  if (isNaN(idNum)) {
-   alert('El ID seleccionado no es válido. Valor recibido: ' + selectedId);
-    return;
-  }
+    if (isNaN(idNum)) {
+      alert('El ID seleccionado no es válido. Valor recibido: ' + selectedId);
+      return;
+    }
 
     setLoading(true);
     setMessage({ type: '', text: '' });
 
-    const base = process.env.NEXT_PUBLIC_API_URL || '';
     const payload = {
       Name_Leader: formValues.Name_Leader,
       Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
-      Name_Path: formValues.Name_Path,
+      Report_ID: parseInt(formValues.Report_ID, 10),
       StateAs: formValues.StateAs,
-      Date_Time: formValues.Fecha // Cambiado de DateTime a Date_Time
+      Date_Time: formValues.Fecha
     };
 
     console.log('update payload', payload);
@@ -101,15 +104,15 @@ fetch(`${base}/api/assignments`)
       });
 
       const data = await res.json();
-
-  
+      if (!res.ok) {
+        throw new Error(data?.message || 'Error al actualizar asignación');
+      }
 
       console.log('updated', data);
       setMessage({ type: 'success', text: 'Asignación actualizada correctamente' });
-      // Opcional: recargar la lista de asignaciones
-      // fetch(`${base}/api/assignments`).then(res => res.json()).then(setAssignments);
+      loadAssignments();
     } catch (err) {
-
+      setMessage({ type: 'error', text: err?.message || 'No se pudo actualizar la asignación' });
     } finally {
       setLoading(false);
     }
@@ -117,18 +120,9 @@ fetch(`${base}/api/assignments`)
 
   return (
     <div>
+      <ButtonBack />
+
       <h2>Modificar Asignación</h2>
-      <div className="mb-4">
-        <label className="mr-2">Elige Asignación:</label>
-        <select value={selectedId} onChange={e => setSelectedId(e.target.value)}>
-          <option value="">--</option>
-          {assignments.map(c => (
-            <option key={c.Assigment_ID} value={c.Assigment_ID}>
-              {c.Name_Leader} - {c.Name_Path} - {c.StateAs}
-            </option>
-          ))}
-        </select>
-      </div>
 
       {selectedId && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -165,17 +159,17 @@ fetch(`${base}/api/assignments`)
             </select>
           </div>
           <div>
-            <label>Nombre Ruta:</label>
+            <label>Reporte:</label>
             <select
-              name="Name_Path"
-              value={formValues.Name_Path}
+              name="Report_ID"
+              value={formValues.Report_ID}
               onChange={handleChange}
               required
             >
               <option value="">Seleccione</option>
-              {namepath.map((path, idx) => (
-                <option key={idx} value={path.Name_Path}>
-                  {path.Name_Path}
+              {reports.map((report) => (
+                <option key={report.Report_ID} value={report.Report_ID}>
+                  {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'}`}
                 </option>
               ))}
             </select>
@@ -220,6 +214,48 @@ fetch(`${base}/api/assignments`)
           </button>
         </form>
       )}
+
+      <div className="mt-8 overflow-x-auto rounded-lg shadow-md bg-white">
+        <h3 className="text-xl font-semibold p-4">Asignaciones existentes</h3>
+        <table className="min-w-full border-collapse">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="py-3 px-4 text-left text-sm font-medium">Asignación ID</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Líder</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Cuadrilla</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Reporte</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Estado</th>
+              <th className="py-3 px-4 text-left text-sm font-medium">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignments.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center py-4 text-gray-500">No hay datos</td>
+              </tr>
+            ) : (
+              assignments.map((assignment) => (
+                <tr key={assignment.Assigment_ID} className="border-b hover:bg-blue-50 transition">
+                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.Assigment_ID}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.Name_Leader}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.Num_Crew}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">#{assignment.Report_ID}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.StateAs}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(String(assignment.Assigment_ID))}
+                      className="bg-blue-600 text-white py-1 px-3 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Actualizar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

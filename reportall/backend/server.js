@@ -11,7 +11,6 @@ import vehiclesRouter from './src/Routes/Vehicle.js';
 import availabilityRouter from './src/Routes/Availability.js';
 import leadersRouter from './src/Routes/Leaders.js';
 import crewsonlyRouter from './src/Routes/Crewsonly.js';
-import pathRouter from './src/Routes/paths.js';
 import stateRouter from './src/Routes/stattus.js';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -43,7 +42,6 @@ app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/leaders', leadersRouter);
 app.use('/api/availabilities', availabilityRouter);
 app.use('/api/crewsonly', crewsonlyRouter);
-app.use('/api/paths', pathRouter);
 app.use('/api/states', stateRouter);
 
 // Manejador de errores simple

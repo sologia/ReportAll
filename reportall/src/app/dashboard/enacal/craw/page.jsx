@@ -35,6 +35,7 @@ const CrawPage = () => {
 
         <ButtonGroup
             buttons={[
+              { label: "Resumen IT", href: "/dashboard/enacal/craw/report-summary" },
               { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
               { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
               { label: "Menu", href: "/dashboard/enacal" },

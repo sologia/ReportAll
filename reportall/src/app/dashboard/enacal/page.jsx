@@ -9,9 +9,10 @@ const TowExample = () => {
         buttonClass="w-80 m-auto mt-3"
         buttons={[
           { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
+          { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
           { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
           { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
-          { label: "Path", href: "/dashboard/enacal/path" },
+          // { label: "Path", href: "/dashboard/enacal/path" },
           { label: "Clientes", href: "/dashboard/clientes" },
         ]}
       />

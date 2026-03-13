@@ -1,11 +1,14 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
+import SimpleTable from '@/app/components/SimpleTable';
 // import MyMap from '@/app/page';
 import dynamic from 'next/dynamic';
 const MyMap = dynamic(() => import('@/app/components/MyMap'), { ssr: false });
 import { useForm } from '@/hooks/useForm';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSession } from '@/lib/auth';
 
 
 const ReportFields = {
@@ -13,6 +16,7 @@ const ReportFields = {
 }
 
 const CreateReportClient = () => {
+  const router = useRouter();
 
   const { tipoReporte, onInputChange: onReportInputChange } = useForm(ReportFields);
 
@@ -26,8 +30,43 @@ const CreateReportClient = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [datest, setDate] = useState('');
+  const [clientId, setClientId] = useState(null);
+  const [clientReports, setClientReports] = useState([]);
+
+  const clientReportsColumns = [
+    { header: 'ID Reporte', field: 'Report_ID' },
+    { header: 'Problema', field: 'Name_Problem' },
+    { header: 'Urgencia', field: 'Urgency' },
+    { header: 'Dirección', field: 'Adress' },
+    { header: 'Distrito', field: 'District' },
+    { header: 'Estado', field: 'State' },
+    { header: 'Fecha', field: 'Report_Date' },
+  ];
+
+  const loadClientReports = (currentClientId) => {
+    if (!currentClientId) return;
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    fetch(`${base}/api/reports/client/${currentClientId}`)
+      .then(res => res.json())
+      .then(data => setClientReports(Array.isArray(data) ? data : []))
+      .catch(err => console.error('Error cargando reportes del cliente:', err));
+  }
 
   useEffect(() => {
+    const session = getSession();
+    if (!session) {
+      router.replace('/auth/login');
+      return;
+    }
+
+    if (session.role !== 'cliente') {
+      router.replace('/dashboard/enacal');
+      return;
+    }
+
+    setClientId(session.clientId);
+  loadClientReports(session.clientId);
+
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => {
@@ -106,7 +145,7 @@ const CreateReportClient = () => {
       formData.append('Adress', address);
       formData.append('Name_Sector', selectedSector);
       formData.append('Date_Time', datest);
-      formData.append('ClientID', '1');
+      formData.append('ClientID', String(clientId || ''));
 
       if (selectedFiles.length > 0 && selectedFiles[0]?.file) {
         formData.append('BINPhoto', selectedFiles[0].file);
@@ -123,6 +162,7 @@ const CreateReportClient = () => {
       }
 
       setSubmitMessage('Reporte enviado correctamente.');
+      loadClientReports(clientId);
     } catch (error) {
       console.error('Error enviando reporte:', error);
       setSubmitMessage('No se pudo enviar el reporte. Verifica los datos e intenta de nuevo.');
@@ -130,6 +170,10 @@ const CreateReportClient = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (!clientId) {
+    return <p className='ml-8 mt-8'>Cargando perfil de cliente...</p>;
+  }
 
 
   return (
@@ -238,6 +282,11 @@ const CreateReportClient = () => {
         </div>
         {submitMessage && <p className='ml-8 text-sm'>{submitMessage}</p>}
       </form>
+
+      <div className='mt-10'>
+        <h3 className='text-xl font-semibold ml-6'>Reportes ya creados</h3>
+        <SimpleTable columns={clientReportsColumns} data={clientReports} />
+      </div>
 
     </div>
   )

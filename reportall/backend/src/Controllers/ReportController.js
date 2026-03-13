@@ -23,6 +23,132 @@ export async function getAll(req, res, next) {
     }
 }
 
+// GET /api/reports/options
+export async function getOptions(req, res, next) {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT
+                r.Report_ID,
+                r.Adress,
+                p.Name_Problem,
+                cpr.Urgency
+            FROM Reports r
+            LEFT JOIN Cat_Problems p ON r.Problem_ID = p.Problem_ID
+            LEFT JOIN Cat_ProblemLevels cpr ON r.ProblemLevel_ID = cpr.ProblemLevel_ID
+            ORDER BY r.Report_ID DESC
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        next(err);
+    }
+}
+
+// GET /api/reports/summary?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&state=...&district=...
+export async function getSummary(req, res, next) {
+    try {
+        const { dateFrom, dateTo, state, district } = req.query;
+        const pool = await poolPromise;
+        const request = pool.request();
+
+        const whereParts = [];
+
+        if (dateFrom) {
+            whereParts.push('CAST(d.Date_time AS date) >= @dateFrom');
+            request.input('dateFrom', sql.Date, dateFrom);
+        }
+
+        if (dateTo) {
+            whereParts.push('CAST(d.Date_time AS date) <= @dateTo');
+            request.input('dateTo', sql.Date, dateTo);
+        }
+
+        if (state) {
+            whereParts.push('ISNULL(st.StateAs, \'Sin estado\') = @state');
+            request.input('state', sql.NVarChar(100), state);
+        }
+
+        if (district) {
+            whereParts.push('cs.Name_Sector = @district');
+            request.input('district', sql.NVarChar(200), district);
+        }
+
+        const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
+
+        const query = `
+            SELECT
+                r.Report_ID,
+                p.Name_Problem,
+                cpr.Urgency,
+                r.Adress,
+                cs.Name_Sector AS District,
+                CAST(d.Date_time AS date) AS Report_Date,
+                ISNULL(st.StateAs, 'Sin estado') AS State
+            FROM Reports r
+            LEFT JOIN Cat_Problems p ON r.Problem_ID = p.Problem_ID
+            LEFT JOIN Cat_ProblemLevels cpr ON r.ProblemLevel_ID = cpr.ProblemLevel_ID
+            LEFT JOIN Cat_Sectors cs ON r.Sector_ID = cs.Sector_ID
+            LEFT JOIN Clients_Reports cr ON cr.Report_ID = r.Report_ID
+            LEFT JOIN Dates d ON d.Date_ID = cr.Date_ID
+            OUTER APPLY (
+                SELECT TOP 1 a.State_ID
+                FROM Assigments a
+                WHERE a.Report_ID = r.Report_ID
+                ORDER BY a.Assigment_ID DESC
+            ) la
+            LEFT JOIN Cat_States st ON st.State_ID = la.State_ID
+            ${whereClause}
+            ORDER BY r.Report_ID DESC
+        `;
+
+        const result = await request.query(query);
+        res.json(result.recordset);
+    } catch (err) {
+        next(err);
+    }
+}
+
+// GET /api/reports/client/:clientId
+export async function getByClient(req, res, next) {
+    try {
+        const clientId = parseInt(req.params.clientId, 10);
+        if (Number.isNaN(clientId)) return res.status(400).json({ message: 'Invalid client id' });
+
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('clientId', sql.Int, clientId)
+            .query(`
+                SELECT
+                    r.Report_ID,
+                    p.Name_Problem,
+                    cpr.Urgency,
+                    r.Adress,
+                    cs.Name_Sector AS District,
+                    CAST(d.Date_time AS date) AS Report_Date,
+                    ISNULL(st.StateAs, 'Sin estado') AS State
+                FROM Clients_Reports cr
+                INNER JOIN Reports r ON r.Report_ID = cr.Report_ID
+                LEFT JOIN Cat_Problems p ON p.Problem_ID = r.Problem_ID
+                LEFT JOIN Cat_ProblemLevels cpr ON cpr.ProblemLevel_ID = r.ProblemLevel_ID
+                LEFT JOIN Cat_Sectors cs ON cs.Sector_ID = r.Sector_ID
+                LEFT JOIN Dates d ON d.Date_ID = cr.Date_ID
+                OUTER APPLY (
+                    SELECT TOP 1 a.State_ID
+                    FROM Assigments a
+                    WHERE a.Report_ID = r.Report_ID
+                    ORDER BY a.Assigment_ID DESC
+                ) la
+                LEFT JOIN Cat_States st ON st.State_ID = la.State_ID
+                WHERE cr.Client_ID = @clientId
+                ORDER BY cr.Client_Report_ID DESC
+            `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        next(err);
+    }
+}
+
 // GET /api/reports/:id
 export async function getById(req, res, next) {
     try {

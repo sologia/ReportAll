@@ -1,13 +1,31 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
+import SimpleTable from '@/app/components/SimpleTable'
 import React, { useEffect, useState } from 'react'
 
 const CreateCraw = () => {
   const [vehicles, setVehicles] = useState([]);
   const [sectors, setSectors] = useState([]);
+  const [crews, setCrews] = useState([]);
 
   // disponibilidad fija
   const defaultAvailability = 'Disponible';
+
+  const crewColumns = [
+    { header: 'Crew ID', field: 'Crew_ID' },
+    { header: 'N° Cuadrilla', field: 'Num_Crew' },
+    { header: 'Sector', field: 'Name_Sector' },
+    { header: 'Estado', field: 'Availability_Crew' },
+    { header: 'Placa', field: 'Plate' },
+  ];
+
+  const loadCrews = () => {
+    const base = process.env.NEXT_PUBLIC_API_URL || '';
+    fetch(`${base}/api/crews`)
+      .then(res => res.json())
+      .then(data => setCrews(Array.isArray(data) ? data : []))
+      .catch(err => console.error('Error cargando cuadrillas existentes', err));
+  }
 
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_URL || '';
@@ -20,6 +38,8 @@ const CreateCraw = () => {
       .then(res => res.json())
       .then(data => setSectors(data))
       .catch(err => console.error('Error cargando sectores', err));
+
+    loadCrews();
   }, []);
 
   const handleSubmit = (e) => {
@@ -42,7 +62,7 @@ const CreateCraw = () => {
       .then(res => res.json())
       .then(data => {
         console.log('Crew created', data);
-        // optionally navigate away or show a message
+        loadCrews();
       })
       .catch(err => console.error('Error creating crew', err));
   };
@@ -121,6 +141,11 @@ const CreateCraw = () => {
             </button>
         </div>
       </form>
+
+      <div className='mt-10'>
+        <h3 className='text-xl font-semibold'>Cuadrillas ya creadas</h3>
+        <SimpleTable columns={crewColumns} data={crews} />
+      </div>
 
     </div>
   )
