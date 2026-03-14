@@ -92,6 +92,7 @@ const ViewReports = () => {
       <div>
           <ButtonGroup
           buttons={[
+            { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
             { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
             { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
             { label: "Asignaciones", href: "/dashboard/enacal/assignments" },

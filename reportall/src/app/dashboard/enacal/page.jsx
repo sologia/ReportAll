@@ -10,6 +10,7 @@ const TowExample = () => {
         buttons={[
           { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
           { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
+          { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
           { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
           { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
         ]}

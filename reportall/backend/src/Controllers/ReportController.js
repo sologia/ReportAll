@@ -269,6 +269,211 @@ export async function getSummaryMap(req, res, next) {
     }
 }
 
+// GET /api/reports/statistics?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&district=...
+export async function getStatistics(req, res, next) {
+    try {
+        const { dateFrom, dateTo, district } = req.query;
+        const pool = await poolPromise;
+
+        const reportWhereParts = [];
+        const crewWhereParts = ['a.Report_ID IS NOT NULL'];
+
+        const bindFilterInputs = (queryRequest) => {
+            if (dateFrom) {
+                queryRequest.input('dateFrom', sql.Date, dateFrom);
+            }
+
+            if (dateTo) {
+                queryRequest.input('dateTo', sql.Date, dateTo);
+            }
+
+            if (district) {
+                queryRequest.input('district', sql.NVarChar(200), district);
+            }
+        };
+
+        if (dateFrom) {
+            reportWhereParts.push('CAST(d.Date_time AS date) >= @dateFrom');
+            crewWhereParts.push('CAST(da.Date_time AS date) >= @dateFrom');
+        }
+
+        if (dateTo) {
+            reportWhereParts.push('CAST(d.Date_time AS date) <= @dateTo');
+            crewWhereParts.push('CAST(da.Date_time AS date) <= @dateTo');
+        }
+
+        if (district) {
+            reportWhereParts.push('rs.Name_Sector = @district');
+            crewWhereParts.push('s.Name_Sector = @district');
+        }
+
+        const reportWhereClause = reportWhereParts.length ? `WHERE ${reportWhereParts.join(' AND ')}` : '';
+        const crewWhereClause = crewWhereParts.length ? `WHERE ${crewWhereParts.join(' AND ')}` : '';
+
+        const reportRequest = pool.request();
+        bindFilterInputs(reportRequest);
+
+        const reportStatsResult = await reportRequest.query(`
+            WITH LatestAssignment AS (
+                SELECT
+                    a.Report_ID,
+                    a.State_ID,
+                    ROW_NUMBER() OVER (PARTITION BY a.Report_ID ORDER BY a.Assigment_ID DESC) AS rn
+                FROM Assigments a
+                WHERE a.Report_ID IS NOT NULL
+            )
+            SELECT
+                r.Report_ID,
+                ISNULL(st.StateAs, 'Sin estado') AS State,
+                ISNULL(cpl.Urgency, 'Sin urgencia') AS Urgency,
+                ISNULL(rs.Name_Sector, 'Sin distrito') AS District,
+                ISNULL(p.Name_Problem, 'Sin problema') AS Problem,
+                CASE WHEN la.Report_ID IS NULL THEN 0 ELSE 1 END AS IsAssigned,
+                CASE
+                    WHEN LOWER(ISNULL(st.StateAs, '')) LIKE '%terminad%'
+                      OR LOWER(ISNULL(st.StateAs, '')) LIKE '%resuelt%'
+                      OR LOWER(ISNULL(st.StateAs, '')) LIKE '%complet%'
+                    THEN 1
+                    ELSE 0
+                END AS IsSolved
+            FROM Reports r
+            LEFT JOIN Cat_Problems p ON p.Problem_ID = r.Problem_ID
+            LEFT JOIN Cat_ProblemLevels cpl ON cpl.ProblemLevel_ID = r.ProblemLevel_ID
+            LEFT JOIN Cat_Sectors rs ON rs.Sector_ID = r.Sector_ID
+            LEFT JOIN Clients_Reports cr ON cr.Report_ID = r.Report_ID
+            LEFT JOIN Dates d ON d.Date_ID = cr.Date_ID
+            LEFT JOIN LatestAssignment la ON la.Report_ID = r.Report_ID AND la.rn = 1
+            LEFT JOIN Cat_States st ON st.State_ID = la.State_ID
+            ${reportWhereClause}
+        `);
+
+        const crewRequest = pool.request();
+        bindFilterInputs(crewRequest);
+
+        const crewStatsResult = await crewRequest.query(`
+            WITH LatestCrewAssignment AS (
+                SELECT
+                    a.Crew_ID,
+                    a.Report_ID,
+                    a.State_ID,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY a.Crew_ID, a.Report_ID
+                        ORDER BY a.Assigment_ID DESC
+                    ) AS rn
+                FROM Assigments a
+                LEFT JOIN Dates da ON da.Date_ID = a.Date_ID
+                LEFT JOIN Reports r ON r.Report_ID = a.Report_ID
+                LEFT JOIN Cat_Sectors s ON s.Sector_ID = r.Sector_ID
+                ${crewWhereClause}
+            )
+            SELECT
+                c.Crew_ID,
+                c.Num_Crew,
+                ISNULL(cs.Name_Sector, 'Sin distrito') AS District,
+                COUNT(lca.Report_ID) AS Assigned_Total,
+                SUM(
+                    CASE
+                        WHEN LOWER(ISNULL(st.StateAs, '')) LIKE '%terminad%'
+                          OR LOWER(ISNULL(st.StateAs, '')) LIKE '%resuelt%'
+                          OR LOWER(ISNULL(st.StateAs, '')) LIKE '%complet%'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS Solved_Total
+            FROM Crews c
+            LEFT JOIN Cat_Sectors cs ON cs.Sector_ID = c.Sector_ID
+            LEFT JOIN LatestCrewAssignment lca ON lca.Crew_ID = c.Crew_ID AND lca.rn = 1
+            LEFT JOIN Cat_States st ON st.State_ID = lca.State_ID
+            GROUP BY c.Crew_ID, c.Num_Crew, cs.Name_Sector
+            ORDER BY COUNT(lca.Report_ID) DESC, c.Num_Crew ASC
+        `);
+
+        const reportsRows = reportStatsResult.recordset || [];
+        const crewRowsRaw = crewStatsResult.recordset || [];
+
+        const totalReports = reportsRows.length;
+        const totalAssigned = reportsRows.reduce((sum, row) => sum + (row.IsAssigned ? 1 : 0), 0);
+        const totalSolved = reportsRows.reduce((sum, row) => sum + (row.IsSolved ? 1 : 0), 0);
+
+        const countByField = (rows, fieldName) => {
+            const bucket = rows.reduce((acc, row) => {
+                const key = row[fieldName] || 'Sin dato';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+
+            return Object.entries(bucket)
+                .map(([label, value]) => ({ label, value }))
+                .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+        };
+
+        const byState = countByField(reportsRows, 'State');
+        const byUrgency = countByField(reportsRows, 'Urgency');
+        const byProblem = countByField(reportsRows, 'Problem').slice(0, 10);
+        const byDistrict = countByField(reportsRows, 'District');
+
+        const crewRows = crewRowsRaw.map((crew) => {
+            const assigned = Number(crew.Assigned_Total) || 0;
+            const solved = Number(crew.Solved_Total) || 0;
+            const pending = Math.max(assigned - solved, 0);
+            const solveRate = assigned > 0 ? (solved / assigned) * 100 : 0;
+
+            return {
+                ...crew,
+                Assigned_Total: assigned,
+                Solved_Total: solved,
+                Pending_Total: pending,
+                Solve_Rate: Number(solveRate.toFixed(2)),
+            };
+        });
+
+        const activeCrews = crewRows.filter((crew) => crew.Assigned_Total > 0);
+        const assignedByCrews = activeCrews.reduce((sum, crew) => sum + crew.Assigned_Total, 0);
+        const solvedByCrews = activeCrews.reduce((sum, crew) => sum + crew.Solved_Total, 0);
+
+        const avgAssigned = activeCrews.length > 0 ? assignedByCrews / activeCrews.length : 0;
+        const avgSolved = activeCrews.length > 0 ? solvedByCrews / activeCrews.length : 0;
+        const avgSolveRate = activeCrews.length > 0
+            ? activeCrews.reduce((sum, crew) => sum + crew.Solve_Rate, 0) / activeCrews.length
+            : 0;
+
+        const response = {
+            filtersApplied: {
+                dateFrom: dateFrom || null,
+                dateTo: dateTo || null,
+                district: district || null,
+            },
+            overview: {
+                totalReports,
+                totalAssigned,
+                totalSolved,
+                assignmentRate: totalReports > 0 ? Number(((totalAssigned / totalReports) * 100).toFixed(2)) : 0,
+                solvedRate: totalReports > 0 ? Number(((totalSolved / totalReports) * 100).toFixed(2)) : 0,
+            },
+            charts: {
+                byState,
+                byUrgency,
+                byProblem,
+                byDistrict,
+            },
+            crews: {
+                averages: {
+                    totalCrews: crewRows.length,
+                    activeCrews: activeCrews.length,
+                    avgAssigned: Number(avgAssigned.toFixed(2)),
+                    avgSolved: Number(avgSolved.toFixed(2)),
+                    avgSolveRate: Number(avgSolveRate.toFixed(2)),
+                },
+                ranking: crewRows,
+            },
+        };
+
+        res.json(response);
+    } catch (err) {
+        next(err);
+    }
+}
+
 // GET /api/reports/client/:clientId
 export async function getByClient(req, res, next) {
     try {

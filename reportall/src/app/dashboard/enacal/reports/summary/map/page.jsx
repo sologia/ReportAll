@@ -33,6 +33,7 @@ const SummaryMapPage = () => {
     <div>
       <ButtonGroup
         buttons={[
+          { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
           { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
           { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
           { label: 'Menu', href: '/dashboard/enacal' },
