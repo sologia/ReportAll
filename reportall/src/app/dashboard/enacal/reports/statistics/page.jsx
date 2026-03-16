@@ -286,7 +286,7 @@ export default function ReportsStatisticsPage() {
           <div className='grid gap-4 xl:grid-cols-2'>
             <DonutChart title='Distribución de reportes por estado' total={overview.totalReports} segments={donutSegments} />
             <HorizontalBarChart
-              title='Top 10 problemas más reportados'
+              title='Top problemas más reportados'
               data={problemData}
             />
           </div>
@@ -297,7 +297,7 @@ export default function ReportsStatisticsPage() {
               data={urgencyData}
             />
             <HorizontalBarChart
-              title='Top cuadrillas por asignaciones (Top 10)'
+              title='Top cuadrillas por asignaciones'
               data={topCrews.map((crew) => ({
                 label: `Cuadrilla ${crew.Num_Crew}`,
                 value: crew.Assigned_Total,
