@@ -65,6 +65,12 @@ export async function getReportsByCrew(req, res, next) {
         const id = parseInt(req.params.id, 10);
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
+        const role = String(req.auth?.role || '').trim().toLowerCase();
+        const authCrewId = req.auth?.crewId || null;
+        if (role === 'cuadrilla' && authCrewId !== id) {
+            return res.status(403).json({ message: 'No autorizado para consultar reportes de otra cuadrilla' });
+        }
+
         const { problem, state, date } = req.query;
 
         const pool = await poolPromise;

@@ -154,8 +154,45 @@ export async function update(req, res, next) {
         const id = parseInt(req.params.id, 10);
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
+        const role = String(req.auth?.role || '').trim().toLowerCase();
+        const authCrewId = req.auth?.crewId || null;
         const { Name_Leader, Num_Crew, Report_ID, Date_Time, StateAs } = req.body;
+
+        if (role === 'cuadrilla') {
+            const hasOnlyState = (
+                StateAs !== undefined
+                && Name_Leader === undefined
+                && Num_Crew === undefined
+                && Report_ID === undefined
+                && Date_Time === undefined
+            );
+
+            if (!hasOnlyState) {
+                return res.status(403).json({ message: 'La cuadrilla solo puede editar el estado de sus reportes asignados' });
+            }
+
+            if (!authCrewId) {
+                return res.status(403).json({ message: 'No autorizado: usuario de cuadrilla sin crewId en sesión' });
+            }
+        }
+
         const pool = await poolPromise;
+
+        if (role === 'cuadrilla') {
+            const ownership = await pool.request()
+                .input('id', sql.Int, id)
+                .input('crewId', sql.Int, authCrewId)
+                .query(`
+                    SELECT TOP 1 Assigment_ID
+                    FROM Assigments
+                    WHERE Assigment_ID = @id AND Crew_ID = @crewId
+                `);
+
+            if (!ownership.recordset[0]?.Assigment_ID) {
+                return res.status(403).json({ message: 'No autorizado: esta asignación no pertenece a tu cuadrilla' });
+            }
+        }
+
         const request = pool.request().input('id', sql.Int, id);
 
         let setParts = [];

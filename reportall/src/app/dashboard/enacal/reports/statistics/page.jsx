@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import ButtonGroup from '@/app/components/ButtonGroup '
+import { getSession } from '@/lib/auth'
+import { normalizeRole } from '@/lib/rbac'
 
 const numberFormatter = new Intl.NumberFormat('es-NI')
 
@@ -115,6 +117,7 @@ function DonutChart({ title, total, segments }) {
 }
 
 export default function ReportsStatisticsPage() {
+  const role = normalizeRole(getSession()?.role)
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
   const [districtOptions, setDistrictOptions] = useState([])
@@ -204,15 +207,24 @@ export default function ReportsStatisticsPage() {
     color: colorByState(item.label),
   }))
 
+  const navButtons = role === 'director_it'
+    ? [
+      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
+      { label: 'Resumen cuadrillas', href: '/dashboard/enacal/craw/report-summary' },
+      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+    : [
+      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
+      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
+      { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+
   return (
     <div className='space-y-6'>
       <ButtonGroup
-        buttons={[
-          { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
-          { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
-          { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
-          { label: 'Menu', href: '/dashboard/enacal' },
-        ]}
+        buttons={navButtons}
       />
 
       <h2 className='text-2xl font-semibold'>Estadísticas de Reportes y Cuadrillas</h2>

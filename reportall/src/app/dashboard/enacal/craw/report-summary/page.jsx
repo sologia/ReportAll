@@ -3,8 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import ButtonGroup from '@/app/components/ButtonGroup '
+import { getSession } from '@/lib/auth'
+import { canViewIds, normalizeRole } from '@/lib/rbac'
 
 const CrewReportSummaryPage = () => {
+  const role = normalizeRole(getSession()?.role)
+  const showIds = canViewIds(role)
   const [data, setData] = useState([])
   const [districts, setDistricts] = useState([])
   const [loading, setLoading] = useState(false)
@@ -68,14 +72,23 @@ const CrewReportSummaryPage = () => {
     loadSummary(reset)
   }
 
+  const navButtons = role === 'director_it'
+    ? [
+      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
+      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
+      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+    : [
+      { label: 'Cuadrillas', href: '/dashboard/enacal/craw' },
+      { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+
   return (
     <div>
       <ButtonGroup
-        buttons={[
-          { label: 'Cuadrillas', href: '/dashboard/enacal/craw' },
-          { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
-          { label: 'Menu', href: '/dashboard/enacal' },
-        ]}
+        buttons={navButtons}
       />
 
       <h2 className='text-2xl font-semibold mb-4'>Resumen de Reportes Atendidos por Cuadrilla</h2>
@@ -152,7 +165,7 @@ const CrewReportSummaryPage = () => {
         <table className='min-w-full border-collapse'>
           <thead className='bg-blue-600 text-white'>
             <tr>
-              <th className='py-3 px-4 text-left text-sm font-medium'>Crew ID</th>
+              {showIds ? <th className='py-3 px-4 text-left text-sm font-medium'>Crew ID</th> : null}
               <th className='py-3 px-4 text-left text-sm font-medium'>Número Cuadrilla</th>
               <th className='py-3 px-4 text-left text-sm font-medium'>Distrito</th>
               <th className='py-3 px-4 text-left text-sm font-medium'>Reportes Atendidos</th>
@@ -162,16 +175,16 @@ const CrewReportSummaryPage = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className='text-center py-4 text-gray-500'>Cargando...</td>
+                <td colSpan={showIds ? 5 : 4} className='text-center py-4 text-gray-500'>Cargando...</td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={5} className='text-center py-4 text-gray-500'>No hay datos</td>
+                <td colSpan={showIds ? 5 : 4} className='text-center py-4 text-gray-500'>No hay datos</td>
               </tr>
             ) : (
               data.map((row) => (
                 <tr key={row.Crew_ID} className='border-b hover:bg-blue-50 transition'>
-                  <td className='py-3 px-4 text-sm text-gray-700'>{row.Crew_ID}</td>
+                  {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>{row.Crew_ID}</td> : null}
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.Num_Crew}</td>
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.District}</td>
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.Reports_Attended}</td>

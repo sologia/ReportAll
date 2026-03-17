@@ -3,12 +3,13 @@ import { useForm } from '@/hooks/useForm';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginUser } from '@/lib/auth';
+import { getDefaultRouteByRole, normalizeRole } from '@/lib/rbac';
 import 'tailwindcss';
 
 const loginFormFields = {
     loginEmail: '',
     loginPassword: '',
-    loginRole: 'trabajador'
+    loginRole: 'cliente'
 }
 
 function LoginPage() {
@@ -26,12 +27,8 @@ function LoginPage() {
             return;
         }
 
-        if (session.role === 'trabajador') {
-            router.push('/dashboard/enacal');
-            return;
-        }
-
-        router.push('/dashboard/clientes');
+        const role = normalizeRole(session.role);
+        router.push(getDefaultRouteByRole(role));
     }
 
     return (
@@ -69,8 +66,11 @@ function LoginPage() {
                                 onChange={onLoginInputChange}
                                 className="p-3 border rounded-lg w-90 m-auto"
                             >
-                                <option value="trabajador">Trabajador</option>
                                 <option value="cliente">Cliente</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="director_it">Director IT</option>
+                                <option value="cuadrilla">Cuadrilla</option>
+                                <option value="lider_cuadrilla">Líder de cuadrilla</option>
                             </select>
                             <button
                                 type="submit"

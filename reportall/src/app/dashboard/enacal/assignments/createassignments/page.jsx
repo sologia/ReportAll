@@ -3,8 +3,12 @@ import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
 import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
+import { buildSessionHeaders, getSession } from '@/lib/auth'
+import { canViewIds, normalizeRole } from '@/lib/rbac'
 
 const CreateAssignments = () => {
+    const role = normalizeRole(getSession()?.role)
+    const showIds = canViewIds(role)
     const [numcrew, setNumCrew] = useState([])
     const [reports, setReports] = useState([])
     const [assignments, setAssignments] = useState([])
@@ -94,7 +98,10 @@ const CreateAssignments = () => {
         try {
             const response = await fetch(`${base}/api/assignments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...buildSessionHeaders(getSession()),
+                },
                 body: JSON.stringify(payload),
             })
 
@@ -191,7 +198,9 @@ const CreateAssignments = () => {
                             <option value="">Seleccione</option>
                             {allowedReports.map((report) => (
                                 <option key={report.Report_ID} value={report.Report_ID}>
-                                    {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'} (${report.District || 'Sin distrito'})`}
+                                    {showIds
+                                        ? `#${report.Report_ID} - ${report.Adress || 'Sin dirección'} (${report.District || 'Sin distrito'})`
+                                        : `${report.Adress || 'Sin dirección'} (${report.District || 'Sin distrito'})`}
                                 </option>
                             ))}
                         </select>

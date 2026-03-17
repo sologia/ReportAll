@@ -2,8 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
 import Swal from 'sweetalert2';
+import { buildSessionHeaders, getSession } from '@/lib/auth';
+import { canViewIds, normalizeRole } from '@/lib/rbac';
 
 const UpdateAssignments = () => {
+  const role = normalizeRole(getSession()?.role);
+  const showIds = canViewIds(role);
   const [assignments, setAssignments] = useState([]);
   const [nameleader, setNameLeader] = useState([]);
   const [numcrew, setNumCrew] = useState([]);
@@ -111,7 +115,10 @@ const UpdateAssignments = () => {
     try {
       const res = await fetch(`${base}/api/assignments/${selectedId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildSessionHeaders(getSession()),
+        },
         body: JSON.stringify(payload)
       });
 
@@ -193,7 +200,7 @@ const UpdateAssignments = () => {
               <option value="">Seleccione</option>
               {reports.map((report) => (
                 <option key={report.Report_ID} value={report.Report_ID}>
-                  {`#${report.Report_ID} - ${report.Adress || 'Sin dirección'}`}
+                  {showIds ? `#${report.Report_ID} - ${report.Adress || 'Sin dirección'}` : `${report.Adress || 'Sin dirección'}`}
                 </option>
               ))}
             </select>
@@ -244,7 +251,7 @@ const UpdateAssignments = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-blue-600 text-white">
             <tr>
-              <th className="py-3 px-4 text-left text-sm font-medium">Asignación ID</th>
+              {showIds ? <th className="py-3 px-4 text-left text-sm font-medium">Asignación ID</th> : null}
               <th className="py-3 px-4 text-left text-sm font-medium">Líder</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Cuadrilla</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Reporte</th>
@@ -255,15 +262,15 @@ const UpdateAssignments = () => {
           <tbody>
             {assignments.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">No hay datos</td>
+                <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
               assignments.map((assignment) => (
                 <tr key={assignment.Assigment_ID} className="border-b hover:bg-blue-50 transition">
-                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.Assigment_ID}</td>
+                  {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{assignment.Assigment_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Name_Leader}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Num_Crew}</td>
-                  <td className="py-3 px-4 text-sm text-gray-700">#{assignment.Report_ID}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{showIds ? `#${assignment.Report_ID}` : (assignment.Report_Adress || 'Reporte asignado')}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.StateAs}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">
                     <button

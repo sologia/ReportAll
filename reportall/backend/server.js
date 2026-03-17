@@ -13,6 +13,7 @@ import leadersRouter from './src/Routes/Leaders.js';
 import crewsonlyRouter from './src/Routes/Crewsonly.js';
 import stateRouter from './src/Routes/stattus.js';
 import authRouter from './src/Routes/Auth.js';
+import { attachAuthContext } from './src/middlewares/rbac.js';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -31,6 +32,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(attachAuthContext);
 
 // Rutas
 app.use('/api/reports', reportsRouter);

@@ -29,6 +29,18 @@ export function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
+export function buildSessionHeaders(session = getSession()) {
+  if (!session) return {};
+
+  const headers = {};
+  if (session.role) headers['x-user-role'] = String(session.role);
+  if (session.clientId !== undefined && session.clientId !== null) headers['x-client-id'] = String(session.clientId);
+  if (session.leaderCrewId !== undefined && session.leaderCrewId !== null) headers['x-leader-crew-id'] = String(session.leaderCrewId);
+  if (session.crewId !== undefined && session.crewId !== null) headers['x-crew-id'] = String(session.crewId);
+
+  return headers;
+}
+
 export async function loginUser({ email, password, role }) {
   try {
     const base = getApiBase();

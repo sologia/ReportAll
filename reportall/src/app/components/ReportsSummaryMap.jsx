@@ -95,7 +95,7 @@ function PolygonSelector({ onAddPoint }) {
   return null
 }
 
-export default function ReportsSummaryMap({ reports = [] }) {
+export default function ReportsSummaryMap({ reports = [], showIds = true }) {
   const [selectedState, setSelectedState] = useState('Todos')
   const [polygonPoints, setPolygonPoints] = useState([])
 
@@ -241,7 +241,7 @@ export default function ReportsSummaryMap({ reports = [] }) {
           >
             <Tooltip direction='top' offset={[0, -10]} opacity={1}>
               <div className='text-sm'>
-                <p><strong>Reporte:</strong> #{report.Report_ID}</p>
+                {showIds ? <p><strong>Reporte:</strong> #{report.Report_ID}</p> : null}
                 <p><strong>Problema:</strong> {report.Name_Problem || 'N/D'}</p>
                 <p><strong>Urgencia:</strong> {report.Urgency || 'N/D'}</p>
                 <p><strong>Dirección:</strong> {report.Adress || 'N/D'}</p>

@@ -2,8 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
 import Swal from 'sweetalert2';
+import { getSession } from '@/lib/auth';
+import { canViewIds, normalizeRole } from '@/lib/rbac';
 
 const UpdateCraw = () => {
+  const role = normalizeRole(getSession()?.role);
+  const showIds = canViewIds(role);
   const [crews, setCrews] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [sectors, setSectors] = useState([]);
@@ -243,7 +247,7 @@ const UpdateCraw = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-blue-600 text-white">
             <tr>
-              <th className="py-3 px-4 text-left text-sm font-medium">Crew ID</th>
+              {showIds ? <th className="py-3 px-4 text-left text-sm font-medium">Crew ID</th> : null}
               <th className="py-3 px-4 text-left text-sm font-medium">N° Cuadrilla</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Sector</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Estado</th>
@@ -254,12 +258,12 @@ const UpdateCraw = () => {
           <tbody>
             {crews.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">No hay datos</td>
+                <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
               crews.map((crew) => (
                 <tr key={crew.Crew_ID} className="border-b hover:bg-blue-50 transition">
-                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td>
+                  {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Num_Crew}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Name_Sector}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Availability_Crew}</td>

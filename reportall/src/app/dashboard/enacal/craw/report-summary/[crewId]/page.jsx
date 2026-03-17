@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
+import { getSession } from '@/lib/auth'
+import { canViewIds, normalizeRole } from '@/lib/rbac'
 
 const CrewReportsDetailPage = () => {
+  const role = normalizeRole(getSession()?.role)
+  const showIds = canViewIds(role)
   const params = useParams()
   const crewId = params?.crewId
 
@@ -25,6 +29,10 @@ const CrewReportsDetailPage = () => {
     { header: 'Estado', field: 'State' },
     { header: 'Fecha', field: 'Assignment_Date' },
   ]
+
+  const visibleColumns = showIds
+    ? columns
+    : columns.filter((column) => column.field !== 'Assigment_ID' && column.field !== 'Report_ID')
 
   const problemOptions = [...new Set(data.map((row) => row.Name_Problem).filter(Boolean))]
   const stateOptions = [...new Set(data.map((row) => row.State).filter(Boolean))]
@@ -63,7 +71,7 @@ const CrewReportsDetailPage = () => {
         <ButtonBack />
       </div>
 
-      <h2 className='text-2xl font-semibold mb-4'>Detalle de reportes atendidos - Cuadrilla {crewId}</h2>
+      <h2 className='text-2xl font-semibold mb-4'>Detalle de reportes atendidos {showIds ? `- Cuadrilla ${crewId}` : ''}</h2>
 
       <div className='mb-4 grid gap-3 md:grid-cols-3'>
         <div className='flex flex-col gap-1'>
@@ -109,7 +117,7 @@ const CrewReportsDetailPage = () => {
       </div>
 
       <div>
-        {loading ? <p>Cargando detalle...</p> : <SimpleTable columns={columns} data={data} />}
+        {loading ? <p>Cargando detalle...</p> : <SimpleTable columns={visibleColumns} data={data} />}
       </div>
     </div>
   )

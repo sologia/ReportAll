@@ -143,7 +143,6 @@ function RegisterPage() {
             className="p-3 border rounded-lg w-90 m-auto"
           >
             <option value="cliente">Cliente</option>
-            <option value="trabajador">Trabajador</option>
           </select>
 
           <button

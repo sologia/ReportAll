@@ -3,8 +3,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
+import { getSession } from '@/lib/auth'
+import { canViewIds, normalizeRole } from '@/lib/rbac'
 
 const SummaryReportsPage = () => {
+  const role = normalizeRole(getSession()?.role)
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
@@ -23,6 +26,10 @@ const SummaryReportsPage = () => {
     { header: 'Estado', field: 'State' },
     { header: 'Fecha', field: 'Report_Date' },
   ]
+
+  const visibleColumns = canViewIds(role)
+    ? columns
+    : columns.filter((column) => column.field !== 'Report_ID')
 
   const stateOptions = useMemo(() => {
     const values = Array.from(new Set(data.map(item => item.State).filter(Boolean)))
@@ -77,16 +84,25 @@ const SummaryReportsPage = () => {
     loadSummary(reset)
   }
 
+  const navButtons = role === 'director_it'
+    ? [
+      { label: 'Resumen cuadrillas', href: '/dashboard/enacal/craw/report-summary' },
+      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
+      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+    : [
+      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
+      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
+      { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
+      { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
+      { label: 'Menu', href: '/dashboard/enacal' },
+    ]
+
   return (
     <div>
       <ButtonGroup
-        buttons={[
-          { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-          { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
-          { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
-          { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
-          { label: 'Menu', href: '/dashboard/enacal' },
-        ]}
+        buttons={navButtons}
       />
 
       <h2 className='text-2xl font-semibold mb-4'>Resumen General de Reportes (Director IT)</h2>
@@ -162,7 +178,7 @@ const SummaryReportsPage = () => {
       </form>
 
       <div className='mt-6'>
-        {loading ? <p>Cargando resumen...</p> : <SimpleTable columns={columns} data={data} />}
+        {loading ? <p>Cargando resumen...</p> : <SimpleTable columns={visibleColumns} data={data} />}
       </div>
     </div>
   )

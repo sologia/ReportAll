@@ -2,6 +2,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearSession, getSession } from '@/lib/auth';
+import { getDefaultRouteByRole, isPathAllowedForRole, normalizeRole } from '@/lib/rbac';
 
 function DashboardLayout({ children }) {
 
@@ -18,13 +19,10 @@ function DashboardLayout({ children }) {
       return;
     }
 
-    if (currentSession.role === 'cliente' && pathname.startsWith('/dashboard/enacal')) {
-      router.replace('/dashboard/clientes');
-      return;
-    }
-
-    if (currentSession.role === 'trabajador' && pathname.startsWith('/dashboard/clientes')) {
-      router.replace('/dashboard/enacal');
+    const role = normalizeRole(currentSession.role);
+    const isAllowed = isPathAllowedForRole(role, pathname);
+    if (!isAllowed) {
+      router.replace(getDefaultRouteByRole(role));
       return;
     }
 
@@ -47,6 +45,8 @@ function DashboardLayout({ children }) {
 
     if (pathname.includes("/dashboard/enacal/craw"))
       return "Cuadrillas";
+    if (pathname.includes("/dashboard/enacal/crew/reports"))
+      return "Mis Reportes Asignados";
     if (pathname.includes("/dashboard/enacal/path"))
       return "Path";
 

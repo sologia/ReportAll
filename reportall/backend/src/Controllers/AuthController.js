@@ -68,6 +68,25 @@ async function ensureWorker(nameLeader) {
   return createdResult.recordset[0]?.Leader_Crew_ID;
 }
 
+async function findCrewIdByNumber(numCrew) {
+  const numericValue = Number.parseInt(String(numCrew || ''), 10);
+  if (Number.isNaN(numericValue)) {
+    return null;
+  }
+
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('Num_Crew', sql.Int, numericValue)
+    .query(`
+      SELECT TOP 1 Crew_ID
+      FROM Crews
+      WHERE Num_Crew = @Num_Crew
+      ORDER BY Crew_ID DESC;
+    `);
+
+  return result.recordset[0]?.Crew_ID || null;
+}
+
 export async function register(req, res, next) {
   try {
     const {
@@ -87,8 +106,8 @@ export async function register(req, res, next) {
       return res.status(400).json({ message: 'email, password, role y displayName son requeridos' });
     }
 
-    if (!['cliente', 'trabajador'].includes(normalizedRole)) {
-      return res.status(400).json({ message: 'role debe ser cliente o trabajador' });
+    if (!['cliente', 'administrador', 'director_it', 'cuadrilla', 'lider_cuadrilla'].includes(normalizedRole)) {
+      return res.status(400).json({ message: 'role inválido para este sistema' });
     }
 
     const pool = await poolPromise;
@@ -102,6 +121,7 @@ export async function register(req, res, next) {
 
     let clientId = null;
     let leaderCrewId = null;
+    let crewId = null;
 
     if (normalizedRole === 'cliente') {
       const payload = {
@@ -122,15 +142,22 @@ export async function register(req, res, next) {
       }
     }
 
-    if (normalizedRole === 'trabajador') {
+    if (normalizedRole === 'lider_cuadrilla') {
       const workerName = String(workerData?.Name_Leader || finalDisplayName).trim();
       if (!workerName) {
-        return res.status(400).json({ message: 'Para trabajadores, Name_Leader es requerido' });
+        return res.status(400).json({ message: 'Para lider_cuadrilla, workerData.Name_Leader es requerido' });
       }
 
       leaderCrewId = await ensureWorker(workerName);
       if (!leaderCrewId) {
         return res.status(500).json({ message: 'No se pudo crear/encontrar el trabajador' });
+      }
+    }
+
+    if (normalizedRole === 'cuadrilla') {
+      crewId = await findCrewIdByNumber(workerData?.Num_Crew);
+      if (!crewId) {
+        return res.status(400).json({ message: 'Para cuadrilla, workerData.Num_Crew es requerido y debe existir en Crews' });
       }
     }
 
@@ -145,10 +172,11 @@ export async function register(req, res, next) {
       .input('Display_Name', sql.NVarChar(200), finalDisplayName)
       .input('Client_ID', sql.Int, clientId)
       .input('Leader_Crew_ID', sql.Int, leaderCrewId)
+      .input('Crew_ID', sql.Int, crewId)
       .query(`
-        INSERT INTO Auth_Users (Email, Password_Hash, Password_Salt, Role, Display_Name, Client_ID, Leader_Crew_ID)
-        OUTPUT INSERTED.User_ID, INSERTED.Email, INSERTED.Role, INSERTED.Display_Name, INSERTED.Client_ID, INSERTED.Leader_Crew_ID
-        VALUES (@Email, @Password_Hash, @Password_Salt, @Role, @Display_Name, @Client_ID, @Leader_Crew_ID);
+        INSERT INTO Auth_Users (Email, Password_Hash, Password_Salt, Role, Display_Name, Client_ID, Leader_Crew_ID, Crew_ID)
+        OUTPUT INSERTED.User_ID, INSERTED.Email, INSERTED.Role, INSERTED.Display_Name, INSERTED.Client_ID, INSERTED.Leader_Crew_ID, INSERTED.Crew_ID
+        VALUES (@Email, @Password_Hash, @Password_Salt, @Role, @Display_Name, @Client_ID, @Leader_Crew_ID, @Crew_ID);
       `);
 
     const created = createdUserResult.recordset[0];
@@ -161,6 +189,7 @@ export async function register(req, res, next) {
         displayName: created.Display_Name,
         clientId: created.Client_ID,
         leaderCrewId: created.Leader_Crew_ID,
+        crewId: created.Crew_ID,
       },
     });
   } catch (err) {
@@ -190,6 +219,7 @@ export async function login(req, res, next) {
           u.Display_Name,
           u.Client_ID,
           u.Leader_Crew_ID,
+          u.Crew_ID,
           u.Is_Active
         FROM Auth_Users u
         WHERE u.Email = @Email;
@@ -211,6 +241,7 @@ export async function login(req, res, next) {
       displayName: user.Display_Name,
       clientId: user.Client_ID,
       leaderCrewId: user.Leader_Crew_ID,
+      crewId: user.Crew_ID,
     });
   } catch (err) {
     next(err);
