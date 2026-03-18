@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query('SELECT Availability_Crew FROM Cat_Availabilitys_Crews');
+    const result = await pool.request().execute('sp_Availability_List');
     res.json(result.recordset);
   } catch (err) {
     next(err);

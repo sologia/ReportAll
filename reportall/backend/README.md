@@ -21,6 +21,49 @@ You may move the `.env` file to the root of `backend/` and adjust
 `dotenv.config()` call in `server.js` accordingly.  Ensure the
 `DB_USER`/`DB_PASSWORD` pair are correct to avoid login errors.
 
+## Dependencias del proyecto
+
+Instalación recomendada desde la raíz del proyecto (`reportall`):
+
+```bash
+npm install
+npm install --prefix backend
+```
+
+### Dependencias de la raíz (`reportall/package.json`)
+
+- `@react-leaflet/core`
+- `cors`
+- `dotenv`
+- `leaflet`
+- `leaflet-geosearch`
+- `msnodesqlv8`
+- `next`
+- `node`
+- `react`
+- `react-dom`
+- `react-icons`
+- `react-leaflet`
+- `sweetalert2`
+- `wellknown`
+
+Dev dependencies:
+
+- `@tailwindcss/postcss`
+- `concurrently`
+- `tailwindcss`
+
+### Dependencias del backend (`backend/package.json`)
+
+- `cors`
+- `dotenv`
+- `express`
+- `msnodesqlv8`
+- `mssql`
+- `multer`
+- `node`
+- `wellknown`
+
 ## Migración de registro y login
 
 Ejecuta en SQL Server el script:
@@ -36,3 +79,15 @@ Endpoints habilitados:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+
+## Migración de procedimientos almacenados del backend
+
+Ejecuta en SQL Server el script:
+
+`backend/sql/2026-03-17-backend-stored-procedures.sql`
+
+Este script:
+
+- Crea/actualiza procedimientos almacenados para `clients`, `paths`, `crews`, `assigments`, `reports`, `auth` y catálogos.
+- Elimina el SP legacy `Create_Paths` (ya no usado por el backend).
+- Permite que el backend opere sin queries SQL inline en los controladores/rutas.

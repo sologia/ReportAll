@@ -4,7 +4,7 @@ import { poolPromise, sql } from '../config/db.js';
 export async function getAll(req, res, next) {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query('exec SelectCrews');
+        const result = await pool.request().execute('SelectCrews');
         res.json(result.recordset);
     } catch (err) {
         next(err);
@@ -18,41 +18,12 @@ export async function getReportsSummary(req, res, next) {
         const pool = await poolPromise;
         const request = pool.request();
 
-        const whereParts = [];
-        if (district) {
-            whereParts.push('cs.Name_Sector = @district');
-            request.input('district', sql.NVarChar(200), district);
-        }
+        if (district) request.input('District', sql.NVarChar(200), district);
+        if (order) request.input('Order', sql.NVarChar(4), order);
+        if (dateFrom) request.input('DateFrom', sql.Date, dateFrom);
+        if (dateTo) request.input('DateTo', sql.Date, dateTo);
 
-        if (dateFrom) {
-            whereParts.push('CAST(da.Date_time AS date) >= @dateFrom');
-            request.input('dateFrom', sql.Date, dateFrom);
-        }
-
-        if (dateTo) {
-            whereParts.push('CAST(da.Date_time AS date) <= @dateTo');
-            request.input('dateTo', sql.Date, dateTo);
-        }
-
-        const whereClause = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
-        const orderDirection = String(order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
-
-        const query = `
-            SELECT
-                c.Crew_ID,
-                c.Num_Crew,
-                cs.Name_Sector AS District,
-                COUNT(a.Report_ID) AS Reports_Attended
-            FROM Crews c
-            LEFT JOIN Cat_Sectors cs ON c.Sector_ID = cs.Sector_ID
-            LEFT JOIN Assigments a ON a.Crew_ID = c.Crew_ID AND a.Report_ID IS NOT NULL
-            LEFT JOIN Dates da ON da.Date_ID = a.Date_ID
-            ${whereClause}
-            GROUP BY c.Crew_ID, c.Num_Crew, cs.Name_Sector
-            ORDER BY COUNT(a.Report_ID) ${orderDirection}, c.Num_Crew ASC
-        `;
-
-        const result = await request.query(query);
+        const result = await request.execute('sp_Crew_GetReportsSummary');
         res.json(result.recordset);
     } catch (err) {
         next(err);
@@ -74,46 +45,13 @@ export async function getReportsByCrew(req, res, next) {
         const { problem, state, date } = req.query;
 
         const pool = await poolPromise;
-        const request = pool.request().input('id', sql.Int, id);
-        const whereParts = ['a.Crew_ID = @id'];
+        const request = pool.request().input('Crew_ID', sql.Int, id);
 
-        if (problem) {
-            whereParts.push('p.Name_Problem = @problem');
-            request.input('problem', sql.NVarChar(250), problem);
-        }
+        if (problem) request.input('Problem', sql.NVarChar(250), problem);
+        if (state) request.input('State', sql.NVarChar(250), state);
+        if (date) request.input('Date', sql.Date, date);
 
-        if (state) {
-            whereParts.push('st.StateAs = @state');
-            request.input('state', sql.NVarChar(250), state);
-        }
-
-        if (date) {
-            whereParts.push('CAST(ds.Date_time AS date) = @date');
-            request.input('date', sql.Date, date);
-        }
-
-        const whereClause = `WHERE ${whereParts.join(' AND ')}`;
-
-        const result = await request.query(`
-                SELECT
-                    a.Assigment_ID,
-                    r.Report_ID,
-                    p.Name_Problem,
-                    cpr.Urgency,
-                    r.Adress,
-                    cs.Name_Sector AS District,
-                    ds.Date_time AS Assignment_Date,
-                    st.StateAs AS State
-                FROM Assigments a
-                INNER JOIN Reports r ON r.Report_ID = a.Report_ID
-                LEFT JOIN Cat_Problems p ON p.Problem_ID = r.Problem_ID
-                LEFT JOIN Cat_ProblemLevels cpr ON cpr.ProblemLevel_ID = r.ProblemLevel_ID
-                LEFT JOIN Cat_Sectors cs ON cs.Sector_ID = r.Sector_ID
-                LEFT JOIN Dates ds ON ds.Date_ID = a.Date_ID
-                LEFT JOIN Cat_States st ON st.State_ID = a.State_ID
-                ${whereClause}
-                ORDER BY a.Assigment_ID DESC
-            `);
+        const result = await request.execute('sp_Crew_GetReportsByCrew');
 
         res.json(result.recordset);
     } catch (err) {
@@ -129,7 +67,7 @@ export async function getById(req, res, next) {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .query('EXEC sp_SelectCrewByID @id');
+            .execute('sp_SelectCrewByID');
         const row = result.recordset[0];
         if (!row) return res.status(404).json({ message: 'Not found' });
         res.json(row);
@@ -150,7 +88,7 @@ export async function create(req, res, next) {
             .input('Plate', sql.NVarChar(20), Plate)
             .input('Num_Crew', sql.Int, Num_Crew);
 
-        const result = await request.query('EXEC sp_InsertCrew @Availability, @Sector, @Plate, @Num_Crew');
+        const result = await request.execute('sp_InsertCrew');
         res.status(201).json(result.recordset && result.recordset[0] ? result.recordset[0] : {});
     } catch (err) {
         next(err);
@@ -167,40 +105,21 @@ export async function update(req, res, next) {
       
 
         const pool = await poolPromise;
-        const request = pool.request().input('id', sql.Int, id);
+        const request = pool.request()
+            .input('Crew_ID', sql.Int, id);
 
-        let setParts = [];
-        if (Num_Crew !== undefined) {
-            setParts.push('Num_Crew = @Num_Crew');
-            request.input('Num_Crew', sql.Int, Num_Crew);
-        }
-        if (Availability !== undefined) {
-            setParts.push('Availability_Crew_ID = (SELECT Availability_Crew_ID FROM Cat_Availabilitys_Crews WHERE Availability_Crew = @Availability)');
-            request.input('Availability', sql.NVarChar(250), Availability);
-        }
-        if (Sector !== undefined) {
-            setParts.push('Sector_ID = (SELECT Sector_ID FROM Cat_Sectors WHERE Name_Sector = @Sector)');
-            request.input('Sector', sql.NVarChar(250), Sector);
-        }
-        if (Plate !== undefined) {
-            setParts.push('Vehicle_ID = (SELECT Vehicle_ID FROM Cat_Vehicles WHERE Plate = @Plate)');
-            request.input('Plate', sql.NVarChar(20), Plate);
-        }
+        if (Num_Crew !== undefined) request.input('Num_Crew', sql.Int, Num_Crew);
+        if (Availability !== undefined) request.input('Availability', sql.NVarChar(250), Availability);
+        if (Sector !== undefined) request.input('Sector', sql.NVarChar(250), Sector);
+        if (Plate !== undefined) request.input('Plate', sql.NVarChar(20), Plate);
 
-        if (setParts.length === 0) {
+        if (Num_Crew === undefined && Availability === undefined && Sector === undefined && Plate === undefined) {
             return res.status(400).json({ message: 'No updatable fields provided' });
         }
 
-        const setClause = setParts.join(', ');
-        const sqlQuery = `
-            UPDATE Crews
-            SET ${setClause}
-            WHERE Crew_ID = @id;
-        `;
+        const result = await request.execute('sp_Crew_Update');
 
-        const result = await request.query(sqlQuery);
-
-        if (result.rowsAffected && result.rowsAffected[0] === 0) {
+        if (!result.recordset?.[0] || result.recordset[0].RowsAffected === 0) {
             return res.status(404).json({ message: 'Not found' });
         }
 
@@ -216,9 +135,14 @@ export async function remove(req, res, next) {
         const id = parseInt(req.params.id, 10);
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
         const pool = await poolPromise;
-        await pool.request()
-            .input('id', sql.Int, id)
-            .query('DELETE FROM Crews WHERE Crew_ID = @id');
+        const result = await pool.request()
+            .input('Crew_ID', sql.Int, id)
+            .execute('sp_Crew_Delete');
+
+        if (!result.recordset?.[0] || result.recordset[0].RowsAffected === 0) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
         res.status(204).end();
     } catch (err) {
         next(err);

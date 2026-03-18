@@ -24,48 +24,16 @@ async function ensureClient({ FirstName, SecondName, FirstLastName, SecondLastNa
     .input('SecondLastName', sql.NVarChar(100), SecondLastName)
     .input('Numero_NIC', sql.NVarChar(50), Numero_NIC);
 
-  const existingResult = await request.query(`
-    SELECT TOP 1 Client_ID
-    FROM Clients
-    WHERE Numero_NIC = @Numero_NIC
-    ORDER BY Client_ID DESC;
-  `);
-
-  if (existingResult.recordset[0]?.Client_ID) {
-    return existingResult.recordset[0].Client_ID;
-  }
-
-  const createdResult = await request.query(`
-    INSERT INTO Clients (FirstName_Client, SecondName_Client, FirstLastName_Client, SecondLastName_Client, Numero_NIC)
-    OUTPUT INSERTED.Client_ID
-    VALUES (@FirstName, @SecondName, @FirstLastName, @SecondLastName, @Numero_NIC);
-  `);
-
-  return createdResult.recordset[0]?.Client_ID;
+  const result = await request.execute('sp_Auth_EnsureClient');
+  return result.recordset[0]?.Client_ID;
 }
 
 async function ensureWorker(nameLeader) {
   const pool = await poolPromise;
   const request = pool.request().input('Name_Leader', sql.NVarChar(250), nameLeader);
 
-  const existingResult = await request.query(`
-    SELECT TOP 1 Leader_Crew_ID
-    FROM Leader_Crews
-    WHERE Name_Leader = @Name_Leader
-    ORDER BY Leader_Crew_ID DESC;
-  `);
-
-  if (existingResult.recordset[0]?.Leader_Crew_ID) {
-    return existingResult.recordset[0].Leader_Crew_ID;
-  }
-
-  const createdResult = await request.query(`
-    INSERT INTO Leader_Crews (Name_Leader)
-    OUTPUT INSERTED.Leader_Crew_ID
-    VALUES (@Name_Leader);
-  `);
-
-  return createdResult.recordset[0]?.Leader_Crew_ID;
+  const result = await request.execute('sp_Auth_EnsureLeader');
+  return result.recordset[0]?.Leader_Crew_ID;
 }
 
 async function findCrewIdByNumber(numCrew) {
@@ -77,12 +45,7 @@ async function findCrewIdByNumber(numCrew) {
   const pool = await poolPromise;
   const result = await pool.request()
     .input('Num_Crew', sql.Int, numericValue)
-    .query(`
-      SELECT TOP 1 Crew_ID
-      FROM Crews
-      WHERE Num_Crew = @Num_Crew
-      ORDER BY Crew_ID DESC;
-    `);
+    .execute('sp_Auth_FindCrewByNumber');
 
   return result.recordset[0]?.Crew_ID || null;
 }
@@ -113,7 +76,7 @@ export async function register(req, res, next) {
     const pool = await poolPromise;
     const existingUserResult = await pool.request()
       .input('Email', sql.NVarChar(255), normalizedEmail)
-      .query('SELECT TOP 1 User_ID FROM Auth_Users WHERE Email = @Email;');
+      .execute('sp_Auth_GetUserByEmail');
 
     if (existingUserResult.recordset[0]?.User_ID) {
       return res.status(409).json({ message: 'Este correo ya está registrado' });
@@ -173,11 +136,7 @@ export async function register(req, res, next) {
       .input('Client_ID', sql.Int, clientId)
       .input('Leader_Crew_ID', sql.Int, leaderCrewId)
       .input('Crew_ID', sql.Int, crewId)
-      .query(`
-        INSERT INTO Auth_Users (Email, Password_Hash, Password_Salt, Role, Display_Name, Client_ID, Leader_Crew_ID, Crew_ID)
-        OUTPUT INSERTED.User_ID, INSERTED.Email, INSERTED.Role, INSERTED.Display_Name, INSERTED.Client_ID, INSERTED.Leader_Crew_ID, INSERTED.Crew_ID
-        VALUES (@Email, @Password_Hash, @Password_Salt, @Role, @Display_Name, @Client_ID, @Leader_Crew_ID, @Crew_ID);
-      `);
+      .execute('sp_Auth_CreateUser');
 
     const created = createdUserResult.recordset[0];
     return res.status(201).json({
@@ -209,21 +168,7 @@ export async function login(req, res, next) {
     const pool = await poolPromise;
     const userResult = await pool.request()
       .input('Email', sql.NVarChar(255), normalizedEmail)
-      .query(`
-        SELECT TOP 1
-          u.User_ID,
-          u.Email,
-          u.Password_Hash,
-          u.Password_Salt,
-          u.Role,
-          u.Display_Name,
-          u.Client_ID,
-          u.Leader_Crew_ID,
-          u.Crew_ID,
-          u.Is_Active
-        FROM Auth_Users u
-        WHERE u.Email = @Email;
-      `);
+      .execute('sp_Auth_GetUserByEmail');
 
     const user = userResult.recordset[0];
     if (!user || !user.Is_Active) {
