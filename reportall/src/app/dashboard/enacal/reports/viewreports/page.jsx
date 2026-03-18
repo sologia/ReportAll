@@ -2,14 +2,23 @@
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import { buildSessionHeaders, getSession } from '@/lib/auth';
+import { canViewIds, normalizeRole } from '@/lib/rbac';
 
 
 
 const ViewReports = () => {
+  const session = getSession();
+  const role = normalizeRole(session?.role);
+  const isAdmin = canViewIds(role);
 
   const [data, setData] = useState([]);
   const [states, setStates] = useState([]);
   const [sectors, setSectors] = useState([]);
+  const [urgencies, setUrgencies] = useState([]);
+  const [draftUrgencies, setDraftUrgencies] = useState({});
+  const [savingReportId, setSavingReportId] = useState(null);
   const [filters, setFilters] = useState({
     district: '',
     sector: '',
@@ -40,9 +49,16 @@ const ViewReports = () => {
       if (activeFilters.state) params.append('state', activeFilters.state);
 
       const query = params.toString();
-      const response = await fetch(`${base}/api/reports/summary${query ? `?${query}` : ''}`);
+      const response = await fetch(`${base}/api/reports/summary${query ? `?${query}` : ''}`, {
+        headers: buildSessionHeaders(session),
+      });
       const raw = await response.json();
-      setData(Array.isArray(raw) ? raw : []);
+      const rows = Array.isArray(raw) ? raw : [];
+      setData(rows);
+      setDraftUrgencies(rows.reduce((accumulator, row) => {
+        accumulator[row.Report_ID] = row.Urgency || '';
+        return accumulator;
+      }, {}));
     } catch (err) {
       console.error('failed loading reports', err);
       setData([]);
@@ -54,18 +70,32 @@ const ViewReports = () => {
   useEffect(() => {
     loadReports();
 
-    Promise.all([
-      fetch(`${base}/api/states`),
-      fetch(`${base}/api/sectors`),
-    ])
-      .then(async ([statesRes, sectorsRes]) => {
-        const [statesData, sectorsData] = await Promise.all([
+    const requests = [
+      fetch(`${base}/api/states`, { headers: buildSessionHeaders(session) }),
+      fetch(`${base}/api/sectors`, { headers: buildSessionHeaders(session) }),
+    ];
+
+    if (isAdmin) {
+      requests.push(fetch(`${base}/api/reports/urgencies`, { headers: buildSessionHeaders(session) }));
+    }
+
+    Promise.all(requests)
+      .then(async (responses) => {
+        const [statesRes, sectorsRes, urgenciesRes] = responses;
+        const payloads = [
           statesRes.json(),
           sectorsRes.json(),
-        ]);
+        ];
+
+        if (urgenciesRes) {
+          payloads.push(urgenciesRes.json());
+        }
+
+        const [statesData, sectorsData, urgenciesData = []] = await Promise.all(payloads);
 
         setStates(Array.isArray(statesData) ? statesData : []);
         setSectors(Array.isArray(sectorsData) ? sectorsData : []);
+        setUrgencies(Array.isArray(urgenciesData) ? urgenciesData : []);
       })
       .catch(err => console.error('failed loading filter options', err));
   }, []);
@@ -85,6 +115,60 @@ const ViewReports = () => {
     setFilters(reset);
     loadReports(reset);
   }
+
+  const handleUrgencyChange = (reportId, value) => {
+    setDraftUrgencies((previous) => ({ ...previous, [reportId]: value }));
+  };
+
+  const saveUrgency = async (reportId) => {
+    const urgency = draftUrgencies[reportId];
+    if (!urgency) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Urgencia requerida',
+        text: 'Selecciona una urgencia antes de guardar.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    try {
+      setSavingReportId(reportId);
+      const response = await fetch(`${base}/api/reports/${reportId}/urgency`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildSessionHeaders(session),
+        },
+        body: JSON.stringify({ Urgency: urgency }),
+      });
+
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body?.message || 'No se pudo actualizar la urgencia');
+      }
+
+      setData((previous) => previous.map((row) => (
+        row.Report_ID === reportId ? { ...row, Urgency: body?.Urgency || urgency } : row
+      )));
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Urgencia actualizada',
+        text: 'La urgencia del reporte se guardó correctamente.',
+        confirmButtonText: 'Aceptar',
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: error?.message || 'No se pudo actualizar la urgencia',
+        confirmButtonText: 'Entendido',
+      });
+    } finally {
+      setSavingReportId(null);
+    }
+  };
 
   return (
     <>
@@ -172,7 +256,55 @@ const ViewReports = () => {
       </form>
 
       <div>
-        {loading ? <p>Cargando reportes...</p> : <SimpleTable columns={ columns } data={data}/>}
+        {loading ? <p>Cargando reportes...</p> : isAdmin ? (
+          <div className="overflow-x-auto rounded-lg shadow-md mt-6 bg-white">
+            <table className="min-w-full border-collapse">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  {columns.map((col, index) => (
+                    <th key={index} className="py-3 px-4 text-left text-sm font-medium">{col.header}</th>
+                  ))}
+                  <th className="py-3 px-4 text-left text-sm font-medium">Editar urgencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length + 1} className="text-center py-4 text-gray-500">No hay datos</td>
+                  </tr>
+                ) : data.map((row) => (
+                  <tr key={row.Report_ID} className="border-b hover:bg-blue-50 transition">
+                    {columns.map((col, index) => (
+                      <td key={index} className="py-3 px-4 text-sm text-gray-700">{row[col.field]}</td>
+                    ))}
+                    <td className="py-3 px-4 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={draftUrgencies[row.Report_ID] || ''}
+                          onChange={(event) => handleUrgencyChange(row.Report_ID, event.target.value)}
+                          className="rounded-md border px-2 py-1"
+                        >
+                          <option value="">Seleccione</option>
+                          {urgencies.map((item) => (
+                            <option key={item.ProblemLevel_ID || item.Urgency} value={item.Urgency}>{item.Urgency}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => saveUrgency(row.Report_ID)}
+                          disabled={savingReportId === row.Report_ID}
+                          className="bg-blue-600 text-white py-1 px-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+                        >
+                          {savingReportId === row.Report_ID ? 'Guardando...' : 'Guardar'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <SimpleTable columns={ columns } data={data}/>}
       </div>
 
       

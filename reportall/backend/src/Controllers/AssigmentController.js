@@ -65,10 +65,20 @@ export async function getById(req, res, next) {
 // POST /api/assigments
 export async function create(req, res, next) {
     try {
+        const role = String(req.auth?.role || '').trim().toLowerCase();
+        const authLeaderCrewId = req.auth?.leaderCrewId || null;
         const { Name_Leader, Num_Crew, Report_ID, Date_Time, StateAs } = req.body;
 
-        if (!Name_Leader || Num_Crew === undefined || Report_ID === undefined || !Date_Time || !StateAs) {
-            return res.status(400).json({ message: 'Name_Leader, Num_Crew, Report_ID, Date_Time y StateAs son requeridos' });
+        if (Num_Crew === undefined || Report_ID === undefined || !Date_Time || !StateAs) {
+            return res.status(400).json({ message: 'Num_Crew, Report_ID, Date_Time y StateAs son requeridos' });
+        }
+
+        if (role !== 'lider_cuadrilla' && !Name_Leader) {
+            return res.status(400).json({ message: 'Name_Leader es requerido para este rol' });
+        }
+
+        if (role === 'lider_cuadrilla' && !authLeaderCrewId) {
+            return res.status(403).json({ message: 'No autorizado: usuario líder sin leaderCrewId en sesión' });
         }
 
         const reportId = parseInt(Report_ID, 10);
@@ -111,11 +121,16 @@ export async function create(req, res, next) {
         }
 
         const request = pool.request()
-            .input('Name_Leader', sql.NVarChar(250), Name_Leader)
             .input('Num_Crew', sql.Int, Num_Crew)
             .input('Report_ID', sql.Int, reportId)
             .input('Date_Time', sql.DateTime, Date_Time)
             .input('StateAs', sql.NVarChar(250), StateAs);
+
+        if (role === 'lider_cuadrilla') {
+            request.input('Leader_Crew_ID', sql.Int, authLeaderCrewId);
+        } else {
+            request.input('Name_Leader', sql.NVarChar(250), Name_Leader);
+        }
 
         const result = await request.query(`
             DECLARE @Date_ID INT;
@@ -132,7 +147,7 @@ export async function create(req, res, next) {
 
             INSERT INTO Assigments (Leader_Crew_ID, Crew_ID, Report_ID, Date_ID, State_ID)
             VALUES (
-                (SELECT TOP 1 Leader_Crew_ID FROM Leader_Crews WHERE Name_Leader = @Name_Leader),
+                ${role === 'lider_cuadrilla' ? '@Leader_Crew_ID' : '(SELECT TOP 1 Leader_Crew_ID FROM Leader_Crews WHERE Name_Leader = @Name_Leader)'},
                 (SELECT TOP 1 Crew_ID FROM Crews WHERE Num_Crew = @Num_Crew),
                 @Report_ID,
                 @Date_ID,

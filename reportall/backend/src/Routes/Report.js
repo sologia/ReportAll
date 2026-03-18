@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import * as ctrl from '../Controllers/ReportController.js';
+import { requireRoles } from '../middlewares/rbac.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -10,6 +11,9 @@ router.get('/', ctrl.getAll);
 
 // GET /api/reports/options
 router.get('/options', ctrl.getOptions);
+
+// GET /api/reports/urgencies
+router.get('/urgencies', ctrl.getUrgencies);
 
 // GET /api/reports/summary
 router.get('/summary', ctrl.getSummary);
@@ -25,6 +29,9 @@ router.get('/client/:clientId', ctrl.getByClient);
 
 // GET /api/reports/:id
 router.get('/:id', ctrl.getById);
+
+// PATCH /api/reports/:id/urgency
+router.patch('/:id/urgency', requireRoles(['administrador']), ctrl.updateUrgency);
 
 // POST /api/reports  (espera campo de fichero 'BINPhoto' opcional)
 router.post('/', upload.single('BINPhoto'), ctrl.create);

@@ -46,6 +46,21 @@ export async function getOptions(req, res, next) {
     }
 }
 
+// GET /api/reports/urgencies
+export async function getUrgencies(req, res, next) {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT ProblemLevel_ID, Urgency
+            FROM Cat_ProblemLevels
+            ORDER BY ProblemLevel_ID ASC
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        next(err);
+    }
+}
+
 // GET /api/reports/summary?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&state=...&district=...
 export async function getSummary(req, res, next) {
     try {
@@ -638,6 +653,57 @@ export async function update(req, res, next) {
         }
 
         res.json({ message: 'Updated successfully' });
+    } catch (err) {
+        next(err);
+    }
+}
+
+// PATCH /api/reports/:id/urgency
+export async function updateUrgency(req, res, next) {
+    try {
+        const id = parseInt(req.params.id, 10);
+        if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
+
+        const urgency = String(req.body?.Urgency || '').trim();
+        if (!urgency) {
+            return res.status(400).json({ message: 'Urgency es requerida' });
+        }
+
+        const pool = await poolPromise;
+        const exists = await pool.request()
+            .input('Urgency', sql.NVarChar(200), urgency)
+            .query(`
+                SELECT TOP 1 ProblemLevel_ID, Urgency
+                FROM Cat_ProblemLevels
+                WHERE Urgency = @Urgency
+            `);
+
+        const urgencyRow = exists.recordset[0];
+        if (!urgencyRow) {
+            return res.status(400).json({ message: 'Urgencia inválida' });
+        }
+
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .input('ProblemLevel_ID', sql.Int, urgencyRow.ProblemLevel_ID)
+            .query(`
+                UPDATE Reports
+                SET ProblemLevel_ID = @ProblemLevel_ID
+                WHERE Report_ID = @id;
+
+                SELECT
+                    r.Report_ID,
+                    cpr.Urgency
+                FROM Reports r
+                LEFT JOIN Cat_ProblemLevels cpr ON cpr.ProblemLevel_ID = r.ProblemLevel_ID
+                WHERE r.Report_ID = @id;
+            `);
+
+        if (!result.rowsAffected || result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Reporte no encontrado' });
+        }
+
+        res.json(result.recordsets?.[1]?.[0] || { Report_ID: id, Urgency: urgencyRow.Urgency });
     } catch (err) {
         next(err);
     }

@@ -7,7 +7,8 @@ import { buildSessionHeaders, getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
 const CreateAssignments = () => {
-    const role = normalizeRole(getSession()?.role)
+    const session = getSession()
+    const role = normalizeRole(session?.role)
     const showIds = canViewIds(role)
     const [numcrew, setNumCrew] = useState([])
     const [reports, setReports] = useState([])
@@ -42,6 +43,7 @@ const CreateAssignments = () => {
 
     const crewInfoColumns = [
         { header: 'Crew ID', field: 'Crew_ID' },
+        { header: 'Representante', field: 'Representative_Name' },
         { header: 'Numero Cuadrilla', field: 'Num_Crew' },
         { header: 'Disponibilidad', field: 'Availability_Crew' },
         { header: 'Distrito', field: 'Name_Sector' },
@@ -50,17 +52,34 @@ const CreateAssignments = () => {
 
     const loadData = async () => {
         try {
-            const [leadersRes, crewsOnlyRes, statesRes, reportsRes, assignmentsRes, crewsRes] = await Promise.all([
-                fetch(`${base}/api/leaders`),
+            const requests = [
                 fetch(`${base}/api/crewsonly`),
                 fetch(`${base}/api/states`),
                 fetch(`${base}/api/reports/options`),
                 fetch(`${base}/api/assignments`),
                 fetch(`${base}/api/crews`),
-            ])
+            ]
 
-            const [leaders, crewsOnly, states, reportsData, assignmentsData, crewsData] = await Promise.all([
-                leadersRes.json(),
+            const responses = role === 'lider_cuadrilla'
+                ? await Promise.all(requests)
+                : await Promise.all([fetch(`${base}/api/leaders`), ...requests])
+
+            let leaders = []
+            let crewsOnlyRes
+            let statesRes
+            let reportsRes
+            let assignmentsRes
+            let crewsRes
+
+            if (role === 'lider_cuadrilla') {
+                [crewsOnlyRes, statesRes, reportsRes, assignmentsRes, crewsRes] = responses
+            } else {
+                const leadersRes = responses[0]
+                ;[crewsOnlyRes, statesRes, reportsRes, assignmentsRes, crewsRes] = responses.slice(1)
+                leaders = await leadersRes.json()
+            }
+
+            const [crewsOnly, states, reportsData, assignmentsData, crewsData] = await Promise.all([
                 crewsOnlyRes.json(),
                 statesRes.json(),
                 reportsRes.json(),
@@ -68,12 +87,25 @@ const CreateAssignments = () => {
                 crewsRes.json(),
             ])
 
+            const normalizedCrewsOnly = Array.isArray(crewsOnly) ? crewsOnly : []
+            const representativeByCrew = normalizedCrewsOnly.reduce((accumulator, crew) => {
+                accumulator[String(crew.Num_Crew)] = crew.Representative_Name || crew.Crew_Label || ''
+                return accumulator
+            }, {})
+
             setLeader(Array.isArray(leaders) ? leaders : [])
-            setNumCrew(Array.isArray(crewsOnly) ? crewsOnly : [])
+            setNumCrew(normalizedCrewsOnly)
             setStateAs(Array.isArray(states) ? states : [])
             setReports(Array.isArray(reportsData) ? reportsData : [])
             setAssignments(Array.isArray(assignmentsData) ? assignmentsData : [])
-            setCrewInfo(Array.isArray(crewsData) ? crewsData : [])
+            setCrewInfo(
+                Array.isArray(crewsData)
+                    ? crewsData.map((crew) => ({
+                        ...crew,
+                        Representative_Name: representativeByCrew[String(crew.Num_Crew)] || 'Sin representante',
+                    }))
+                    : [],
+            )
         } catch (err) {
             console.error('Error cargando datos de asignaciones', err)
         }
@@ -88,11 +120,14 @@ const CreateAssignments = () => {
         setSubmitError('')
         const form = e.target
         const payload = {
-            Name_Leader: form.opciones_lider.value,
             Num_Crew: parseInt(form.opciones_cuadrillas.value, 10),
             Report_ID: parseInt(form.opciones_reporte.value, 10),
             Date_Time: form.date.value,
             StateAs: form.opciones_estados.value,
+        }
+
+        if (role !== 'lider_cuadrilla') {
+            payload.Name_Leader = form.opciones_lider.value
         }
 
         try {
@@ -151,27 +186,34 @@ const CreateAssignments = () => {
                         />
                     </div>
 
-                    <div className='flex gap-6 items-center'>
-                        <label form="opciones_lider" className='w-24'>Nombre Lider</label>
-                        <select
-                            name="opciones_lider"
-                            id="opciones_lider"
-                            className='bg-[#b2b1b1] rounded-2xl w-32'
-                            required
-                        >
-                            <option value="">Seleccione</option>
-                            {leader.map((t, idx) => (
-                                <option key={idx} value={t.Name_Leader}>{t.Name_Leader}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {role === 'lider_cuadrilla' ? (
+                        <div className='flex gap-6 items-center'>
+                            <label className='w-24'>Líder</label>
+                            <p className='bg-[#d9edf7] rounded-2xl w-64 px-3 py-2'>{session?.displayName || 'Líder autenticado'}</p>
+                        </div>
+                    ) : (
+                        <div className='flex gap-6 items-center'>
+                            <label form="opciones_lider" className='w-24'>Nombre Lider</label>
+                            <select
+                                name="opciones_lider"
+                                id="opciones_lider"
+                                className='bg-[#b2b1b1] rounded-2xl w-32'
+                                required
+                            >
+                                <option value="">Seleccione</option>
+                                {leader.map((t, idx) => (
+                                    <option key={idx} value={t.Name_Leader}>{t.Name_Leader}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className='flex gap-6 items-center'>
                         <label form="opciones_cuadrillas" className='w-24'>Cuadrilla</label>
                         <select
                             name="opciones_cuadrillas"
                             id="opciones_cuadrillas"
-                            className='bg-[#b2b1b1] rounded-2xl w-32'
+                            className='bg-[#b2b1b1] rounded-2xl w-72'
                             value={selectedCrew}
                             onChange={(e) => {
                                 setSelectedCrew(e.target.value)
@@ -181,7 +223,7 @@ const CreateAssignments = () => {
                             <option value="">Seleccione</option>
                             {numcrew.map((c, idx) => (
                                 <option key={idx} value={c.Num_Crew}>
-                                    {`${c.Num_Crew} - ${c.District || 'Sin distrito'}`}
+                                    {`${c.Crew_Label || c.Representative_Name || `Cuadrilla ${c.Num_Crew}`} | N. ${c.Num_Crew} | ${c.District || 'Sin distrito'}`}
                                 </option>
                             ))}
                         </select>
