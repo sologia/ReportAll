@@ -2,7 +2,6 @@
 import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
 import SimpleTable from '@/app/components/SimpleTable';
-// import MyMap from '@/app/page';
 import dynamic from 'next/dynamic';
 const MyMap = dynamic(() => import('@/app/components/MyMap'), { ssr: false });
 import { useForm } from '@/hooks/useForm';

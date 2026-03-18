@@ -18,7 +18,6 @@ const AssignmentsPage = () => {
     { header: "Estado", field: "StateAs" },
   ];
 
-  // load assignments (placeholder) to avoid confusion in UI
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/api/assignments`)

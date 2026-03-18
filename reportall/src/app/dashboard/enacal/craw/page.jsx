@@ -12,19 +12,15 @@ const CrawPage = () => {
   const columns = [
     { header: "NumCuadrilla", field: "Num_Crew" },
     { header: "Nombre Sector", field: "Name_Sector" },
-    // adjust the following to match whatever fields your API returns
     { header: "Estado", field: "Availability_Crew" },
     { header: "Placa", field: "Plate" },
   ];
 
-  // fetch list of crews from backend when page loads
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/api/crews`)
       .then(res => res.json())
       .then(raw => {
-        // optionally rename fields or transform data here if needed
-        // for now we assume the backend returns the same names as the proc
         setData(raw);
       })
       .catch(err => console.error('failed loading crews', err));

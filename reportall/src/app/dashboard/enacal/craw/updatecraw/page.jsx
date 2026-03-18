@@ -24,7 +24,6 @@ const UpdateCraw = () => {
 
   const base = process.env.NEXT_PUBLIC_API_URL || '';
 
-  // Cargar listas al montar
   useEffect(() => {
     Promise.all([
       fetch(`${base}/api/crews`),
@@ -48,7 +47,6 @@ const UpdateCraw = () => {
       .catch(err => console.error('Error cargando catálogos de cuadrilla:', err));
   }, [base]);
 
-  // Cargar detalles de la cuadrilla seleccionada
   useEffect(() => {
     if (!selectedId) return;
     fetch(`${base}/api/crews/${selectedId}`)
@@ -96,7 +94,6 @@ const UpdateCraw = () => {
     setLoading(true);
     setMessage('');
 
-    // Asegurar que ningún campo sea undefined
     const payload = {
       Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
       Plate: formValues.Plate || '',

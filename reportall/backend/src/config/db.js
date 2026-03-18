@@ -3,7 +3,6 @@ dotenv.config();
 
 const DB_AUTH = (process.env.DB_AUTH || 'sql').toLowerCase();
 
-// Cargar el driver adecuado (top-level await, package.json tiene "type":"module")
 import msnodesqlv8 from 'mssql/msnodesqlv8.js';
 let sqlModule;
 if (DB_AUTH === 'windows') {
@@ -35,7 +34,7 @@ export const sqlConfig = DB_AUTH === 'windows' ? {
   database: process.env.DB_NAME,
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 1433,
   options: {
-    encrypt: process.env.DB_ENCRYPT === 'true', // true si usas Azure; por defecto false
+    encrypt: process.env.DB_ENCRYPT === 'true',
     ...commonOptions
   },
   pool: { max: 10, min: 0, idleTimeoutMillis: 30000 }

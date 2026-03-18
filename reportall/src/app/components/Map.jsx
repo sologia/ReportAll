@@ -7,10 +7,6 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-geosearch/dist/geosearch.css'
 import SearchBarControl from '../../frontend/components/searchcontrol/search'
-
-// leaflet no carga automáticamente las imágenes del marcador en webpack/Next
-// hay que configurar la url para que apunten a los assets correctos.
-// sin esto el icono aparece vacío o no se muestra.
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
@@ -40,7 +36,7 @@ function Square(props) {
 }
 
 export default function MyMap({ onSelect, selectedPosition, autoSelectCurrentLocation = false }) {
-  const [position, setPosition] = useState([12.1364, -86.2514]) // fallback Managua
+  const [position, setPosition] = useState([12.1364, -86.2514])
 
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.geolocation) {
@@ -60,7 +56,6 @@ export default function MyMap({ onSelect, selectedPosition, autoSelectCurrentLoc
   function ClickHandler() {
     useMapEvents({
       click(e) {
-        // notifica al padre con latitud y longitud
         onSelect && onSelect([e.latlng.lat, e.latlng.lng])
       }
     })

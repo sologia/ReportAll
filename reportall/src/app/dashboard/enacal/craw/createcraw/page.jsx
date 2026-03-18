@@ -9,7 +9,6 @@ const CreateCraw = () => {
   const [sectors, setSectors] = useState([]);
   const [crews, setCrews] = useState([]);
 
-  // disponibilidad fija
   const defaultAvailability = 'Disponible';
   const base = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -52,7 +51,6 @@ const CreateCraw = () => {
     const payload = {
       Availability: defaultAvailability,
       Sector: form.opciones_sectores.value,
-      // Plate string rather 
       Plate: form.opciones_vehiculos.value,
       Num_Crew: parseInt(form.num_cuadrilla.value, 10)
     };
@@ -140,14 +138,12 @@ const CreateCraw = () => {
             </select>
           </div>
 
-          {/* disponibilidad oculta */}
           <input type="hidden" name="availability" value={defaultAvailability} />
         </div>
 
         <div className='flex flex-col gap-3 mr-16'>
           <button
                 type="submit"
-              //   value='Login'
                 className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
             >
                 Aceptar
@@ -155,7 +151,6 @@ const CreateCraw = () => {
 
           <button
                 type="submit"
-              //   value='Login'
                 className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
             >
                 Cancelar
@@ -173,23 +168,3 @@ const CreateCraw = () => {
 }
 
 export default CreateCraw
-
-
-{/* <form action="/action_page.php">
-  <label for="cars">Choose a car:</label>
-  <select name="cars" id="cars">
-    <optgroup label="Swedish Cars">
-      <option value="volvo">Volvo</option>
-      <option value="saab">Saab</option>
-    </optgroup>
-    <optgroup label="German Cars">
-      <option value="mercedes">Mercedes</option>
-      <option value="audi">Audi</option>
-    </optgroup>
-  </select>
-  <br><br>
-  <input type="submit" value="Submit">
-</form>
- 
-</body>
-</html> */}
