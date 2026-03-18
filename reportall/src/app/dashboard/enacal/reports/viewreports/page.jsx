@@ -116,6 +116,14 @@ const ViewReports = () => {
     loadReports(reset);
   }
 
+  const getUrgencyClasses = (value) => {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized.includes('alta')) return 'bg-red-100 text-red-700';
+    if (normalized.includes('media')) return 'bg-yellow-100 text-yellow-800';
+    if (normalized.includes('baja')) return 'bg-green-100 text-green-700';
+    return 'bg-gray-100 text-gray-700';
+  };
+
   const handleUrgencyChange = (reportId, value) => {
     setDraftUrgencies((previous) => ({ ...previous, [reportId]: value }));
   };
@@ -275,7 +283,13 @@ const ViewReports = () => {
                 ) : data.map((row) => (
                   <tr key={row.Report_ID} className="border-b hover:bg-blue-50 transition">
                     {columns.map((col, index) => (
-                      <td key={index} className="py-3 px-4 text-sm text-gray-700">{row[col.field]}</td>
+                      <td key={index} className="py-3 px-4 text-sm text-gray-700">
+                        {col.field === 'Urgency' ? (
+                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
+                            {row[col.field] || 'Sin urgencia'}
+                          </span>
+                        ) : row[col.field]}
+                      </td>
                     ))}
                     <td className="py-3 px-4 text-sm text-gray-700">
                       <div className="flex items-center gap-2">

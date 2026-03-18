@@ -11,6 +11,20 @@ function isIdColumn(column) {
   return field.includes('id') || header.includes('id');
 }
 
+function getUrgencyClasses(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized.includes('alta')) return 'bg-red-100 text-red-700';
+  if (normalized.includes('media')) return 'bg-yellow-100 text-yellow-800';
+  if (normalized.includes('baja')) return 'bg-green-100 text-green-700';
+  return 'bg-gray-100 text-gray-700';
+}
+
+function isUrgencyColumn(column) {
+  const field = String(column?.field || '').toLowerCase();
+  const header = String(column?.header || '').toLowerCase();
+  return field === 'urgency' || header.includes('urgencia');
+}
+
 export default function SimpleTable({ columns, data }) {
   const role = getSession()?.role;
   const showIds = canViewIds(role);
@@ -53,7 +67,13 @@ export default function SimpleTable({ columns, data }) {
                     key={cIndex}
                     className="py-3 px-4 text-sm text-gray-700"
                   >
-                    {row[col.field]}
+                    {isUrgencyColumn(col) ? (
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
+                        {row[col.field] || 'Sin urgencia'}
+                      </span>
+                    ) : (
+                      row[col.field]
+                    )}
                   </td>
                 ))}
               </tr>
