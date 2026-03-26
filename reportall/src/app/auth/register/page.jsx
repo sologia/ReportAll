@@ -4,6 +4,7 @@ import { useForm } from '@/hooks/useForm';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { registerUser } from '@/lib/auth';
+import Swal from 'sweetalert2';
 import 'tailwindcss';
 
 const registerFormFields = {
@@ -33,34 +34,134 @@ function RegisterPage() {
   const registerSubmit = async (event) => {
     event.preventDefault();
 
+    const normalizedName = registerName.trim();
+    const normalizedLastName = registerLastName.trim();
+    const normalizedNic = registerNIC.trim();
+    const normalizedEmail = registerEmail.trim();
+
+    if (!normalizedName) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Nombre requerido',
+        text: 'Debes ingresar el primer nombre.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!normalizedLastName) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Apellido requerido',
+        text: 'Debes ingresar el primer apellido.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!/^\d{6,10}$/.test(normalizedNic)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Número NIC inválido',
+        text: 'El número NIC debe contener solo números y tener entre 6 y 10 dígitos.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!normalizedEmail) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Correo requerido',
+        text: 'Debes ingresar el correo electrónico.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Correo inválido',
+        text: 'Ingresa un correo electrónico válido.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!registerPassword) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña requerida',
+        text: 'Debes ingresar una contraseña.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (registerPassword.length < 6) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña muy corta',
+        text: 'La contraseña debe tener al menos 6 caracteres.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!registerPassword2) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Confirmación requerida',
+        text: 'Debes confirmar la contraseña.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
     if (registerPassword !== registerPassword2) {
-      window.alert('Contraseñas no son iguales');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Contraseñas diferentes',
+        text: 'Las contraseñas no coinciden.',
+        confirmButtonText: 'Aceptar',
+      });
       return;
     }
 
     const registered = await registerUser({
-      email: registerEmail,
+      email: normalizedEmail,
       password: registerPassword,
       role: registerRole,
-      displayName: `${registerName} ${registerLastName}`.trim(),
+      displayName: `${normalizedName} ${normalizedLastName}`.trim(),
       clientData: {
-        FirstName: registerName,
+        FirstName: normalizedName,
         SecondName: '',
-        FirstLastName: registerLastName,
+        FirstLastName: normalizedLastName,
         SecondLastName: '',
-        Numero_NIC: registerNIC,
+        Numero_NIC: normalizedNic,
       },
       workerData: {
-        Name_Leader: `${registerName} ${registerLastName}`.trim(),
+        Name_Leader: `${normalizedName} ${normalizedLastName}`.trim(),
       },
     });
 
     if (!registered.ok) {
-      window.alert(registered.message || 'No se pudo registrar usuario');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Registro fallido',
+        text: registered.message || 'No se pudo registrar usuario.',
+        confirmButtonText: 'Entendido',
+      });
       return;
     }
 
-    window.alert('Cuenta creada correctamente. Ahora debes iniciar sesión.');
+    await Swal.fire({
+      icon: 'success',
+      title: 'Registro completado',
+      text: 'Cuenta creada correctamente. Ahora debes iniciar sesión.',
+      confirmButtonText: 'Continuar',
+    });
     router.push('/auth/login');
   }
 
@@ -73,7 +174,7 @@ function RegisterPage() {
           <img src="/img/logoENACAL.png" />
         </div>
 
-        <form className="flex flex-col gap-4" onSubmit={registerSubmit}>
+        <form className="flex flex-col gap-4" onSubmit={registerSubmit} noValidate>
           <div className="flex gap-4 m-auto">
             <input
               type="text"
@@ -103,6 +204,10 @@ function RegisterPage() {
             value={registerNIC}
             onChange={onRegisterInputChange}
             className="p-3 border rounded-lg w-90 m-auto"
+            inputMode="numeric"
+            pattern="[0-9]{6,10}"
+            minLength={6}
+            maxLength={10}
             required={registerRole === 'cliente'}
           />
 

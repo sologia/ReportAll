@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginUser } from '@/lib/auth';
 import { getDefaultRouteByRole, normalizeRole } from '@/lib/rbac';
+import Swal from 'sweetalert2';
 import 'tailwindcss';
 
 const loginFormFields = {
@@ -20,14 +21,49 @@ function LoginPage() {
 
     const loginSubmit = async (event) => {
         event.preventDefault();
-        const session = await loginUser({ email: loginEmail, password: loginPassword, role: loginRole });
+
+        const normalizedEmail = loginEmail.trim();
+
+        if (!normalizedEmail || !loginPassword) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Datos incompletos',
+                text: 'Debes ingresar correo electrónico y contraseña.',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Correo inválido',
+                text: 'Ingresa un correo electrónico válido.',
+                confirmButtonText: 'Aceptar',
+            });
+            return;
+        }
+
+        const session = await loginUser({ email: normalizedEmail, password: loginPassword, role: loginRole });
 
         if (!session) {
-            window.alert('Credenciales inválidas o rol incorrecto');
+            await Swal.fire({
+                icon: 'error',
+                title: 'Inicio de sesión fallido',
+                text: 'Credenciales inválidas o rol incorrecto.',
+                confirmButtonText: 'Entendido',
+            });
             return;
         }
 
         const role = normalizeRole(session.role);
+        await Swal.fire({
+            icon: 'success',
+            title: 'Bienvenido',
+            text: 'Inicio de sesión correcto.',
+            timer: 1400,
+            showConfirmButton: false,
+        });
         router.push(getDefaultRouteByRole(role));
     }
 
@@ -43,7 +79,7 @@ function LoginPage() {
                             <img src="/img/logoENACAL.png" />
                         </div>
 
-                        <form className="flex flex-col gap-4" onSubmit={loginSubmit}>
+                        <form className="flex flex-col gap-4" onSubmit={loginSubmit} noValidate>
                             <input
                                 type="email"
                                 placeholder="Correo electrónico"
