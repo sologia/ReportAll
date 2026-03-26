@@ -48,11 +48,45 @@ const CreateCraw = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
+    const numCrewValue = parseInt(form.num_cuadrilla.value, 10);
+    const selectedPlate = form.opciones_vehiculos.value;
+    const selectedSector = form.opciones_sectores.value;
+
+    if (!Number.isInteger(numCrewValue) || numCrewValue <= 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Número inválido',
+        text: 'El número de cuadrilla debe ser un entero mayor que cero.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!selectedPlate) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Matrícula requerida',
+        text: 'Debes seleccionar la matrícula del vehículo.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!selectedSector) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Sector requerido',
+        text: 'Debes seleccionar un sector para la cuadrilla.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
     const payload = {
       Availability: defaultAvailability,
-      Sector: form.opciones_sectores.value,
-      Plate: form.opciones_vehiculos.value,
-      Num_Crew: parseInt(form.num_cuadrilla.value, 10)
+      Sector: selectedSector,
+      Plate: selectedPlate,
+      Num_Crew: numCrewValue,
     };
 
     try {
@@ -93,7 +127,7 @@ const CreateCraw = () => {
         <ButtonBack/>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9">
+      <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9" noValidate>
 
         <div className=' flex flex-col gap-4 ml-16'>
           
@@ -104,6 +138,8 @@ const CreateCraw = () => {
               id="num_cuadrilla"
               name="num_cuadrilla"
               className="bg-[#b2b1b1] rounded-2xl w-32"
+              min={1}
+              step={1}
               required
             />
           </div>
@@ -150,7 +186,8 @@ const CreateCraw = () => {
           </button>
 
           <button
-                type="submit"
+              type="button"
+              onClick={() => window.location.reload()}
                 className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
             >
                 Cancelar

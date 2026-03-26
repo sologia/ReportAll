@@ -91,17 +91,58 @@ const UpdateCraw = () => {
       return;
     }
 
-    setLoading(true);
     setMessage('');
 
+    const normalizedNumCrew = parseInt(formValues.Num_Crew, 10);
+    if (!Number.isInteger(normalizedNumCrew) || normalizedNumCrew <= 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Número inválido',
+        text: 'El número de cuadrilla debe ser un entero mayor que cero.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!formValues.Plate) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Matrícula requerida',
+        text: 'Debes seleccionar la matrícula del vehículo.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!formValues.Sector) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Sector requerido',
+        text: 'Debes seleccionar un sector para la cuadrilla.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!formValues.Availability) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Disponibilidad requerida',
+        text: 'Debes seleccionar la disponibilidad de la cuadrilla.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
     const payload = {
-      Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
+      Num_Crew: normalizedNumCrew,
       Plate: formValues.Plate || '',
       Sector: formValues.Sector || '',
       Availability: formValues.Availability || 'Disponible'
     };
 
     try {
+      setLoading(true);
       const res = await fetch(`${base}/api/crews/${idNum}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -166,7 +207,7 @@ const UpdateCraw = () => {
       </div>
 
       {selectedId && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           <div>
             <label>Número de Cuadrilla:</label>
             <input
@@ -175,6 +216,8 @@ const UpdateCraw = () => {
               value={formValues.Num_Crew}
               onChange={handleChange}
               disabled={loading}
+              min={1}
+              step={1}
               className="border p-2 rounded"
             />
           </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
 import { getSession } from '@/lib/auth'
+import Swal from 'sweetalert2'
 
 const ViewReportClient = () => {
   const router = useRouter();
@@ -34,6 +35,12 @@ const ViewReportClient = () => {
     }
 
     if (!session.clientId) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perfil incompleto',
+        text: 'No se encontró el identificador de cliente para cargar tus reportes.',
+        confirmButtonText: 'Aceptar',
+      });
       setLoading(false);
       setData([]);
       return;
@@ -45,6 +52,12 @@ const ViewReportClient = () => {
       .then((result) => setData(Array.isArray(result) ? result : []))
       .catch((err) => {
         console.error('Error cargando reportes del cliente', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de carga',
+          text: 'No se pudieron cargar tus reportes.',
+          confirmButtonText: 'Entendido',
+        });
         setData([]);
       })
       .finally(() => setLoading(false));

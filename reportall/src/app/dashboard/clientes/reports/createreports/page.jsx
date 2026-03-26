@@ -49,7 +49,15 @@ const CreateReportClient = () => {
     fetch(`${base}/api/reports/client/${currentClientId}`)
       .then(res => res.json())
       .then(data => setClientReports(Array.isArray(data) ? data : []))
-      .catch(err => console.error('Error cargando reportes del cliente:', err));
+      .catch(async (err) => {
+        console.error('Error cargando reportes del cliente:', err);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error de carga',
+          text: 'No se pudieron cargar los reportes del cliente.',
+          confirmButtonText: 'Entendido',
+        });
+      });
   }
 
   useEffect(() => {
@@ -99,6 +107,12 @@ const CreateReportClient = () => {
       })
       .catch((error) => {
         console.error('Error cargando catálogos de reporte:', error?.message || error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de catálogos',
+          text: error?.message || 'No se pudieron cargar los catálogos de reporte.',
+          confirmButtonText: 'Entendido',
+        });
       });
   }, []);
 
@@ -108,6 +122,28 @@ const CreateReportClient = () => {
 
   const ReportSubmit = async (e) => {
     e.preventDefault();
+
+    if (!tipoReporte) {
+      setSubmitMessage('Debes seleccionar un tipo de problema.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Problema requerido',
+        text: 'Debes seleccionar un tipo de problema.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!datest) {
+      setSubmitMessage('Debes seleccionar una fecha.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Fecha requerida',
+        text: 'Debes seleccionar una fecha.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
 
     if (!coords || coords.length !== 2) {
       setSubmitMessage('Debes seleccionar una ubicación válida en el mapa.');
@@ -205,7 +241,7 @@ const CreateReportClient = () => {
         <ButtonBack />
       </div>
 
-      <form onSubmit={ReportSubmit} className="flex flex-col gap-6">
+      <form onSubmit={ReportSubmit} className="flex flex-col gap-6" noValidate>
 
         <div className=' flex flex-col gap-4 ml-15'>
 
