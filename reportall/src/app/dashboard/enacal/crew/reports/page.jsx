@@ -38,7 +38,7 @@ export default function CrewAssignedReportsPage() {
     try {
       setLoading(true)
       const headers = buildSessionHeaders(current)
-      const response = await fetch(`${base}/api/crews/${current.crewId}/reports`, { headers })
+      const response = await fetch(`${base}/api/crews/${current.crewId}/reports`, { headers, credentials: 'include' })
       const data = await response.json()
       const rows = Array.isArray(data) ? data : []
       setReports(rows)
@@ -63,7 +63,7 @@ export default function CrewAssignedReportsPage() {
     setSession(currentSession)
 
     const headers = buildSessionHeaders(currentSession)
-    fetch(`${base}/api/states`, { headers })
+    fetch(`${base}/api/states`, { headers, credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setStates(Array.isArray(data) ? data : []))
       .catch(() => setStates([]))
@@ -95,6 +95,7 @@ export default function CrewAssignedReportsPage() {
 
       const response = await fetch(`${base}/api/assignments/${assigmentId}`, {
         method: 'PUT',
+        credentials: 'include',
         headers,
         body: JSON.stringify({ StateAs: nextState }),
       })

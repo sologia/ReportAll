@@ -15,6 +15,8 @@ DB_NAME=ENACAL_Project
 DB_USER=sa
 DB_PASSWORD=...
 PORT=3001
+JWT_SECRET=tu_clave_secreta_jwt
+JWT_EXPIRES_IN=8h
 ```
 
 You may move the `.env` file to the root of `backend/` and adjust
@@ -79,6 +81,18 @@ Endpoints habilitados:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+
+Respuesta de `POST /api/auth/login`:
+
+- `token` (JWT tipo Bearer)
+- `tokenType`
+- `expiresIn`
+- `user` (perfil básico)
+
+Autorización backend:
+
+- El middleware acepta `Authorization: Bearer <token>`.
+- Mantiene compatibilidad temporal con headers legacy (`x-user-role`, `x-client-id`, etc.) mientras migras clientes.
 
 ## Migración de procedimientos almacenados del backend
 

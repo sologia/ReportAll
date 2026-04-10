@@ -101,13 +101,66 @@ const UpdateAssignments = () => {
       return;
     }
 
-    setLoading(true);
     setMessage({ type: '', text: '' });
+
+    if (!formValues.Name_Leader) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Líder requerido',
+        text: 'Debes seleccionar un líder para la asignación.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    const normalizedCrew = parseInt(formValues.Num_Crew, 10);
+    if (!Number.isInteger(normalizedCrew) || normalizedCrew <= 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Cuadrilla requerida',
+        text: 'Debes seleccionar una cuadrilla válida.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    const normalizedReport = parseInt(formValues.Report_ID, 10);
+    if (!Number.isInteger(normalizedReport) || normalizedReport <= 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Reporte requerido',
+        text: 'Debes seleccionar un reporte válido.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!formValues.Fecha) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Fecha requerida',
+        text: 'Debes seleccionar la fecha de la asignación.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    if (!formValues.StateAs) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Estado requerido',
+        text: 'Debes seleccionar el estado de la asignación.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    setLoading(true);
 
     const payload = {
       Name_Leader: formValues.Name_Leader,
-      Num_Crew: parseInt(formValues.Num_Crew, 10) || 0,
-      Report_ID: parseInt(formValues.Report_ID, 10),
+      Num_Crew: normalizedCrew,
+      Report_ID: normalizedReport,
       StateAs: formValues.StateAs,
       Date_Time: formValues.Fecha
     };
@@ -115,6 +168,7 @@ const UpdateAssignments = () => {
     try {
       const res = await fetch(`${base}/api/assignments/${selectedId}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           ...buildSessionHeaders(getSession()),
@@ -156,7 +210,7 @@ const UpdateAssignments = () => {
       <h2>Modificar Asignación</h2>
 
       {selectedId && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           <div>
             <label>Nombre Líder:</label>
             <select

@@ -119,11 +119,66 @@ const CreateAssignments = () => {
         e.preventDefault()
         setSubmitError('')
         const form = e.target
+        const selectedDate = form.date.value
+        const selectedState = form.opciones_estados.value
+        const selectedReportId = parseInt(form.opciones_reporte.value, 10)
+        const selectedCrewNumber = parseInt(form.opciones_cuadrillas.value, 10)
+
+        if (!selectedDate) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Fecha requerida',
+                text: 'Debes seleccionar la fecha de la asignación.',
+                confirmButtonText: 'Aceptar',
+            })
+            return
+        }
+
+        if (role !== 'lider_cuadrilla' && !form.opciones_lider.value) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Líder requerido',
+                text: 'Debes seleccionar un líder para la asignación.',
+                confirmButtonText: 'Aceptar',
+            })
+            return
+        }
+
+        if (!Number.isInteger(selectedCrewNumber) || selectedCrewNumber <= 0) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Cuadrilla requerida',
+                text: 'Debes seleccionar una cuadrilla válida.',
+                confirmButtonText: 'Aceptar',
+            })
+            return
+        }
+
+        if (!Number.isInteger(selectedReportId) || selectedReportId <= 0) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Reporte requerido',
+                text: 'Debes seleccionar un reporte válido.',
+                confirmButtonText: 'Aceptar',
+            })
+            return
+        }
+
+        if (!selectedState) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Estado requerido',
+                text: 'Debes seleccionar el estado de la asignación.',
+                confirmButtonText: 'Aceptar',
+            })
+            return
+        }
+
         const payload = {
-            Num_Crew: parseInt(form.opciones_cuadrillas.value, 10),
-            Report_ID: parseInt(form.opciones_reporte.value, 10),
-            Date_Time: form.date.value,
-            StateAs: form.opciones_estados.value,
+            Num_Crew: selectedCrewNumber,
+            Report_ID: selectedReportId,
+            Date_Time: selectedDate,
+            StateAs: selectedState,
         }
 
         if (role !== 'lider_cuadrilla') {
@@ -133,6 +188,7 @@ const CreateAssignments = () => {
         try {
             const response = await fetch(`${base}/api/assignments`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     ...buildSessionHeaders(getSession()),
@@ -173,7 +229,7 @@ const CreateAssignments = () => {
                 <ButtonBack />
             </div>
 
-            <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9">
+            <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9" noValidate>
                 <div className='flex flex-col gap-4 ml-16'>
                     <div className='flex gap-6 items-center'>
                         <label htmlFor="date" className='w-[90px]'>Fecha dd/mm/aa </label>

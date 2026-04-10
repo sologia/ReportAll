@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "load:test": "node scripts/concurrency-test.js",
+    "validate:states": "npm run load:test -- --url http://localhost:3001/api/states --users 50 --method GET",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "msnodesqlv8": "^5.1.1",
     "mssql": "^12.1.1",
     "multer": "^2.0.2",

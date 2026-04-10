@@ -7,6 +7,7 @@
     "dev": "concurrently \"npm run start --prefix backend\" \"next dev --turbopack\"",
     "frontend": "next dev --turbopack",
     "backend": "npm run start --prefix backend",
+    "validate:states": "npm run validate:states --prefix backend",
     "build": "next build --turbopack",
     "start": "next start",
     "backendrun": "",

@@ -1,5 +1,41 @@
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { poolPromise, sql } from '../config/db.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
+const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'reportall_auth';
+
+function parseExpiresToSeconds(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return 8 * 60 * 60;
+
+  const exactSeconds = Number.parseInt(normalized, 10);
+  if (!Number.isNaN(exactSeconds) && String(exactSeconds) === normalized) {
+    return exactSeconds;
+  }
+
+  const match = normalized.match(/^(\d+)([smhd])$/);
+  if (!match) return 8 * 60 * 60;
+
+  const amount = Number.parseInt(match[1], 10);
+  const unit = match[2];
+  if (unit === 's') return amount;
+  if (unit === 'm') return amount * 60;
+  if (unit === 'h') return amount * 60 * 60;
+  return amount * 60 * 60 * 24;
+}
+
+function getAuthCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: parseExpiresToSeconds(JWT_EXPIRES_IN) * 1000,
+  };
+}
 
 function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
@@ -180,15 +216,57 @@ export async function login(req, res, next) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    return res.json({
-      email: user.Email,
-      role: user.Role,
-      displayName: user.Display_Name,
-      clientId: user.Client_ID,
-      leaderCrewId: user.Leader_Crew_ID,
-      crewId: user.Crew_ID,
-    });
+    const token = jwt.sign(
+      {
+        userId: user.User_ID,
+        email: user.Email,
+        role: user.Role,
+        displayName: user.Display_Name,
+        clientId: user.Client_ID,
+        leaderCrewId: user.Leader_Crew_ID,
+        crewId: user.Crew_ID,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.cookie(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const shouldExposeToken = process.env.AUTH_EXPOSE_TOKEN === 'true' || !isProduction;
+
+    const payload = {
+      tokenType: 'Bearer',
+      expiresIn: JWT_EXPIRES_IN,
+      user: {
+        userId: user.User_ID,
+        email: user.Email,
+        role: user.Role,
+        displayName: user.Display_Name,
+        clientId: user.Client_ID,
+        leaderCrewId: user.Leader_Crew_ID,
+        crewId: user.Crew_ID,
+      },
+    };
+
+    if (shouldExposeToken) {
+      payload.token = token;
+    }
+
+    return res.json(payload);
   } catch (err) {
     next(err);
   }
+}
+
+export async function logout(req, res) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+  });
+
+  return res.status(200).json({ ok: true });
 }

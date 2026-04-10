@@ -51,6 +51,7 @@ const ViewReports = () => {
       const query = params.toString();
       const response = await fetch(`${base}/api/reports/summary${query ? `?${query}` : ''}`, {
         headers: buildSessionHeaders(session),
+        credentials: 'include',
       });
       const raw = await response.json();
       const rows = Array.isArray(raw) ? raw : [];
@@ -71,12 +72,12 @@ const ViewReports = () => {
     loadReports();
 
     const requests = [
-      fetch(`${base}/api/states`, { headers: buildSessionHeaders(session) }),
-      fetch(`${base}/api/sectors`, { headers: buildSessionHeaders(session) }),
+      fetch(`${base}/api/states`, { headers: buildSessionHeaders(session), credentials: 'include' }),
+      fetch(`${base}/api/sectors`, { headers: buildSessionHeaders(session), credentials: 'include' }),
     ];
 
     if (isAdmin) {
-      requests.push(fetch(`${base}/api/reports/urgencies`, { headers: buildSessionHeaders(session) }));
+      requests.push(fetch(`${base}/api/reports/urgencies`, { headers: buildSessionHeaders(session), credentials: 'include' }));
     }
 
     Promise.all(requests)
@@ -144,6 +145,7 @@ const ViewReports = () => {
       setSavingReportId(reportId);
       const response = await fetch(`${base}/api/reports/${reportId}/urgency`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           ...buildSessionHeaders(session),

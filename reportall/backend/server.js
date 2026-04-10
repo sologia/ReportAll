@@ -29,7 +29,22 @@ dotenv.config({ path: envPath });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+const configuredOrigins = String(
+  process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:3000'
+)
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    // Requests sin origin (Postman/curl) siguen permitidas.
+    if (!origin) return callback(null, true);
+    if (configuredOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS origin no permitido'));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(attachAuthContext);
