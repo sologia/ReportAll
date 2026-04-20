@@ -29,20 +29,23 @@ const AssignmentsPage = () => {
   return (
     <form>
 
-      <ButtonGroup
+      {/* <ButtonGroup
         buttons={[
           { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
           { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
           { label: "Menu", href: "/dashboard/enacal" },
         ]}
-      />
+      /> */}
 
-      <SearchBar />
+      {/* <SearchBar /> */}
 
+      {/* Tengo problemas con la page y que se muestren los botone */}
       <ButtonGroup
         buttons={[
-          { label: "Crear", href: "/dashboard/enacal/assignments/createassignments" },
-          { label: "Modificar", href: "/dashboard/enacal/assignments/updateassignments" },
+          { label: "Crear Asignacion", href: "/dashboard/enacal/assignments/createassignments" },
+          { label: "Modificar Asignacion", href: "/dashboard/enacal/assignments/updateassignments" },
+          // { label: "Menu", href: "/dashboard/enacal" },
+
         ]}
       />
 

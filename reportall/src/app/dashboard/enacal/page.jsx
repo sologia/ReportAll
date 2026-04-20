@@ -15,12 +15,14 @@ const TowExample = () => {
       { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
       { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
       { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
+      { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     director_it: [
       { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
       { label: "Resumen cuadrillas", href: "/dashboard/enacal/craw/report-summary" },
       { label: "Mapa de Reportes", href: "/dashboard/enacal/reports/summary/map" },
       { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
+      { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     cuadrilla: [
       { label: "Mis reportes asignados", href: "/dashboard/enacal/crew/reports" },

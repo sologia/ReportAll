@@ -117,10 +117,6 @@ export async function loginUser({ email, password, role }) {
       return null;
     }
 
-    if (role && session?.role !== role) {
-      return null;
-    }
-
     setSession(session);
     if (token) {
       setAccessToken(token);
@@ -144,6 +140,33 @@ export async function logoutUser() {
     // intencionalmente vacio: siempre limpiamos cliente al final
   } finally {
     clearSession();
+  }
+}
+
+export async function refreshAccessToken() {
+  try {
+    const base = getApiBase();
+    const response = await fetch(`${base}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        ...buildSessionHeaders(getSession()),
+      },
+    });
+
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body?.user) {
+      return { ok: false, status: response.status, body };
+    }
+
+    setSession(body.user);
+    if (body?.token) {
+      setAccessToken(body.token);
+    }
+
+    return { ok: true, status: response.status, body };
+  } catch (error) {
+    return { ok: false, status: 0, body: { message: error?.message || 'refresh failed' } };
   }
 }
 

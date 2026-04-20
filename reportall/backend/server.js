@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 import reportsRouter from './src/Routes/Report.js';
 import crewsRouter from './src/Routes/Crew.js';
 import clientsRouter from './src/Routes/Client.js';
@@ -13,7 +14,9 @@ import leadersRouter from './src/Routes/Leaders.js';
 import crewsonlyRouter from './src/Routes/Crewsonly.js';
 import stateRouter from './src/Routes/stattus.js';
 import authRouter from './src/Routes/Auth.js';
+import systemRouter from './src/Routes/System.js';
 import { attachAuthContext } from './src/middlewares/rbac.js';
+import { getRequestContext, logStructured } from './src/config/logger.js';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -30,7 +33,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const configuredOrigins = String(
-  process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:3000'
+  process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:3000,http://localhost:3002'
 )
   .split(',')
   .map((value) => value.trim())
@@ -45,6 +48,23 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+app.use((req, res, next) => {
+  req.requestId = String(req.header('x-request-id') || '').trim() || crypto.randomUUID();
+  res.setHeader('x-request-id', req.requestId);
+
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    logStructured('info', 'http_request', {
+      ...getRequestContext(req),
+      statusCode: res.statusCode,
+      durationMs: Date.now() - startedAt,
+    });
+  });
+
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(attachAuthContext);
@@ -62,11 +82,28 @@ app.use('/api/availabilities', availabilityRouter);
 app.use('/api/crewsonly', crewsonlyRouter);
 app.use('/api/states', stateRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/system', systemRouter);
 
-// Manejador de errores simple
+// Manejador de errores estructurado
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Internal Server Error' });
+  const statusCode = Number.isInteger(err?.status) ? err.status : 500;
+
+  logStructured('error', 'request_failed', {
+    ...getRequestContext(req),
+    statusCode,
+    errorName: err?.name || 'Error',
+    errorCode: err?.code || null,
+    errorMessage: err?.message || 'Internal Server Error',
+    errorDetails: err?.details || null,
+    stack: err?.stack || null,
+  });
+
+  res.status(statusCode).json({
+    error: statusCode === 500 ? 'Internal Server Error' : (err?.message || 'Error'),
+    requestId: req.requestId || null,
+    code: err?.code || null,
+    details: err?.details || null,
+  });
 });
 
 app.listen(PORT, () => {

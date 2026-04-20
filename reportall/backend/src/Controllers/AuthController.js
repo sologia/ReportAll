@@ -5,6 +5,11 @@ import { poolPromise, sql } from '../config/db.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'reportall_auth';
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'dev_refresh_secret_change_me';
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const REFRESH_COOKIE_NAME = process.env.REFRESH_COOKIE_NAME || 'reportall_refresh';
+
+const activeRefreshTokenByUserId = new Map();
 
 function parseExpiresToSeconds(value) {
   const normalized = String(value || '').trim().toLowerCase();
@@ -35,6 +40,84 @@ function getAuthCookieOptions() {
     path: '/',
     maxAge: parseExpiresToSeconds(JWT_EXPIRES_IN) * 1000,
   };
+}
+
+function getRefreshCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: parseExpiresToSeconds(REFRESH_TOKEN_EXPIRES_IN) * 1000,
+  };
+}
+
+function buildUserClaims(user) {
+  return {
+    userId: user.User_ID,
+    email: user.Email,
+    role: user.Role,
+    displayName: user.Display_Name,
+    clientId: user.Client_ID,
+    leaderCrewId: user.Leader_Crew_ID,
+    crewId: user.Crew_ID,
+  };
+}
+
+function signAccessToken(claims) {
+  return jwt.sign(claims, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+}
+
+function signRefreshToken(claims, tokenId) {
+  return jwt.sign(
+    {
+      sub: String(claims.userId),
+      email: claims.email,
+      role: claims.role,
+      tokenId,
+      type: 'refresh',
+    },
+    REFRESH_TOKEN_SECRET,
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+  );
+}
+
+function parseCookieValue(req, cookieName) {
+  const cookiesHeader = String(req.header('cookie') || '');
+  if (!cookiesHeader) return '';
+
+  const parts = cookiesHeader.split(';').map((part) => part.trim());
+  for (const part of parts) {
+    if (!part) continue;
+    const equalsIndex = part.indexOf('=');
+    if (equalsIndex < 0) continue;
+
+    const key = part.slice(0, equalsIndex).trim();
+    const value = part.slice(equalsIndex + 1).trim();
+    if (key !== cookieName) continue;
+
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return '';
+}
+
+function clearAuthCookies(res) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const baseCookie = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+  };
+
+  res.clearCookie(AUTH_COOKIE_NAME, baseCookie);
+  res.clearCookie(REFRESH_COOKIE_NAME, baseCookie);
 }
 
 function normalizeEmail(value) {
@@ -216,21 +299,15 @@ export async function login(req, res, next) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user.User_ID,
-        email: user.Email,
-        role: user.Role,
-        displayName: user.Display_Name,
-        clientId: user.Client_ID,
-        leaderCrewId: user.Leader_Crew_ID,
-        crewId: user.Crew_ID,
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const claims = buildUserClaims(user);
+    const accessToken = signAccessToken(claims);
+    const refreshTokenId = crypto.randomUUID();
+    const refreshToken = signRefreshToken(claims, refreshTokenId);
 
-    res.cookie(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
+    activeRefreshTokenByUserId.set(String(claims.userId), refreshTokenId);
+
+    res.cookie(AUTH_COOKIE_NAME, accessToken, getAuthCookieOptions());
+    res.cookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions());
 
     const isProduction = process.env.NODE_ENV === 'production';
     const shouldExposeToken = process.env.AUTH_EXPOSE_TOKEN === 'true' || !isProduction;
@@ -238,19 +315,12 @@ export async function login(req, res, next) {
     const payload = {
       tokenType: 'Bearer',
       expiresIn: JWT_EXPIRES_IN,
-      user: {
-        userId: user.User_ID,
-        email: user.Email,
-        role: user.Role,
-        displayName: user.Display_Name,
-        clientId: user.Client_ID,
-        leaderCrewId: user.Leader_Crew_ID,
-        crewId: user.Crew_ID,
-      },
+      refreshExpiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      user: claims,
     };
 
     if (shouldExposeToken) {
-      payload.token = token;
+      payload.token = accessToken;
     }
 
     return res.json(payload);
@@ -259,14 +329,91 @@ export async function login(req, res, next) {
   }
 }
 
+export async function refresh(req, res, next) {
+  try {
+    const refreshToken = parseCookieValue(req, REFRESH_COOKIE_NAME);
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'Refresh token requerido' });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+    } catch {
+      return res.status(401).json({ message: 'Refresh token inválido o expirado' });
+    }
+
+    const userId = String(payload?.sub || '').trim();
+    const email = normalizeEmail(payload?.email);
+    const tokenId = String(payload?.tokenId || '').trim();
+    const tokenType = String(payload?.type || '').trim().toLowerCase();
+
+    if (!userId || !email || !tokenId || tokenType !== 'refresh') {
+      return res.status(401).json({ message: 'Refresh token inválido' });
+    }
+
+    const activeTokenId = activeRefreshTokenByUserId.get(userId);
+    if (!activeTokenId || activeTokenId !== tokenId) {
+      return res.status(401).json({ message: 'Refresh token revocado o reutilizado' });
+    }
+
+    const pool = await poolPromise;
+    const userResult = await pool.request()
+      .input('Email', sql.NVarChar(255), email)
+      .execute('sp_Auth_GetUserByEmail');
+
+    const user = userResult.recordset[0];
+    if (!user || !user.Is_Active || String(user.User_ID) !== userId) {
+      return res.status(401).json({ message: 'Usuario no válido para refresh' });
+    }
+
+    const claims = buildUserClaims(user);
+    const accessToken = signAccessToken(claims);
+    const nextRefreshTokenId = crypto.randomUUID();
+    const nextRefreshToken = signRefreshToken(claims, nextRefreshTokenId);
+
+    activeRefreshTokenByUserId.set(userId, nextRefreshTokenId);
+
+    res.cookie(AUTH_COOKIE_NAME, accessToken, getAuthCookieOptions());
+    res.cookie(REFRESH_COOKIE_NAME, nextRefreshToken, getRefreshCookieOptions());
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const shouldExposeToken = process.env.AUTH_EXPOSE_TOKEN === 'true' || !isProduction;
+
+    const responsePayload = {
+      ok: true,
+      tokenType: 'Bearer',
+      expiresIn: JWT_EXPIRES_IN,
+      refreshExpiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      refreshRotated: true,
+      user: claims,
+    };
+
+    if (shouldExposeToken) {
+      responsePayload.token = accessToken;
+    }
+
+    return res.status(200).json(responsePayload);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function logout(req, res) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.clearCookie(AUTH_COOKIE_NAME, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    path: '/',
-  });
+  const refreshToken = parseCookieValue(req, REFRESH_COOKIE_NAME);
+  if (refreshToken) {
+    try {
+      const payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+      const userId = String(payload?.sub || '').trim();
+      if (userId) {
+        activeRefreshTokenByUserId.delete(userId);
+      }
+    } catch {
+      // si el token ya vencio o es invalido, igual limpiamos cookies
+    }
+  }
+
+  clearAuthCookies(res);
 
   return res.status(200).json({ ok: true });
 }
