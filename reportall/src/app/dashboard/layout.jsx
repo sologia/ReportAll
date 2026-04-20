@@ -57,7 +57,7 @@ function DashboardLayout({ children }) {
     if (pathname.includes("/dashboard/clientes"))
       return "";
     if (pathname.includes("/dashboard/enacal"))
-      return "items center"
+      return "items-center"
   }
 
   if (!ready) {
@@ -65,22 +65,22 @@ function DashboardLayout({ children }) {
   }
 
   return (
-    <div className={`min-h-screen w-full flex justify-center bg-[#42B8EA] ${getStyle()}`}>
-      <div className='w-[1050px] min-h-screen bg-white shadow-(--sombra2) flex flex-col overflow-visible'>
+    <div className={`min-h-screen w-full flex justify-center bg-[#42B8EA] px-2 sm:px-4 ${getStyle()}`}>
+      <div className='w-full max-w-[1050px] min-h-screen bg-white shadow-(--sombra2) flex flex-col overflow-visible'>
 
-        <div className='border-[1.5] w-full h-[100px] flex justify-between items-center shadow-(--sombra1) mb-4'>
+        <div className='border-[1.5] w-full min-h-[100px] flex flex-col sm:flex-row justify-between sm:items-center shadow-(--sombra1) mb-4 px-4 sm:px-0 py-3 sm:py-0 gap-3 sm:gap-0'>
 
-          <div className='w-40 ml-9'>
-            <img src="/img/logoEnacal.png" />
+          <div className='w-32 sm:w-40 sm:ml-9'>
+            <img src="/img/logoEnacal.png" alt="Logo Enacal" className="w-full h-auto object-contain" />
           </div>
 
-          <div className='mr-9'>
-            <div className="flex items-center gap-4">
-              <span>{session?.displayName || 'Usuario'}</span>
+          <div className='w-full sm:w-auto sm:mr-9'>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <span className="truncate">{session?.displayName || 'Usuario'}</span>
               <button
                 type="button"
                 onClick={onLogout}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto text-sm sm:text-base"
               >
                 Cerrar sesión
               </button>
@@ -90,11 +90,11 @@ function DashboardLayout({ children }) {
 
         </div>
 
-        <div className='w-[1000px] m-auto bg-(--fondo1) flex-1 min-h-0 rounded-md'>
+        <div className='w-full max-w-[1000px] mx-auto bg-(--fondo1) flex-1 min-h-0 rounded-md'>
           <div>
 
-            <div className="bg-(--fondo3) rounded-md h-[42px] flex items-center pl-8">
-              <h3 className="text-[25px]">{getLabel()}</h3>
+            <div className="bg-(--fondo3) rounded-md min-h-[42px] flex items-center px-4 sm:pl-8 py-1">
+              <h3 className="text-xl sm:text-2xl">{getLabel()}</h3>
             </div>
 
             <div>

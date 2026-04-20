@@ -1,6 +1,8 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
+import SectionCard from '@/app/components/SectionCard'
 import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 
@@ -121,35 +123,41 @@ const CreateCraw = () => {
   };
 
   return (
-    <div>
+    <section className='w-full px-2 sm:px-4 pb-6'>
       
       <div>
         <ButtonBack/>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9" noValidate>
+      <PageHeaderCard
+        title='Crear Cuadrilla'
+        description='Registra cuadrillas con su vehículo y sector correspondiente.'
+      />
 
-        <div className=' flex flex-col gap-4 ml-16'>
+      <SectionCard>
+      <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row xl:justify-between items-start gap-6" noValidate>
+
+        <div className='flex flex-col gap-4 w-full'>
           
-          <div className='flex gap-6 items-center'>
-            <label htmlFor="num_cuadrilla" className='w-[90px]'>N° Cuadrilla</label>
+          <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+            <label htmlFor="num_cuadrilla" className='w-full sm:w-36'>N° Cuadrilla</label>
             <input
               type="number"
               id="num_cuadrilla"
               name="num_cuadrilla"
-              className="bg-[#b2b1b1] rounded-2xl w-32"
+              className="bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2"
               min={1}
               step={1}
               required
             />
           </div>
 
-          <div className='flex gap-6'>
-            <label htmlFor="opciones_vehiculos" className='w-24'>Matrícula</label>
+          <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+            <label htmlFor="opciones_vehiculos" className='w-full sm:w-36'>Matrícula</label>
             <select
               name="opciones_vehiculos"
               id="opciones_vehiculos"
-              className='bg-[#b2b1b1] rounded-2xl w-32'
+              className='bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2'
               required
             >
               <option value="">Seleccione</option>
@@ -159,12 +167,12 @@ const CreateCraw = () => {
             </select>
           </div>
 
-          <div className='flex gap-6'>
-            <label htmlFor='opciones_sectores' className='w-24'>Sector</label>
+          <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+            <label htmlFor='opciones_sectores' className='w-full sm:w-36'>Sector</label>
             <select
               name="opciones_sectores"
               id="opciones_sectores"
-              className='bg-[#b2b1b1] rounded-2xl w-32'
+              className='bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2'
               required
             >
               <option value="">Seleccione</option>
@@ -177,10 +185,10 @@ const CreateCraw = () => {
           <input type="hidden" name="availability" value={defaultAvailability} />
         </div>
 
-        <div className='flex flex-col gap-3 mr-16'>
+        <div className='flex flex-col gap-3 w-full xl:w-auto'>
           <button
                 type="submit"
-                className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+          className="w-full xl:w-56 mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
             >
                 Aceptar
           </button>
@@ -188,19 +196,20 @@ const CreateCraw = () => {
           <button
               type="button"
               onClick={() => window.location.reload()}
-                className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+              className="w-full xl:w-56 mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
             >
                 Cancelar
             </button>
         </div>
       </form>
+      </SectionCard>
 
       <div className='mt-10'>
         <h3 className='text-xl font-semibold'>Cuadrillas ya creadas</h3>
         <SimpleTable columns={crewColumns} data={crews} />
       </div>
 
-    </div>
+    </section>
   )
 }
 

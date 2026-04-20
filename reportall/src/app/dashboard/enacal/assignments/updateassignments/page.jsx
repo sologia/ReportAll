@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
+import PageHeaderCard from '@/app/components/PageHeaderCard';
+import SectionCard from '@/app/components/SectionCard';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
@@ -204,101 +206,146 @@ const UpdateAssignments = () => {
   };
 
   return (
-    <div>
+    <section className="w-full px-2 sm:px-4 pb-6">
       <ButtonBack />
 
-      <h2>Modificar Asignación</h2>
+      <PageHeaderCard
+        title="Modificar Asignación"
+        description="Selecciona una asignación y actualiza sus datos."
+      />
 
-      {selectedId && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-          <div>
-            <label>Nombre Líder:</label>
-            <select
-              name="Name_Leader"
-              value={formValues.Name_Leader}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione</option>
-              {nameleader.map((leader, idx) => (
-                <option key={idx} value={leader.Name_Leader}>
-                  {leader.Name_Leader}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Num Cuadrilla:</label>
-            <select
-              name="Num_Crew"
-              value={formValues.Num_Crew}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione</option>
-              {numcrew.map((crew, idx) => (
-                <option key={idx} value={crew.Num_Crew}>
-                  {crew.Num_Crew}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Reporte:</label>
-            <select
-              name="Report_ID"
-              value={formValues.Report_ID}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione</option>
-              {reports.map((report) => (
-                <option key={report.Report_ID} value={report.Report_ID}>
-                  {showIds ? `#${report.Report_ID} - ${report.Adress || 'Sin dirección'}` : `${report.Adress || 'Sin dirección'}`}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Fecha:</label>
-            <input
-              name="Fecha"
-              type="date"
-              value={formValues.Fecha}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Estado:</label>
-            <select
-              name="StateAs"
-              value={formValues.StateAs}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccione</option>
-              {stateas.map((a, idx) => (
-                <option key={idx} value={a.StateAs}>{a.StateAs}</option>
-              ))}
-            </select>
-          </div>
+      <SectionCard>
 
-          {message.text && (
-            <div className={`p-2 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {message.text}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-400"
+        <div className="mt-5">
+          <label htmlFor="selectedAssignment" className="block text-sm font-medium text-slate-700">Asignación a modificar</label>
+          <select
+            id="selectedAssignment"
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="mt-1 w-full sm:w-md bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
           >
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
-        </form>
-      )}
+            <option value="">Seleccione</option>
+            {assignments.map((assignment) => (
+              <option key={assignment.Assigment_ID} value={assignment.Assigment_ID}>
+                {showIds
+                  ? `#${assignment.Assigment_ID} - ${assignment.Name_Leader || 'Sin líder'} - C${assignment.Num_Crew || '-'}`
+                  : `${assignment.Name_Leader || 'Sin líder'} - C${assignment.Num_Crew || '-'}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedId ? (
+          <form onSubmit={handleSubmit} className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4" noValidate>
+            <div>
+              <label htmlFor="Name_Leader" className="block text-sm font-medium text-slate-700">Nombre Líder</label>
+              <select
+                id="Name_Leader"
+                name="Name_Leader"
+                value={formValues.Name_Leader}
+                onChange={handleChange}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+                required
+              >
+                <option value="">Seleccione</option>
+                {nameleader.map((leader, idx) => (
+                  <option key={idx} value={leader.Name_Leader}>
+                    {leader.Name_Leader}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="Num_Crew" className="block text-sm font-medium text-slate-700">Num Cuadrilla</label>
+              <select
+                id="Num_Crew"
+                name="Num_Crew"
+                value={formValues.Num_Crew}
+                onChange={handleChange}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+                required
+              >
+                <option value="">Seleccione</option>
+                {numcrew.map((crew, idx) => (
+                  <option key={idx} value={crew.Num_Crew}>
+                    {crew.Num_Crew}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="Report_ID" className="block text-sm font-medium text-slate-700">Reporte</label>
+              <select
+                id="Report_ID"
+                name="Report_ID"
+                value={formValues.Report_ID}
+                onChange={handleChange}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+                required
+              >
+                <option value="">Seleccione</option>
+                {reports.map((report) => (
+                  <option key={report.Report_ID} value={report.Report_ID}>
+                    {showIds ? `#${report.Report_ID} - ${report.Adress || 'Sin dirección'}` : `${report.Adress || 'Sin dirección'}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="Fecha" className="block text-sm font-medium text-slate-700">Fecha</label>
+              <input
+                id="Fecha"
+                name="Fecha"
+                type="date"
+                value={formValues.Fecha}
+                onChange={handleChange}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="StateAs" className="block text-sm font-medium text-slate-700">Estado</label>
+              <select
+                id="StateAs"
+                name="StateAs"
+                value={formValues.StateAs}
+                onChange={handleChange}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+                required
+              >
+                <option value="">Seleccione</option>
+                {stateas.map((a, idx) => (
+                  <option key={idx} value={a.StateAs}>{a.StateAs}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="lg:col-span-2">
+              {message.text && (
+                <div className={`p-2 rounded text-sm ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {message.text}
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-56 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+              >
+                {loading ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="mt-4 text-sm text-slate-500">Selecciona una asignación para habilitar el formulario.</p>
+        )}
+      </SectionCard>
 
       <div className="mt-8 overflow-x-auto rounded-lg shadow-md bg-white">
         <h3 className="text-xl font-semibold p-4">Asignaciones existentes</h3>
@@ -341,7 +388,7 @@ const UpdateAssignments = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 };
 

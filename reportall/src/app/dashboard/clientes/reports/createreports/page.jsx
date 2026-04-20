@@ -235,7 +235,7 @@ const CreateReportClient = () => {
 
 
   return (
-    <div>
+    <section className='w-full px-2 sm:px-4 pb-6'>
 
       <div>
         <ButtonBack />
@@ -243,20 +243,20 @@ const CreateReportClient = () => {
 
       <form onSubmit={ReportSubmit} className="flex flex-col gap-6" noValidate>
 
-        <div className=' flex flex-col gap-4 ml-15'>
+        <div className='flex flex-col gap-4 w-full'>
 
           <div className='flex'>
-            <p className='m-auto text-[32px] font-bold'>Datos del problema</p>
+            <p className='m-auto text-2xl sm:text-3xl font-bold text-center'>Datos del problema</p>
           </div>
 
-          <div className="flex gap-6 items-center">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center">
 
-            <label className='w-56'>Selecciona un problema</label>
+            <label className='w-full sm:w-56'>Selecciona un problema</label>
             <select
               name="tipoReporte"
               value={tipoReporte}
               onChange={onReportInputChange}
-              className='bg-[#b2b1b1] rounded-2xl w-64'
+              className='bg-[#b2b1b1] rounded-2xl w-full sm:w-72 px-3 py-2'
               required
             >
               <option value="">Seleccione</option>
@@ -268,14 +268,14 @@ const CreateReportClient = () => {
             </select>
           </div>
 
-          <div className="flex gap-6 items-center">
-            <label htmlFor='opciones_sectores' className='w-56'>Sector</label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center">
+            <label htmlFor='opciones_sectores' className='w-full sm:w-56'>Sector</label>
             <select
               name="opciones_sectores"
               id="opciones_sectores"
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
-              className='bg-[#b2b1b1] rounded-2xl w-64'
+              className='bg-[#b2b1b1] rounded-2xl w-full sm:w-72 px-3 py-2'
               required
             >
               <option value="">Seleccione</option>
@@ -287,34 +287,34 @@ const CreateReportClient = () => {
             </select>
           </div>
 
-          <div className='flex gap-6 items-center'>
-            <label htmlFor="num_cuadrilla" className='w-56'>Direccion:</label>
+          <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+            <label htmlFor="num_cuadrilla" className='w-full sm:w-56'>Direccion:</label>
             <textarea
               type="text"
               id="direccion"
               name="direccion"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
+              className="bg-[#b2b1b1] rounded-2xl w-full sm:w-72 resize-none focus:outline-none px-3 py-2"
               required
             />
           </div>
-          <div className='flex gap-6 items-center'>
-            <label htmlFor="fecha" className='w-56'>Fecha:</label>
+          <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+            <label htmlFor="fecha" className='w-full sm:w-56'>Fecha:</label>
             <input
               type="date"
               id="fecha"
               name="fecha"
               value={datest}
               onChange={(e) => setDate(e.target.value)}
-              className="bg-[#b2b1b1] rounded-2xl w-64 resize-none focus:outline-none"
+              className="bg-[#b2b1b1] rounded-2xl w-full sm:w-72 resize-none focus:outline-none px-3 py-2"
               required
             />
           </div>
 
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-start">
 
-            <label className='w-56'>Subir imagenes/videos</label>
+            <label className='w-full sm:w-56'>Subir imagenes/videos</label>
             <div>
               <MultiFileUpload onFilesSelect={setSelectedFiles} />
             </div>
@@ -322,31 +322,31 @@ const CreateReportClient = () => {
 
         </div>
 
-        <div className=''>
-          <p className='ml-6 text-[20px]'>Seleccione la ubicacion del problema</p>
+        <div className='w-full'>
+          <p className='px-2 sm:px-4 text-lg sm:text-xl'>Seleccione la ubicacion del problema</p>
           <MyMap onSelect={handleMapSelect} selectedPosition={coords} currentLocation={currentLocation} />
-          <p className='ml-6'>Ubicación actual: {currentLocation ? `Lat: ${currentLocation[0]}, Lng: ${currentLocation[1]}` : 'Obteniendo...'} (marcador azul)</p>
-          <p className='ml-6'>Ubicación seleccionada: {coords ? `Lat: ${coords[0]}, Lng: ${coords[1]}` : 'Ninguna'} (marcador rojo)</p>
+          <p className='px-2 sm:px-4 wrap-break-word'>Ubicación actual: {currentLocation ? `Lat: ${currentLocation[0]}, Lng: ${currentLocation[1]}` : 'Obteniendo...'} (marcador azul)</p>
+          <p className='px-2 sm:px-4 wrap-break-word'>Ubicación seleccionada: {coords ? `Lat: ${coords[0]}, Lng: ${coords[1]}` : 'Ninguna'} (marcador rojo)</p>
         </div>
 
-        <div className='flex mb-6'>
+        <div className='flex mb-6 px-2 sm:px-4'>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-70 ml-8 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full sm:w-56 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
           >
             {isSubmitting ? 'Enviando...' : 'Aceptar'}
           </button>
         </div>
-        {submitMessage && <p className='ml-8 text-sm'>{submitMessage}</p>}
+        {submitMessage && <p className='px-2 sm:px-4 text-sm'>{submitMessage}</p>}
       </form>
 
       <div className='mt-10'>
-        <h3 className='text-xl font-semibold ml-6'>Reportes ya creados</h3>
+        <h3 className='text-xl font-semibold px-2 sm:px-4'>Reportes ya creados</h3>
         <SimpleTable columns={clientReportsColumns} data={clientReports} />
       </div>
 
-    </div>
+    </section>
   )
 }
 

@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
+import PageHeaderCard from '@/app/components/PageHeaderCard';
+import SectionCard from '@/app/components/SectionCard';
 import Swal from 'sweetalert2';
 import { getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
@@ -180,107 +182,131 @@ const UpdateCraw = () => {
     }
   };
   return (
-    <div>
+    <section className="w-full px-2 sm:px-4 pb-6">
       <ButtonBack />
 
-      <h2>Modificar Cuadrilla</h2>
-      {message && (
-        <div className={`p-2 mb-4 rounded ${message.includes('correctamente') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-          {message}
-        </div>
-      )}
-      <div className="mb-4">
-        <label className="mr-2">Elige cuadrilla:</label>
-        <select
-          value={selectedId}
-          onChange={e => setSelectedId(e.target.value)}
-          disabled={loading}
-        >
-          <option value="">--</option>
-          {crews.map(c => (
-            <option key={c.Crew_ID} value={c.Crew_ID}>
-              {c.Num_Crew} - {c.Name_Sector || 'Sin sector'}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* <PageHeaderCard
+        title="Modificar Cuadrilla"
+        description="Actualiza datos de la cuadrilla seleccionada."
+      /> */}
 
-      {selectedId && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-          <div>
-            <label>Número de Cuadrilla:</label>
-            <input
-              name="Num_Crew"
-              type="number"
-              value={formValues.Num_Crew}
-              onChange={handleChange}
-              disabled={loading}
-              min={1}
-              step={1}
-              className="border p-2 rounded"
-            />
+      <SectionCard>
+
+        {message && (
+          <div className={`p-2 mt-4 mb-2 rounded text-sm ${message.includes('correctamente') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+            {message}
           </div>
-          <div>
-            <label>Matrícula del vehículo:</label>
-            <select
-              name="Plate"
-              value={formValues.Plate}
-              onChange={handleChange}
-              disabled={loading}
-              className="border p-2 rounded"
-            >
-              <option value="">Seleccione</option>
-              {vehicles.map(v => (
-                <option key={v.Vehicle_ID || v.Plate} value={v.Plate}>
-                  {v.Plate}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Sector:</label>
-            <select
-              name="Sector"
-              value={formValues.Sector}
-              onChange={handleChange}
-              disabled={loading}
-              className="border p-2 rounded"
-            >
-              <option value="">Seleccione</option>
-              {sectors.map(s => (
-                <option key={s.Sector_ID || s.Name_Sector} value={s.Name_Sector}>
-                  {s.Name_Sector}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Disponibilidad:</label>
-            <select
-              name="Availability"
-              value={formValues.Availability}
-              onChange={handleChange}
-              disabled={loading}
-              className="border p-2 rounded"
-            >
-              <option value="">Seleccione</option>
-              {availabilities.map(a => (
-                <option key={a.Availability_Crew_ID || a.Availability_Crew} value={a.Availability_Crew}>
-                  {a.Availability_Crew}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
+        )}
+
+        <div className="mt-5">
+          <label htmlFor="selectedCrew" className="block text-sm font-medium text-slate-700">Cuadrilla a modificar</label>
+          <select
+            id="selectedCrew"
+            value={selectedId}
+            onChange={e => setSelectedId(e.target.value)}
             disabled={loading}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+            className="mt-1 w-full sm:w-md bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
           >
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
-        </form>
-      )}
+            <option value="">Seleccione</option>
+            {crews.map(c => (
+              <option key={c.Crew_ID} value={c.Crew_ID}>
+                {showIds
+                  ? `#${c.Crew_ID} - C${c.Num_Crew} - ${c.Name_Sector || 'Sin sector'}`
+                  : `C${c.Num_Crew} - ${c.Name_Sector || 'Sin sector'}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedId ? (
+          <form onSubmit={handleSubmit} className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4" noValidate>
+            <div>
+              <label htmlFor="Num_Crew" className="block text-sm font-medium text-slate-700">Número de Cuadrilla</label>
+              <input
+                id="Num_Crew"
+                name="Num_Crew"
+                type="number"
+                value={formValues.Num_Crew}
+                onChange={handleChange}
+                disabled={loading}
+                min={1}
+                step={1}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="Plate" className="block text-sm font-medium text-slate-700">Matrícula del vehículo</label>
+              <select
+                id="Plate"
+                name="Plate"
+                value={formValues.Plate}
+                onChange={handleChange}
+                disabled={loading}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+              >
+                <option value="">Seleccione</option>
+                {vehicles.map(v => (
+                  <option key={v.Vehicle_ID || v.Plate} value={v.Plate}>
+                    {v.Plate}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="Sector" className="block text-sm font-medium text-slate-700">Sector</label>
+              <select
+                id="Sector"
+                name="Sector"
+                value={formValues.Sector}
+                onChange={handleChange}
+                disabled={loading}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+              >
+                <option value="">Seleccione</option>
+                {sectors.map(s => (
+                  <option key={s.Sector_ID || s.Name_Sector} value={s.Name_Sector}>
+                    {s.Name_Sector}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="Availability" className="block text-sm font-medium text-slate-700">Disponibilidad</label>
+              <select
+                id="Availability"
+                name="Availability"
+                value={formValues.Availability}
+                onChange={handleChange}
+                disabled={loading}
+                className="mt-1 w-full bg-[#b2b1b1] rounded-2xl px-3 py-2 focus:outline-none"
+              >
+                <option value="">Seleccione</option>
+                {availabilities.map(a => (
+                  <option key={a.Availability_Crew_ID || a.Availability_Crew} value={a.Availability_Crew}>
+                    {a.Availability_Crew}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="lg:col-span-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-56 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+              >
+                {loading ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="mt-4 text-sm text-slate-500">Selecciona una cuadrilla para habilitar el formulario.</p>
+        )}
+      </SectionCard>
 
       <div className="mt-8 overflow-x-auto rounded-lg shadow-md bg-white">
         <h3 className="text-xl font-semibold p-4">Cuadrillas existentes</h3>
@@ -323,7 +349,7 @@ const UpdateCraw = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 };
 

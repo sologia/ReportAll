@@ -3,7 +3,9 @@
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SearchBar from '@/app/components/SearchBar'
 import SimpleTable from '@/app/components/SimpleTable'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React, { useState, useEffect } from 'react'
+import ButtonBack from '@/app/components/ButtonBack'
 
 const AssignmentsPage = () => {
 
@@ -27,7 +29,13 @@ const AssignmentsPage = () => {
   }, []);
 
   return (
-    <form>
+    <section aria-label="Gestión de asignaciones" className="w-full px-2 sm:px-4 pb-6">
+      <ButtonBack />
+
+      {/* <PageHeaderCard
+        title="Asignaciones"
+        description="Gestiona las asignaciones de reportes para cada cuadrilla."
+      /> */}
 
       {/* <ButtonGroup
         buttons={[
@@ -53,7 +61,7 @@ const AssignmentsPage = () => {
         <SimpleTable columns={columns} data={data} />
       </div>
 
-    </form>
+    </section>
   )
 }
 export default AssignmentsPage

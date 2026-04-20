@@ -1,6 +1,8 @@
 'use client'
 import ButtonBack from '@/app/components/ButtonBack'
 import SimpleTable from '@/app/components/SimpleTable'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
+import SectionCard from '@/app/components/SectionCard'
 import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { buildSessionHeaders, getSession } from '@/lib/auth'
@@ -224,36 +226,42 @@ const CreateAssignments = () => {
     }
 
     return (
-        <div>
+        <section className='w-full px-2 sm:px-4 pb-6'>
             <div>
                 <ButtonBack />
             </div>
 
-            <form onSubmit={handleSubmit} className="flex justify-between items-start gap-9" noValidate>
-                <div className='flex flex-col gap-4 ml-16'>
-                    <div className='flex gap-6 items-center'>
-                        <label htmlFor="date" className='w-[90px]'>Fecha dd/mm/aa </label>
+            <PageHeaderCard
+                title='Crear Asignación'
+                description='Asigna reportes a cuadrillas según disponibilidad y distrito.'
+            />
+
+            <SectionCard>
+                <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row xl:justify-between items-start gap-6" noValidate>
+                    <div className='flex flex-col gap-4 w-full'>
+                        <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                        <label htmlFor="date" className='w-full sm:w-36'>Fecha dd/mm/aa </label>
                         <input
                             type="date"
                             id="date"
                             name="date"
-                            className="bg-[#b2b1b1] rounded-2xl w-32"
+                            className="bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2"
                             required
                         />
-                    </div>
-
-                    {role === 'lider_cuadrilla' ? (
-                        <div className='flex gap-6 items-center'>
-                            <label className='w-24'>Líder</label>
-                            <p className='bg-[#d9edf7] rounded-2xl w-64 px-3 py-2'>{session?.displayName || 'Líder autenticado'}</p>
                         </div>
-                    ) : (
-                        <div className='flex gap-6 items-center'>
-                            <label form="opciones_lider" className='w-24'>Nombre Lider</label>
+
+                        {role === 'lider_cuadrilla' ? (
+                            <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                            <label className='w-full sm:w-36'>Líder</label>
+                            <p className='bg-[#d9edf7] rounded-2xl w-full sm:w-80 px-3 py-2'>{session?.displayName || 'Líder autenticado'}</p>
+                            </div>
+                        ) : (
+                            <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                            <label htmlFor="opciones_lider" className='w-full sm:w-36'>Nombre Lider</label>
                             <select
                                 name="opciones_lider"
                                 id="opciones_lider"
-                                className='bg-[#b2b1b1] rounded-2xl w-32'
+                                className='bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2'
                                 required
                             >
                                 <option value="">Seleccione</option>
@@ -261,15 +269,15 @@ const CreateAssignments = () => {
                                     <option key={idx} value={t.Name_Leader}>{t.Name_Leader}</option>
                                 ))}
                             </select>
-                        </div>
-                    )}
+                            </div>
+                        )}
 
-                    <div className='flex gap-6 items-center'>
-                        <label form="opciones_cuadrillas" className='w-24'>Cuadrilla</label>
+                        <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                        <label htmlFor="opciones_cuadrillas" className='w-full sm:w-36'>Cuadrilla</label>
                         <select
                             name="opciones_cuadrillas"
                             id="opciones_cuadrillas"
-                            className='bg-[#b2b1b1] rounded-2xl w-72'
+                            className='bg-[#b2b1b1] rounded-2xl w-full sm:w-80 px-3 py-2'
                             value={selectedCrew}
                             onChange={(e) => {
                                 setSelectedCrew(e.target.value)
@@ -283,14 +291,14 @@ const CreateAssignments = () => {
                                 </option>
                             ))}
                         </select>
-                    </div>
+                        </div>
 
-                    <div className='flex gap-6 items-center'>
-                        <label form='opciones_reporte' className='w-24'>Reporte</label>
+                        <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                        <label htmlFor='opciones_reporte' className='w-full sm:w-36'>Reporte</label>
                         <select
                             name="opciones_reporte"
                             id="opciones_reporte"
-                            className='bg-[#b2b1b1] rounded-2xl w-32'
+                            className='bg-[#b2b1b1] rounded-2xl w-full sm:w-80 px-3 py-2'
                             required
                         >
                             <option value="">Seleccione</option>
@@ -302,14 +310,14 @@ const CreateAssignments = () => {
                                 </option>
                             ))}
                         </select>
-                    </div>
+                        </div>
 
-                    <div className='flex gap-6 items-center'>
-                        <label form='opciones_estados' className='w-24'>Estado</label>
+                        <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 sm:items-center'>
+                        <label htmlFor='opciones_estados' className='w-full sm:w-36'>Estado</label>
                         <select
                             name="opciones_estados"
                             id="opciones_estados"
-                            className='bg-[#b2b1b1] rounded-2xl w-32'
+                            className='bg-[#b2b1b1] rounded-2xl w-full sm:w-64 px-3 py-2'
                             required
                         >
                             <option value="">Seleccione</option>
@@ -317,19 +325,20 @@ const CreateAssignments = () => {
                                 <option key={idx} value={s.StateAs}>{s.StateAs}</option>
                             ))}
                         </select>
+                        </div>
                     </div>
-                </div>
 
-                <div className='flex flex-col gap-3 mr-16'>
-                    <button type="submit" className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-                        Aceptar
-                    </button>
+                    <div className='flex flex-col gap-3 w-full xl:w-auto'>
+                        <button type="submit" className="w-full xl:w-56 mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                            Aceptar
+                        </button>
 
-                    <button type="button" className="w-70 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+                        <button type="button" className="w-full xl:w-56 mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </SectionCard>
 
             {submitError ? <p className='mt-3 text-red-600'>{submitError}</p> : null}
 
@@ -342,7 +351,7 @@ const CreateAssignments = () => {
                 <h3 className='text-xl font-semibold'>Informacion de las cuadrillas</h3>
                 <SimpleTable columns={crewInfoColumns} data={crewInfo} />
             </div>
-        </div>
+        </section>
     )
 }
 export default CreateAssignments

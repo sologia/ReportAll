@@ -166,23 +166,23 @@ function RegisterPage() {
   }
 
   return (
-    <div className='h-screen w-full flex items-center justify-center bg-gray-100'>
+    <div className='min-h-screen w-full flex items-center justify-center bg-gray-100 px-4 py-6'>
       <div className='w-full max-w-xl bg-white rounded-2xl shadow-xl'>
-        <h2 className="text-3xl font-bold mb-6 mt-6 text-center">Registro</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 mt-6 text-center">Registro</h2>
 
         <div className='w-48 m-auto mb-5'>
-          <img src="/img/logoENACAL.png" />
+          <img src="/img/logoENACAL.png" alt="Logo ENACAL" className="w-full h-auto object-contain" />
         </div>
 
-        <form className="flex flex-col gap-4" onSubmit={registerSubmit} noValidate>
-          <div className="flex gap-4 m-auto">
+        <form className="flex flex-col gap-4 px-4 sm:px-8 pb-6" onSubmit={registerSubmit} noValidate>
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
             <input
               type="text"
               placeholder="Primer nombre"
               name='registerName'
               value={registerName}
               onChange={onRegisterInputChange}
-              className="p-3 border rounded-lg w-44"
+              className="p-3 border rounded-lg w-full"
               required
             />
 
@@ -192,7 +192,7 @@ function RegisterPage() {
               name='registerLastName'
               value={registerLastName}
               onChange={onRegisterInputChange}
-              className="p-3 border rounded-lg w-44"
+              className="p-3 border rounded-lg w-full"
               required
             />
           </div>
@@ -203,7 +203,7 @@ function RegisterPage() {
             name='registerNIC'
             value={registerNIC}
             onChange={onRegisterInputChange}
-            className="p-3 border rounded-lg w-90 m-auto"
+            className="p-3 border rounded-lg w-full"
             inputMode="numeric"
             pattern="[0-9]{6,10}"
             minLength={6}
@@ -217,7 +217,7 @@ function RegisterPage() {
             name='registerEmail'
             value={registerEmail}
             onChange={onRegisterInputChange}
-            className="p-3 border rounded-lg w-90 m-auto"
+            className="p-3 border rounded-lg w-full"
             required
           />
 
@@ -227,7 +227,7 @@ function RegisterPage() {
             name='registerPassword'
             value={registerPassword}
             onChange={onRegisterInputChange}
-            className="p-3 border rounded-lg w-90 m-auto"
+            className="p-3 border rounded-lg w-full"
             required
           />
 
@@ -237,7 +237,7 @@ function RegisterPage() {
             name='registerPassword2'
             value={registerPassword2}
             onChange={onRegisterInputChange}
-            className="p-3 border rounded-lg w-90 m-auto"
+            className="p-3 border rounded-lg w-full"
             required
           />
 
@@ -245,19 +245,19 @@ function RegisterPage() {
             name='registerRole'
             value={registerRole}
             onChange={onRegisterInputChange}
-            className="p-3 border rounded-lg w-90 m-auto"
+            className="p-3 border rounded-lg w-full"
           >
             <option value="cliente">Cliente</option>
           </select>
 
           <button
             type="submit"
-            className="w-90 m-auto bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
           >
             Crear cuenta
           </button>
 
-          <Link className='text-blue-700 m-auto mb-6' href="/auth/login">Volver a ingresar</Link>
+          <Link className='text-blue-700 text-center mb-1' href="/auth/login">Volver a ingresar</Link>
         </form>
       </div>
     </div>

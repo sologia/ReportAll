@@ -66,7 +66,7 @@ export default function MyMap({ onSelect, selectedPosition, autoSelectCurrentLoc
     <MapContainer
       center={position}
       zoom={20}
-      style={{ height: '100vh', width: '100%' }}
+      style={{ height: 'min(70vh, 34rem)', width: '100%' }}
       maxBounds={[
         [12.0, -86.35],
         [12.25, -86.15]

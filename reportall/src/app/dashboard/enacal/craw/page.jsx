@@ -3,6 +3,7 @@
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SearchBar from '@/app/components/SearchBar'
 import SimpleTable from '@/app/components/SimpleTable'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React, { useState, useEffect } from 'react'
 
 const CrawPage = () => {
@@ -27,7 +28,12 @@ const CrawPage = () => {
   }, []);
 
   return (
-    <div>
+    <section aria-label="Gestión de cuadrillas" className="w-full px-2 sm:px-4 pb-6">
+
+      {/* <PageHeaderCard
+        title="Cuadrillas"
+        description="Consulta, crea o modifica cuadrillas y revisa su estado actual."
+      /> */}
 
       <ButtonGroup
         buttons={[
@@ -51,7 +57,7 @@ const CrawPage = () => {
         <SimpleTable columns={columns} data={data} />
       </div>
 
-    </div>
+    </section>
   )
 }
 export default CrawPage
