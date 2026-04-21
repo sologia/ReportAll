@@ -69,24 +69,24 @@ function LoginPage() {
 
     return (
         <>
-            <div className='min-h-screen w-full flex items-center justify-center bg-gray-100 px-4 py-6'>
+            <div className='h-screen w-full flex items-center justify-center bg-gray-100'>
                 <div className='w-full max-w-xl bg-white rounded-2xl shadow-xl'>
 
                     <div className='bg-white'>
-                        <h2 className="text-2xl sm:text-3xl font-bold mb-6 mt-6 text-center">Iniciar Sesión</h2>
+                        <h2 className="text-3xl font-bold mb-6 mt-6 text-center">Iniciar Sesión</h2>
 
                         <div className='w-48 m-auto mb-5'>
-                            <img src="/img/logoENACAL.png" alt="Logo ENACAL" className="w-full h-auto object-contain" />
+                            <img src="/img/logoENACAL.png" />
                         </div>
 
-                        <form className="flex flex-col gap-4 px-4 sm:px-8 pb-6" onSubmit={loginSubmit} noValidate>
+                        <form className="flex flex-col gap-4" onSubmit={loginSubmit} noValidate>
                             <input
                                 type="email"
                                 placeholder="Correo electrónico"
                                 name='loginEmail'
                                 value={loginEmail}
                                 onChange={onLoginInputChange}
-                                className="p-3 border rounded-lg w-full"
+                                className="p-3 border rounded-lg w-90 m-auto"
                             />
                             <input
                                 type="password"
@@ -94,13 +94,13 @@ function LoginPage() {
                                 name='loginPassword'
                                 value={loginPassword}
                                 onChange={onLoginInputChange}
-                                className="p-3 border rounded-lg w-full"
+                                className="p-3 border rounded-lg w-90 m-auto"
                             />
                             <select
                                 name='loginRole'
                                 value={loginRole}
                                 onChange={onLoginInputChange}
-                                className="p-3 border rounded-lg w-full"
+                                className="p-3 border rounded-lg w-90 m-auto"
                             >
                                 <option value="cliente">Cliente</option>
                                 <option value="administrador">Administrador</option>
@@ -110,12 +110,12 @@ function LoginPage() {
                             </select>
                             <button
                                 type="submit"
-                                className="w-full mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                                className="w-90 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
                             >
                                 Entrar
                             </button>
 
-                            <Link className='text-blue-700 text-center mt-3' href="/auth/register">Crear cuenta</Link>
+                            <Link className='text-blue-700 m-auto mt-3' href="/auth/register">Crear cuenta</Link>
 
                         </form>
                     </div>

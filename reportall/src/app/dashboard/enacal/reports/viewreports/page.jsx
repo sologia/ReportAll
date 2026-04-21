@@ -1,6 +1,7 @@
 'use client'
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
+import StateBadge from '@/app/components/StateBadge'
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
@@ -290,6 +291,8 @@ const ViewReports = () => {
                           <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
                             {row[col.field] || 'Sin urgencia'}
                           </span>
+                        ) : col.field === 'State' ? (
+                          <StateBadge value={row[col.field]} />
                         ) : row[col.field]}
                       </td>
                     ))}

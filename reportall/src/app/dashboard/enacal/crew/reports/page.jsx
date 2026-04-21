@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import SimpleTable from '@/app/components/SimpleTable'
+import StateBadge from '@/app/components/StateBadge'
 import { buildSessionHeaders, getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
@@ -154,16 +155,19 @@ export default function CrewAssignedReportsPage() {
                   {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>{row.Assigment_ID}</td> : null}
                   {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>#{row.Report_ID}</td> : null}
                   <td className='py-3 px-4 text-sm text-gray-700'>
-                    <select
-                      className='rounded-md border px-2 py-1'
-                      value={selectedStates[row.Assigment_ID] || ''}
-                      onChange={(event) => onChangeState(row.Assigment_ID, event.target.value)}
-                    >
-                      <option value=''>Seleccione</option>
-                      {states.map((stateOption, idx) => (
-                        <option key={`${stateOption.StateAs}-${idx}`} value={stateOption.StateAs}>{stateOption.StateAs}</option>
-                      ))}
-                    </select>
+                    <div className='flex items-center gap-2'>
+                      <select
+                        className='rounded-md border px-2 py-1'
+                        value={selectedStates[row.Assigment_ID] || ''}
+                        onChange={(event) => onChangeState(row.Assigment_ID, event.target.value)}
+                      >
+                        <option value=''>Seleccione</option>
+                        {states.map((stateOption, idx) => (
+                          <option key={`${stateOption.StateAs}-${idx}`} value={stateOption.StateAs}>{stateOption.StateAs}</option>
+                        ))}
+                      </select>
+                      <StateBadge value={selectedStates[row.Assigment_ID] || row.State} />
+                    </div>
                   </td>
                   <td className='py-3 px-4 text-sm text-gray-700'>
                     <button

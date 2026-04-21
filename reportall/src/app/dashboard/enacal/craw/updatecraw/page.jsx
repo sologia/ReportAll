@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
 import PageHeaderCard from '@/app/components/PageHeaderCard';
 import SectionCard from '@/app/components/SectionCard';
+import StateBadge from '@/app/components/StateBadge';
 import Swal from 'sweetalert2';
 import { getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
@@ -332,7 +333,7 @@ const UpdateCraw = () => {
                   {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Num_Crew}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Name_Sector}</td>
-                  <td className="py-3 px-4 text-sm text-gray-700">{crew.Availability_Crew}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700"><StateBadge value={crew.Availability_Crew} /></td>
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Plate}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">
                     <button

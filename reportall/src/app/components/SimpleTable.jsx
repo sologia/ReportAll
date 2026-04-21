@@ -25,6 +25,26 @@ function isUrgencyColumn(column) {
   return field === 'urgency' || header.includes('urgencia');
 }
 
+function isStateColumn(column) {
+  const field = String(column?.field || '').toLowerCase();
+  const header = String(column?.header || '').toLowerCase();
+  return field.includes('state') || field.includes('availability') || header.includes('estado');
+}
+
+function getStateLabel(value) {
+  const text = String(value || '').trim();
+  return text || 'Sin estado';
+}
+
+function getStateClasses(value) {
+  const normalized = getStateLabel(value).toLowerCase();
+  if (normalized.includes('recibido')) return 'bg-sky-100 text-sky-700';
+  if (normalized.includes('proceso')) return 'bg-yellow-100 text-yellow-800';
+  if (normalized.includes('problema')) return 'bg-red-100 text-red-700';
+  if (normalized.includes('terminado')) return 'bg-green-100 text-green-700';
+  return 'bg-gray-100 text-gray-700';
+}
+
 export default function SimpleTable({ columns, data }) {
   const role = getSession()?.role;
   const showIds = canViewIds(role);
@@ -70,6 +90,10 @@ export default function SimpleTable({ columns, data }) {
                     {isUrgencyColumn(col) ? (
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
                         {row[col.field] || 'Sin urgencia'}
+                      </span>
+                    ) : isStateColumn(col) ? (
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStateClasses(row[col.field])}`}>
+                        {getStateLabel(row[col.field])}
                       </span>
                     ) : (
                       row[col.field]

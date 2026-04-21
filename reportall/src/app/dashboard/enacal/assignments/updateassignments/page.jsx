@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ButtonBack from '@/app/components/ButtonBack';
 import PageHeaderCard from '@/app/components/PageHeaderCard';
 import SectionCard from '@/app/components/SectionCard';
+import StateBadge from '@/app/components/StateBadge';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
@@ -372,7 +373,7 @@ const UpdateAssignments = () => {
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Name_Leader}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Num_Crew}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{showIds ? `#${assignment.Report_ID}` : (assignment.Report_Adress || 'Reporte asignado')}</td>
-                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.StateAs}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700"><StateBadge value={assignment.StateAs} /></td>
                   <td className="py-3 px-4 text-sm text-gray-700">
                     <button
                       type="button"
