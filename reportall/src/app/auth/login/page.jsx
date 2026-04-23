@@ -115,7 +115,7 @@ function LoginPage() {
                                 Entrar
                             </button>
 
-                            <Link className='text-blue-700 m-auto mt-3' href="/auth/register">Crear cuenta</Link>
+                            <Link className='text-blue-700 m-auto mt-3 px-3 py-2 rounded-md hover:bg-blue-50 transition' href="/auth/register">Crear cuenta</Link>
 
                         </form>
                     </div>

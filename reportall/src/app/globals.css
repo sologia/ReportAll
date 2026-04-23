@@ -14,6 +14,25 @@
   /* --foreground: #171717; */
 }
 
+/* Objetivo tactil minimo para controles interactivos en movil */
+@media (max-width: 767px) {
+  button,
+  input:not([type="hidden"]),
+  select,
+  textarea,
+  a[href] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Enlaces accionables con area tactil consistente en movil */
+  a[href] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /*
 @theme inline {
   --color-background: var(--background);

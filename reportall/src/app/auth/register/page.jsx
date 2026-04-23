@@ -257,7 +257,7 @@ function RegisterPage() {
             Crear cuenta
           </button>
 
-          <Link className='text-blue-700 m-auto mb-6' href="/auth/login">Volver a ingresar</Link>
+          <Link className='text-blue-700 m-auto mb-6 px-3 py-2 rounded-md hover:bg-blue-50 transition' href="/auth/login">Volver a ingresar</Link>
         </form>
       </div>
     </div>
