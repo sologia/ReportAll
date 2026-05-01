@@ -177,10 +177,24 @@ export default function ReportsStatisticsPage() {
     loadStats(reset)
   }
 
-  const topCrews = useMemo(() => {
+  const handleExportPdf = () => {
+    if (typeof window !== 'undefined' && window.print) {
+      window.print()
+    }
+  }
+
+  const crewRanking = useMemo(() => {
     const rows = stats?.crews?.ranking || []
-    return rows.slice(0, 10)
+    return [...rows]
+      .filter((crew) => crew.Assigned_Total > 0)
+      .sort((a, b) => {
+        const diff = (b.Assigned_Total || 0) - (a.Assigned_Total || 0)
+        if (diff !== 0) return diff
+        return String(a.Num_Crew || '').localeCompare(String(b.Num_Crew || ''), undefined, { numeric: true })
+      })
   }, [stats])
+
+  const topCrews = useMemo(() => crewRanking.slice(0, 10), [crewRanking])
 
   const overview = stats?.overview || {
     totalReports: 0,
@@ -222,14 +236,14 @@ export default function ReportsStatisticsPage() {
     ]
 
   return (
-    <div className='space-y-6'>
-      <ButtonGroup
-        buttons={navButtons}
-      />
+    <div id='reportStatisticsRoot' className='space-y-6'>
+      <div className='no-print'>
+        <ButtonGroup buttons={navButtons} />
+      </div>
 
       <h2 className='text-2xl font-semibold'>Estadísticas de Reportes y Cuadrillas</h2>
 
-      <form onSubmit={handleApplyFilters} className='flex flex-wrap gap-4 items-end'>
+      <form onSubmit={handleApplyFilters} className='flex flex-wrap gap-4 items-end no-print'>
         <div className='flex flex-col'>
           <label htmlFor='dateFrom'>Fecha desde</label>
           <input
@@ -281,78 +295,115 @@ export default function ReportsStatisticsPage() {
         >
           Limpiar
         </button>
+
+        <button
+          type='button'
+          onClick={handleExportPdf}
+          className='bg-green-600 text-white py-2 px-5 rounded-lg hover:bg-green-700 transition'
+        >
+          Exportar a PDF
+        </button>
       </form>
 
       {loading ? (
         <p>Cargando estadísticas...</p>
       ) : (
         <>
-          <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-5'>
-            <KpiCard title='Reportes totales' value={numberFormatter.format(overview.totalReports)} />
-            <KpiCard title='Reportes asignados' value={numberFormatter.format(overview.totalAssigned)} subtitle={`${overview.assignmentRate}% del total`} />
-            <KpiCard title='Reportes solucionados' value={numberFormatter.format(overview.totalSolved)} subtitle={`${overview.solvedRate}% del total`} />
-            <KpiCard title='Promedio asignadas por cuadrilla activa' value={crewAverages.avgAssigned} subtitle={`${crewAverages.activeCrews} cuadrillas activas`} />
-            <KpiCard title='Promedio solucionadas por cuadrilla activa' value={crewAverages.avgSolved} subtitle={`Efectividad promedio ${crewAverages.avgSolveRate}%`} />
-          </div>
+          <div>
+            <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-5'>
+              <KpiCard title='Reportes totales' value={numberFormatter.format(overview.totalReports)} />
+              <KpiCard title='Reportes asignados' value={numberFormatter.format(overview.totalAssigned)} subtitle={`${overview.assignmentRate}% del total`} />
+              <KpiCard title='Reportes solucionados' value={numberFormatter.format(overview.totalSolved)} subtitle={`${overview.solvedRate}% del total`} />
+              <KpiCard title='Promedio asignadas por cuadrilla activa' value={crewAverages.avgAssigned} subtitle={`${crewAverages.activeCrews} cuadrillas activas`} />
+              <KpiCard title='Promedio solucionadas por cuadrilla activa' value={crewAverages.avgSolved} subtitle={`Efectividad promedio ${crewAverages.avgSolveRate}%`} />
+            </div>
 
-          <div className='grid gap-4 xl:grid-cols-2'>
-            <DonutChart title='Distribución de reportes por estado' total={overview.totalReports} segments={donutSegments} />
-            <HorizontalBarChart
-              title='Top problemas más reportados'
-              data={problemData}
-            />
-          </div>
+            <div className='grid gap-4 xl:grid-cols-2'>
+              <DonutChart title='Distribución de reportes por estado' total={overview.totalReports} segments={donutSegments} />
+              <HorizontalBarChart
+                title='Top problemas más reportados'
+                data={problemData}
+              />
+            </div>
 
-          <div className='grid gap-4 xl:grid-cols-2'>
-            <HorizontalBarChart
-              title='Reportes por urgencia'
-              data={urgencyData}
-            />
-            <HorizontalBarChart
-              title='Top cuadrillas por asignaciones'
-              data={topCrews.map((crew) => ({
-                label: `Cuadrilla ${crew.Num_Crew}`,
-                value: crew.Assigned_Total,
-                solved: crew.Solved_Total,
-              }))}
-            />
-          </div>
+            <div className='grid gap-4 xl:grid-cols-2'>
+              <HorizontalBarChart
+                title='Reportes por urgencia'
+                data={urgencyData}
+              />
+              <HorizontalBarChart
+                title='Top cuadrillas por asignaciones'
+                data={topCrews.map((crew) => ({
+                  label: `Cuadrilla ${crew.Num_Crew}`,
+                  value: crew.Assigned_Total,
+                  solved: crew.Solved_Total,
+                }))}
+              />
+            </div>
 
-          <div className='rounded-xl border bg-white p-4 shadow-sm overflow-x-auto'>
-            <h3 className='font-semibold mb-3'>Detalle estadístico por cuadrilla</h3>
-            <table className='min-w-full border-collapse'>
-              <thead className='bg-blue-600 text-white'>
-                <tr>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Cuadrilla</th>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Distrito</th>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Asignadas</th>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Solucionadas</th>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Pendientes</th>
-                  <th className='py-3 px-4 text-left text-sm font-medium'>Tasa solución</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topCrews.length === 0 ? (
+            <div className='rounded-xl border bg-white p-4 shadow-sm overflow-x-auto'>
+              <h3 className='font-semibold mb-3'>Detalle estadístico por cuadrilla</h3>
+              <table className='min-w-full border-collapse'>
+                <thead className='bg-blue-600 text-white'>
                   <tr>
-                    <td colSpan={6} className='text-center py-4 text-gray-500'>No hay datos de cuadrillas con estos filtros.</td>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Cuadrilla</th>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Distrito</th>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Asignadas</th>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Solucionadas</th>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Pendientes</th>
+                    <th className='py-3 px-4 text-left text-sm font-medium'>Tasa solución</th>
                   </tr>
-                ) : (
-                  topCrews.map((crew) => (
-                    <tr key={crew.Crew_ID} className='border-b hover:bg-blue-50 transition'>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{crew.Num_Crew}</td>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{crew.District}</td>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Assigned_Total)}</td>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Solved_Total)}</td>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Pending_Total)}</td>
-                      <td className='py-3 px-4 text-sm text-gray-700'>{crew.Solve_Rate}%</td>
+                </thead>
+                <tbody>
+                  {crewRanking.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className='text-center py-4 text-gray-500'>No hay datos de cuadrillas con estos filtros.</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    crewRanking.map((crew) => (
+                      <tr key={crew.Crew_ID} className='border-b hover:bg-blue-50 transition'>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{crew.Num_Crew}</td>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{crew.District}</td>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Assigned_Total)}</td>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Solved_Total)}</td>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{numberFormatter.format(crew.Pending_Total)}</td>
+                        <td className='py-3 px-4 text-sm text-gray-700'>{crew.Solve_Rate}%</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
+
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+
+          #reportStatisticsRoot,
+          #reportStatisticsRoot * {
+            visibility: visible;
+          }
+
+          #reportStatisticsRoot {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
