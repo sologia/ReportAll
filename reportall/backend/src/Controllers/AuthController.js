@@ -11,7 +11,7 @@ const REFRESH_COOKIE_NAME = process.env.REFRESH_COOKIE_NAME || 'reportall_refres
 
 const activeRefreshTokenByUserId = new Map();
 
-function parseExpiresToSeconds(value) {
+export function parseExpiresToSeconds(value) {
   const normalized = String(value || '').trim().toLowerCase();
   if (!normalized) return 8 * 60 * 60;
 

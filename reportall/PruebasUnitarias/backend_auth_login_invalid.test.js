@@ -17,7 +17,10 @@ jest.mock('../backend/src/config/db.js', () => ({
   sql: mockSql
 }));
 
-const { login } = await import('../backend/src/Controllers/AuthController.js');
+let login;
+beforeAll(async () => {
+  ({ login } = await import('../backend/src/Controllers/AuthController.js'));
+});
 
 describe('AuthController - login', () => {
   let req, res, next;

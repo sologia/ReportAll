@@ -1,4 +1,4 @@
-const { getDefaultRouteByRole } = require('../src/lib/rbac');
+import { getDefaultRouteByRole } from '../src/lib/rbac';
 
 describe('rbac.js - getDefaultRouteByRole', () => {
   test('should return correct default route for each role', () => {

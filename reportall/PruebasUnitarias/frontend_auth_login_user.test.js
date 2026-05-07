@@ -1,4 +1,4 @@
-const { loginUser } = require('../src/lib/auth');
+import { loginUser } from '../src/lib/auth';
 
 global.fetch = jest.fn();
 

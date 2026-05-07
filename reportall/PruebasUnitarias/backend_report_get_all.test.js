@@ -14,7 +14,10 @@ jest.mock('../backend/src/config/db.js', () => ({
   }
 }));
 
-const { getAll } = await import('../backend/src/Controllers/ReportController.js');
+let getAll;
+beforeAll(async () => {
+  ({ getAll } = await import('../backend/src/Controllers/ReportController.js'));
+});
 
 describe('ReportController - getAll', () => {
   let req, res, next;

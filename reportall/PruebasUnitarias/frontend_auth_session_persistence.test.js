@@ -1,4 +1,4 @@
-const { getSession, setSession } = require('../src/lib/auth');
+import { getSession, setSession } from '../src/lib/auth';
 
 describe('auth.js - getSession & setSession', () => {
   beforeEach(() => {

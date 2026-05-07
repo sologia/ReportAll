@@ -15,7 +15,10 @@ jest.mock('../backend/src/config/db.js', () => ({
   sql: mockSql
 }));
 
-const { update } = await import('../backend/src/Controllers/ClientController.js');
+let update;
+beforeAll(async () => {
+  ({ update } = await import('../backend/src/Controllers/ClientController.js'));
+});
 
 describe('ClientController - update', () => {
   let req, res, next;

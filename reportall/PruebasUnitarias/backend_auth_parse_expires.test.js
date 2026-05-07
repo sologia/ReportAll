@@ -12,10 +12,13 @@ jest.mock('../backend/src/config/db.js', () => ({
     input: jest.fn().mockReturnThis(),
     execute: jest.fn()
   }),
-  sql: mockSql,
+  sql: mockSql
 }));
 
-const { parseExpiresToSeconds } = await import('../backend/src/Controllers/AuthController.js');
+let parseExpiresToSeconds;
+beforeAll(async () => {
+  ({ parseExpiresToSeconds } = await import('../backend/src/Controllers/AuthController.js'));
+});
 
 describe('AuthController - parseExpiresToSeconds', () => {
   test('should parse duration strings correctly', () => {
@@ -26,5 +29,6 @@ describe('AuthController - parseExpiresToSeconds', () => {
     expect(parseExpiresToSeconds('')).toBe(28800);
     expect(parseExpiresToSeconds('123')).toBe(123);
   });
+});
 
 

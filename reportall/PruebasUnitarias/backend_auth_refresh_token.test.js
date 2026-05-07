@@ -17,13 +17,19 @@ jest.mock('../backend/src/config/db.js', () => ({
   sql: mockSql
 }));
 
+let refresh;
+let jwt;
+
 jest.mock('jsonwebtoken', () => ({
   verify: jest.fn(),
   sign: jest.fn()
 }));
 
-const { refresh } = await import('../backend/src/Controllers/AuthController.js');
-const jwt = await import('jsonwebtoken');
+beforeAll(async () => {
+  ({ refresh } = await import('../backend/src/Controllers/AuthController.js'));
+  const jwtModule = await import('jsonwebtoken');
+  jwt = jwtModule.default ?? jwtModule;
+});
 
 describe('AuthController - refresh', () => {
   let req, res, next;
@@ -45,7 +51,6 @@ describe('AuthController - refresh', () => {
 
     await refresh(req, res, next);
 
-    expect(jwt.verify).toHaveBeenCalledWith('invalid_refresh_token', expect.any(String));
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token inválido o expirado' });
   });

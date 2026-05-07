@@ -15,7 +15,10 @@ jest.mock('../backend/src/config/db.js', () => ({
   sql: mockSql
 }));
 
-const { create } = await import('../backend/src/Controllers/CrewController.js');
+let create;
+beforeAll(async () => {
+  ({ create } = await import('../backend/src/Controllers/CrewController.js'));
+});
 
 describe('CrewController - create', () => {
   let req, res, next;

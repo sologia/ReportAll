@@ -1,4 +1,4 @@
-const { isPathAllowedForRole } = require('../src/lib/rbac');
+import { isPathAllowedForRole } from '../src/lib/rbac';
 
 describe('rbac.js - isPathAllowedForRole', () => {
   test('should verify access control for different roles and paths', () => {

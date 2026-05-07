@@ -1,4 +1,4 @@
-const { canViewIds } = require('../src/lib/rbac');
+import { canViewIds } from '../src/lib/rbac';
 
 describe('rbac.js - canViewIds', () => {
   test('should return true only for administrador role', () => {

@@ -17,7 +17,10 @@ jest.mock('../backend/src/config/db.js', () => ({
   sql: mockSql
 }));
 
-const { remove } = await import('../backend/src/Controllers/ClientController.js');
+let remove;
+beforeAll(async () => {
+  ({ remove } = await import('../backend/src/Controllers/ClientController.js'));
+});
 
 describe('ClientController - remove', () => {
   let req, res, next;
