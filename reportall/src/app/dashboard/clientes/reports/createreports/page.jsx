@@ -4,7 +4,7 @@ import ButtonBack from '@/app/components/ButtonBack'
 import MultiFileUpload from '@/app/components/MultiFileUpload';
 import { useForm } from '@/hooks/useForm';
 
-const MyMap = dynamic(() => import('@/app/page'), { ssr: false });
+const MyMap = dynamic(() => import('@/app/components/MyMapClient'), { ssr: false });
 
 
 const ReportFields = {

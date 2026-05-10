@@ -1,9 +1,5 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import dynamic from 'next/dynamic'
-
-const MyMapClient = dynamic(() => import('@/app/components/MyMapClient'), { ssr: false })
-
-export default function MyMap() {
-  return <MyMapClient />
+export default function HomePage() {
+  redirect('/auth/login')
 }

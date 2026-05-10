@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import ButtonBack from '@/app/components/ButtonBack'
 
-const MyMap = dynamic(() => import('@/app/page'), { ssr: false })
+const MyMap = dynamic(() => import('@/app/components/MyMapClient'), { ssr: false })
 
 const ViewReportClient = () => {
   return (
