@@ -2,11 +2,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const DB_AUTH = (process.env.DB_AUTH || 'sql').toLowerCase();
+const isWindowsPlatform = process.platform === 'win32';
 
-import msnodesqlv8 from 'mssql/msnodesqlv8.js';
 let sqlModule;
 if (DB_AUTH === 'windows') {
-  sqlModule = msnodesqlv8;
+  if (!isWindowsPlatform) {
+    throw new Error('DB_AUTH=windows solo es compatible en entornos Windows. Usa DB_AUTH=sql en Linux/macOS.');
+  }
+
+  sqlModule = await import('mssql/msnodesqlv8.js');
 } else {
   sqlModule = await import('mssql');
 }
