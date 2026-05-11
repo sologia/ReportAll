@@ -23,6 +23,8 @@ describe('dashboard/clientes/reports/viewreports/page.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    document.cookie = 'reportall_session=; Path=/; Max-Age=0';
+    document.cookie = 'reportall_token=; Path=/; Max-Age=0';
     global.fetch = jest.fn().mockResolvedValue({ json: async () => [] });
   });
 

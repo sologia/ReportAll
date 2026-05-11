@@ -48,7 +48,8 @@ function getStateClasses(value) {
 export default function SimpleTable({ columns, data }) {
   const role = getSession()?.role;
   const showIds = canViewIds(role);
-  const visibleColumns = showIds ? columns : columns.filter((column) => !isIdColumn(column));
+  const visibleColumns = (showIds ? columns : columns.filter((column) => !isIdColumn(column)))
+    .filter((column) => !(String(role || '').toLowerCase() === 'cliente' && isUrgencyColumn(column)));
 
   return (
     <div className="overflow-x-auto rounded-lg shadow-md mt-6 bg-white">

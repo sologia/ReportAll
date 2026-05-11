@@ -55,6 +55,11 @@ function MapController({ selectedPosition, currentLocation }) {
   return null
 }
 
+function formatCoordinates(position) {
+  if (!position || position.length !== 2) return 'N/D'
+  return `Lat: ${position[0]}, Lng: ${position[1]}`
+}
+
 export default function MyMap({ onSelect, selectedPosition, currentLocation }) {
   const [position] = useState([12.1364, -86.2514])
 
@@ -89,10 +94,26 @@ export default function MyMap({ onSelect, selectedPosition, currentLocation }) {
       <ClickHandler />
       {currentLocation && (
         <Marker position={currentLocation} icon={L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', shadowSize: [41, 41] })}>
-          <Popup>Mi ubicación actual</Popup>
+          <Popup>
+            <div className='text-sm'>
+              <p><strong>Tipo:</strong> Mi ubicación actual</p>
+              <p><strong>Coordenadas:</strong> {formatCoordinates(currentLocation)}</p>
+              <p><strong>Marcador:</strong> Azul</p>
+            </div>
+          </Popup>
         </Marker>
       )}
-      {selectedPosition && <Marker position={selectedPosition} icon={L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', shadowSize: [41, 41] })} />}
+      {selectedPosition && (
+        <Marker position={selectedPosition} icon={L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', shadowSize: [41, 41] })}>
+          <Popup>
+            <div className='text-sm'>
+              <p><strong>Tipo:</strong> Ubicación del problema</p>
+              <p><strong>Coordenadas:</strong> {formatCoordinates(selectedPosition)}</p>
+              <p><strong>Marcador:</strong> Rojo</p>
+            </div>
+          </Popup>
+        </Marker>
+      )}
     </MapContainer>
   )
 }

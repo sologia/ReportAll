@@ -21,7 +21,7 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('next/dynamic', () => () => {
   return function MockMap({ onSelect }) {
-    return <button onClick={() => onSelect([12.1, -86.2])}>mock-map-select</button>;
+    return <button type="button" onClick={() => onSelect([12.1, -86.2])}>mock-map-select</button>;
   };
 });
 
@@ -29,13 +29,15 @@ describe('dashboard/clientes/reports/createreports/page.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    document.cookie = 'reportall_session=; Path=/; Max-Age=0';
+    document.cookie = 'reportall_token=; Path=/; Max-Age=0';
     localStorage.setItem('reportall_session', JSON.stringify({ role: 'cliente', clientId: 10 }));
 
     global.fetch = jest
       .fn()
-      .mockResolvedValueOnce({ json: async () => [] })
+      .mockResolvedValueOnce({ ok: true, json: async () => [{ Name_Problem: 'Fuga' }] })
       .mockResolvedValueOnce({ ok: true, json: async () => [{ Name_Sector: 'Sector 1' }] })
-      .mockResolvedValueOnce({ ok: true, json: async () => [{ Name_Problem: 'Fuga' }] });
+      .mockResolvedValueOnce({ ok: true, json: async () => [] });
 
     Object.defineProperty(global, 'navigator', {
       value: {
@@ -54,7 +56,7 @@ describe('dashboard/clientes/reports/createreports/page.jsx', () => {
       expect(screen.getByRole('button', { name: 'Aceptar' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Aceptar' }));
+    fireEvent.submit(screen.getByRole('button', { name: 'Aceptar' }).closest('form'));
 
     await waitFor(() => {
       expect(Swal.fire).toHaveBeenCalledWith({
