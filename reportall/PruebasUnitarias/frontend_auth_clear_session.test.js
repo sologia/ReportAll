@@ -16,7 +16,17 @@ describe('auth.js - clearSession', () => {
 
     clearSession();
 
-    expect(document.cookie).toContain('reportall_token=;');
+    expect(document.cookie).not.toContain('reportall_session=test');
+    expect(document.cookie).not.toContain('reportall_token=test');
+    expect(localStorage.getItem('reportall_session')).toBeNull();
+  });
+
+  test('should be safe to call multiple times', () => {
+    clearSession();
+    clearSession();
+
+    expect(document.cookie).not.toContain('reportall_session=test');
+    expect(document.cookie).not.toContain('reportall_token=test');
     expect(localStorage.getItem('reportall_session')).toBeNull();
   });
 });

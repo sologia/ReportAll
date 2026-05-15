@@ -30,7 +30,7 @@ describe('ClientController - update', () => {
     mockPool.request.mockReset();
   });
 
-  test('should update client with partial fields, return 400 if no fields', async () => {
+  test('should update client with partial fields', async () => {
     const mockResult = { RowsAffected: 1 };
 
     const mockRequest = {
@@ -46,12 +46,46 @@ describe('ClientController - update', () => {
     expect(mockRequest.input).toHaveBeenCalledWith('FirstName', mockSql.NVarChar(100), 'NewName');
     expect(mockRequest.execute).toHaveBeenCalledWith('sp_Client_Update');
     expect(res.json).toHaveBeenCalledWith({ message: 'Updated successfully' });
+  });
 
+  test('should return 400 when no updatable fields are provided', async () => {
     req.body = {};
+
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn()
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
     await update(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ message: 'No updatable fields provided' });
+  });
+
+  test('should return 404 when the client does not exist', async () => {
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [{ RowsAffected: 0 }] })
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await update(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
+  });
+
+  test('should return 400 when the client id is invalid', async () => {
+    req.params.id = 'invalid';
+
+    await update(req, res, next);
+
+    expect(mockPool.request).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid id' });
   });
 });
 

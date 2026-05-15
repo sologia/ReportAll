@@ -50,5 +50,37 @@ describe('ReportController - getSummary', () => {
     expect(mockRequest.execute).toHaveBeenCalledWith('sp_Report_GetSummary');
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
+
+  test('should execute summary without filters and return an empty list', async () => {
+    req.query = {};
+
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [] })
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await getSummary(req, res, next);
+
+    expect(mockRequest.input).not.toHaveBeenCalled();
+    expect(mockRequest.execute).toHaveBeenCalledWith('sp_Report_GetSummary');
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  test('should call next when the summary query fails', async () => {
+    const dbError = new Error('summary failed');
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockRejectedValue(dbError)
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await getSummary(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+    expect(res.json).not.toHaveBeenCalled();
+  });
 });
 

@@ -43,6 +43,10 @@ describe('AuthController - refresh', () => {
     };
     next = jest.fn();
     mockPool.execute.mockReset();
+    mockPool.request.mockClear();
+    mockPool.input.mockClear();
+    jwt.verify.mockReset();
+    jwt.sign.mockReset();
   });
 
   test('should return 401 when refresh token is invalid or expired', async () => {
@@ -53,6 +57,27 @@ describe('AuthController - refresh', () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token inválido o expirado' });
+  });
+
+  test('should return 401 when refresh token cookie is missing', async () => {
+    req.header.mockReturnValue('');
+
+    await refresh(req, res, next);
+
+    expect(jwt.verify).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token requerido' });
+  });
+
+  test('should reject a malformed cookie token payload', async () => {
+    req.header.mockReturnValue('reportall_refresh=valid_refresh_token');
+    jwt.verify.mockReturnValue({ sub: '1', email: 'test@example.com', tokenId: 'token-1', type: 'refresh' });
+
+    await refresh(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token inválido o expirado' });
+    expect(mockPool.execute).not.toHaveBeenCalled();
   });
 });
 

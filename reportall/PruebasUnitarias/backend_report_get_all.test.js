@@ -41,5 +41,22 @@ describe('ReportController - getAll', () => {
     expect(mockPool.execute).toHaveBeenCalledWith('sp_SelectReport');
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
+
+  test('should return an empty array when there are no reports', async () => {
+    mockPool.execute.mockResolvedValue({ recordset: [] });
+
+    await getAll(req, res, next);
+
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  test('should call next when the reports query fails', async () => {
+    const dbError = new Error('report query failed');
+    mockPool.execute.mockRejectedValue(dbError);
+
+    await getAll(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+  });
 });
 

@@ -9,5 +9,10 @@ describe('rbac.js - getDefaultRouteByRole', () => {
     expect(getDefaultRouteByRole('lider_cuadrilla')).toBe('/dashboard/enacal/assignments');
     expect(getDefaultRouteByRole('trabajador')).toBe('/dashboard/enacal');
   });
+
+  test('should fallback to enacal route for unknown or empty roles', () => {
+    expect(getDefaultRouteByRole('desconocido')).toBe('/dashboard/enacal');
+    expect(getDefaultRouteByRole(null)).toBe('/dashboard/enacal');
+  });
 });
 

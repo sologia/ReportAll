@@ -7,5 +7,10 @@ describe('rbac.js - canViewIds', () => {
     expect(canViewIds('director_it')).toBe(false);
     expect(canViewIds('cuadrilla')).toBe(false);
   });
+
+  test('should normalize the role value before evaluating access', () => {
+    expect(canViewIds('  ADMINISTRADOR  ')).toBe(true);
+    expect(canViewIds(undefined)).toBe(false);
+  });
 });
 

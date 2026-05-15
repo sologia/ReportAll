@@ -43,5 +43,24 @@ describe('ClientController - remove', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
   });
+
+  test('should delete an existing client and return 204', async () => {
+    mockPool.execute.mockResolvedValue({ recordset: [{ RowsAffected: 1 }] });
+
+    await remove(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalled();
+  });
+
+  test('should return 400 when the client id is invalid', async () => {
+    req.params.id = 'abc';
+
+    await remove(req, res, next);
+
+    expect(mockPool.execute).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid id' });
+  });
 });
 

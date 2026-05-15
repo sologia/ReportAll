@@ -73,5 +73,44 @@ describe('AuthController - login', () => {
       })
     }));
   });
+
+  test('should call next when database lookup fails', async () => {
+    const dbError = new Error('db failure');
+    mockPool.execute.mockRejectedValue(dbError);
+
+    await login(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+    expect(res.json).not.toHaveBeenCalled();
+  });
+
+  test('should normalize the email before querying the database', async () => {
+    req.body.email = '  TEST@EXAMPLE.COM  ';
+
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.pbkdf2Sync('password', salt, 100000, 64, 'sha512').toString('hex');
+
+    mockPool.execute.mockResolvedValue({
+      recordset: [{
+        User_ID: 1,
+        Email: 'test@example.com',
+        Role: 'cliente',
+        Display_Name: 'Test User',
+        Client_ID: null,
+        Leader_Crew_ID: null,
+        Crew_ID: null,
+        Is_Active: true,
+        Password_Salt: salt,
+        Password_Hash: hash,
+      }],
+    });
+
+    await login(req, res, next);
+
+    expect(mockPool.input).toHaveBeenCalledWith('Email', mockSql.NVarChar(255), 'test@example.com');
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      user: expect.objectContaining({ email: 'test@example.com' }),
+    }));
+  });
 });
 

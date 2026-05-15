@@ -29,6 +29,13 @@ describe('AuthController - parseExpiresToSeconds', () => {
     expect(parseExpiresToSeconds('')).toBe(28800);
     expect(parseExpiresToSeconds('123')).toBe(123);
   });
+
+  test('should fallback to default duration for invalid values', () => {
+    expect(parseExpiresToSeconds('abc')).toBe(28800);
+    expect(parseExpiresToSeconds('8x')).toBe(28800);
+    expect(parseExpiresToSeconds('-15m')).toBe(28800);
+    expect(parseExpiresToSeconds(null)).toBe(28800);
+  });
 });
 
 

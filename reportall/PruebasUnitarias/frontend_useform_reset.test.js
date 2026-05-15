@@ -11,8 +11,15 @@ function ResetForm({ initialForm }) {
         onChange={onInputChange}
         placeholder="Email"
       />
+      <input
+        name="password"
+        value={formState.password}
+        onChange={onInputChange}
+        placeholder="Password"
+      />
       <button type="button" onClick={onResetForm}>Reset</button>
       <div data-testid="value">{formState.email}</div>
+      <div data-testid="password-value">{formState.password}</div>
     </>
   );
 }
@@ -26,6 +33,17 @@ describe('useForm Hook - onResetForm', () => {
     fireEvent.click(screen.getByText('Reset'));
 
     expect(screen.getByTestId('value').textContent).toBe('initial@example.com');
+  });
+
+  test('should restore every tracked field to its initial value', () => {
+    render(<ResetForm initialForm={{ email: 'initial@example.com', password: 'pass' }} />);
+
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { name: 'email', value: 'changed@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { name: 'password', value: 'new-pass' } });
+    fireEvent.click(screen.getByText('Reset'));
+
+    expect(screen.getByTestId('value').textContent).toBe('initial@example.com');
+    expect(screen.getByTestId('password-value').textContent).toBe('pass');
   });
 });
 

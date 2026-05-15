@@ -82,5 +82,67 @@ describe('ReportController - getStatistics', () => {
       })
     }));
   });
+
+  test('should return zeroed statistics when there are no reports or active crews', async () => {
+    req.query = {};
+
+    const mockReportRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [] })
+    };
+    const mockCrewRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [{ Crew_Name: 'Crew 0', Assigned_Total: 0, Solved_Total: 0 }] })
+    };
+
+    mockPool.request.mockReturnValueOnce(mockReportRequest).mockReturnValueOnce(mockCrewRequest);
+
+    await getStatistics(req, res, next);
+
+    expect(mockReportRequest.input).not.toHaveBeenCalled();
+    expect(mockCrewRequest.input).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      filtersApplied: {
+        dateFrom: null,
+        dateTo: null,
+        district: null,
+      },
+      overview: expect.objectContaining({
+        totalReports: 0,
+        totalAssigned: 0,
+        totalSolved: 0,
+        assignmentRate: 0,
+        solvedRate: 0,
+      }),
+      crews: expect.objectContaining({
+        averages: expect.objectContaining({
+          totalCrews: 1,
+          activeCrews: 0,
+          avgAssigned: 0,
+          avgSolved: 0,
+          avgSolveRate: 0,
+        })
+      })
+    }));
+  });
+
+  test('should call next when a statistics query fails', async () => {
+    const dbError = new Error('statistics failed');
+    const mockReportRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockRejectedValue(dbError)
+    };
+    const mockCrewRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn()
+    };
+
+    mockPool.request.mockReturnValueOnce(mockReportRequest).mockReturnValueOnce(mockCrewRequest);
+
+    await getStatistics(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+    expect(res.json).not.toHaveBeenCalled();
+  });
 });
 

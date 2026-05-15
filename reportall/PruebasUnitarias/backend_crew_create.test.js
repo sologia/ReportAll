@@ -50,5 +50,34 @@ describe('CrewController - create', () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockResult);
   });
+
+  test('should return an empty object when procedure returns no rows', async () => {
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [] })
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await create(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({});
+  });
+
+  test('should call next when the create procedure fails', async () => {
+    const dbError = new Error('crew create failed');
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockRejectedValue(dbError)
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await create(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+    expect(res.json).not.toHaveBeenCalled();
+  });
 });
 

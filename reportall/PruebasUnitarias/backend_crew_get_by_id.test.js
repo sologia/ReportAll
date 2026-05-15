@@ -49,5 +49,16 @@ describe('CrewController - getById', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
   });
+
+  test('should return the crew when a valid ID exists', async () => {
+    req.params.id = '5';
+    const crew = { Crew_ID: 5, Sector: 'Sector Norte' };
+    mockPool.execute.mockResolvedValue({ recordset: [crew] });
+
+    await getById(req, res, next);
+
+    expect(mockPool.input).toHaveBeenCalledWith('id', mockSql.Int, 5);
+    expect(res.json).toHaveBeenCalledWith(crew);
+  });
 });
 

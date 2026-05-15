@@ -5,6 +5,10 @@ global.fetch = jest.fn();
 describe('auth.js - loginUser', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: ''
+    });
   });
 
   test('should call backend, store session/token in cookies, return user session object', async () => {
@@ -27,7 +31,25 @@ describe('auth.js - loginUser', () => {
       body: JSON.stringify({ email: 'test@example.com', password: 'password' })
     }));
     expect(result).toEqual({ userId: 1, email: 'test@example.com', role: 'cliente' });
-    // Note: setSession and setAccessToken are called, but since they use document.cookie, need to mock document
+    expect(document.cookie).toContain('reportall_token=jwt_token');
+  });
+
+  test('should return null when backend responds with an error status', async () => {
+    fetch.mockResolvedValue({ ok: false, status: 401 });
+
+    const result = await loginUser({ email: 'bad@example.com', password: 'wrong' });
+
+    expect(result).toBeNull();
+    expect(document.cookie).toBe('');
+  });
+
+  test('should return null when the network request throws', async () => {
+    fetch.mockRejectedValue(new Error('network down'));
+
+    const result = await loginUser({ email: 'test@example.com', password: 'password' });
+
+    expect(result).toBeNull();
+    expect(document.cookie).toBe('');
   });
 });
 

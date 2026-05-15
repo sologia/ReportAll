@@ -45,5 +45,33 @@ describe('AuthController - login', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Credenciales inválidas' });
     expect(res.cookie).not.toHaveBeenCalled();
   });
+
+  test('should return 400 when email or password is missing', async () => {
+    req.body = { email: '', password: '' };
+
+    await login(req, res, next);
+
+    expect(mockPool.execute).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'email y password son requeridos' });
+  });
+
+  test('should return 401 when the user exists but is inactive', async () => {
+    mockPool.execute.mockResolvedValue({
+      recordset: [{
+        User_ID: 9,
+        Email: 'invalid@example.com',
+        Is_Active: false,
+        Password_Salt: 'salt',
+        Password_Hash: 'hash',
+      }],
+    });
+
+    await login(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Credenciales inválidas' });
+    expect(res.cookie).not.toHaveBeenCalled();
+  });
 });
 

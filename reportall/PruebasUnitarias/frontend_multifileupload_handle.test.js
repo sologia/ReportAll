@@ -23,5 +23,28 @@ describe('MultiFileUpload Component', () => {
       );
     });
   });
+
+  test('should render selected files and remove one from the list', async () => {
+    const fileA = new File(['a'], 'photo-a.png', { type: 'image/png' });
+    const fileB = new File(['b'], 'video-b.mp4', { type: 'video/mp4' });
+
+    const { container } = render(<MultiFileUpload onFilesSelect={jest.fn()} />);
+    const input = container.querySelector('input[type="file"]');
+
+    fireEvent.change(input, { target: { files: [fileA, fileB] } });
+
+    expect(await screen.findByText('2 archivo(s) seleccionado(s)')).toBeTruthy();
+    expect(screen.getByText('photo-a.png')).toBeTruthy();
+    expect(screen.getByText('video-b.mp4')).toBeTruthy();
+
+    const removeButtons = container.querySelectorAll('button[type="button"]');
+    fireEvent.click(removeButtons[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText('1 archivo(s) seleccionado(s)')).toBeTruthy();
+    });
+    expect(screen.queryByText('photo-a.png')).toBeNull();
+    expect(screen.getByText('video-b.mp4')).toBeTruthy();
+  });
 });
 

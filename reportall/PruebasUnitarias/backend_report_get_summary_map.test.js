@@ -48,5 +48,37 @@ describe('ReportController - getSummaryMap', () => {
     expect(mockRequest.execute).toHaveBeenCalledWith('sp_Report_GetSummaryMap');
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
+
+  test('should allow empty filters and return an empty collection', async () => {
+    req.query = {};
+
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: [] })
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await getSummaryMap(req, res, next);
+
+    expect(mockRequest.input).not.toHaveBeenCalled();
+    expect(mockRequest.execute).toHaveBeenCalledWith('sp_Report_GetSummaryMap');
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  test('should call next when the summary map query fails', async () => {
+    const dbError = new Error('summary map failed');
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockRejectedValue(dbError)
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await getSummaryMap(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(dbError);
+    expect(res.json).not.toHaveBeenCalled();
+  });
 });
 

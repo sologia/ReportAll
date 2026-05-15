@@ -54,5 +54,33 @@ describe('CrewController - getReportsByCrew', () => {
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({ message: 'No autorizado para consultar reportes de otra cuadrilla' });
   });
+
+  test('should allow non-crew roles to query another crew', async () => {
+    const mockRecords = [{ reportId: 10, title: 'Otro reporte' }];
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({ recordset: mockRecords })
+    };
+
+    req.params.id = '3';
+    req.auth = { role: 'administrador', crewId: 1 };
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await getReportsByCrew(req, res, next);
+
+    expect(mockRequest.input).toHaveBeenCalledWith('Crew_ID', mockSql.Int, 3);
+    expect(res.status).not.toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(mockRecords);
+  });
+
+  test('should return 400 when the crew id is invalid', async () => {
+    req.params.id = 'invalid';
+
+    await getReportsByCrew(req, res, next);
+
+    expect(mockPool.request).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid id' });
+  });
 });
 
