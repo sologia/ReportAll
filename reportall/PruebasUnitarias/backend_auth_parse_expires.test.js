@@ -21,7 +21,7 @@ beforeAll(async () => {
 });
 
 describe('AuthController - parseExpiresToSeconds', () => {
-  test('should parse duration strings correctly', () => {
+  test('debe interpretar correctamente las cadenas de duración', () => {
     expect(parseExpiresToSeconds('8h')).toBe(28800);
     expect(parseExpiresToSeconds('1d')).toBe(86400);
     expect(parseExpiresToSeconds('30m')).toBe(1800);
@@ -30,7 +30,7 @@ describe('AuthController - parseExpiresToSeconds', () => {
     expect(parseExpiresToSeconds('123')).toBe(123);
   });
 
-  test('should fallback to default duration for invalid values', () => {
+  test('debe usar la duración por defecto para valores inválidos', () => {
     expect(parseExpiresToSeconds('abc')).toBe(28800);
     expect(parseExpiresToSeconds('8x')).toBe(28800);
     expect(parseExpiresToSeconds('-15m')).toBe(28800);

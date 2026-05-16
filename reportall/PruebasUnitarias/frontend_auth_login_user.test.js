@@ -11,7 +11,7 @@ describe('auth.js - loginUser', () => {
     });
   });
 
-  test('should call backend, store session/token in cookies, return user session object', async () => {
+  test('debe llamar al backend, guardar sesión y token en cookies y devolver el objeto de sesión', async () => {
     const mockResponse = {
       ok: true,
       json: jest.fn().mockResolvedValue({
@@ -34,7 +34,7 @@ describe('auth.js - loginUser', () => {
     expect(document.cookie).toContain('reportall_token=jwt_token');
   });
 
-  test('should return null when backend responds with an error status', async () => {
+  test('debe devolver null cuando el backend responde con error', async () => {
     fetch.mockResolvedValue({ ok: false, status: 401 });
 
     const result = await loginUser({ email: 'bad@example.com', password: 'wrong' });
@@ -43,7 +43,7 @@ describe('auth.js - loginUser', () => {
     expect(document.cookie).toBe('');
   });
 
-  test('should return null when the network request throws', async () => {
+  test('debe devolver null cuando falla la petición de red', async () => {
     fetch.mockRejectedValue(new Error('network down'));
 
     const result = await loginUser({ email: 'test@example.com', password: 'password' });

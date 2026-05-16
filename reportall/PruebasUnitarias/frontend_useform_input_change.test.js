@@ -23,8 +23,8 @@ function TestForm({ initialForm }) {
   );
 }
 
-describe('useForm Hook - onInputChange', () => {
-  test('should update formState when onInputChange is called', () => {
+describe('Hook useForm - onInputChange', () => {
+  test('debe actualizar formState cuando se llama onInputChange', () => {
     render(<TestForm initialForm={{ email: '', password: '' }} />);
 
     const input = screen.getByPlaceholderText('Email');
@@ -33,7 +33,7 @@ describe('useForm Hook - onInputChange', () => {
     expect(screen.getByTestId('value').textContent).toBe('test@example.com');
   });
 
-  test('should preserve other fields when one input changes', () => {
+  test('debe conservar los otros campos cuando cambia un input', () => {
     render(<TestForm initialForm={{ email: 'initial@example.com', password: 'secret' }} />);
 
     const passwordInput = screen.getByPlaceholderText('Password');

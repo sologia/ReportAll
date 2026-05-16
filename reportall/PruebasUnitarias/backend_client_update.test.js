@@ -30,7 +30,7 @@ describe('ClientController - update', () => {
     mockPool.request.mockReset();
   });
 
-  test('should update client with partial fields', async () => {
+  test('debe actualizar un cliente con campos parciales', async () => {
     const mockResult = { RowsAffected: 1 };
 
     const mockRequest = {
@@ -48,7 +48,7 @@ describe('ClientController - update', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Updated successfully' });
   });
 
-  test('should return 400 when no updatable fields are provided', async () => {
+  test('debe devolver 400 cuando no se proporcionan campos actualizables', async () => {
     req.body = {};
 
     const mockRequest = {
@@ -64,7 +64,7 @@ describe('ClientController - update', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'No updatable fields provided' });
   });
 
-  test('should return 404 when the client does not exist', async () => {
+  test('debe devolver 404 cuando el cliente no existe', async () => {
     const mockRequest = {
       input: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({ recordset: [{ RowsAffected: 0 }] })
@@ -78,7 +78,7 @@ describe('ClientController - update', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
   });
 
-  test('should return 400 when the client id is invalid', async () => {
+  test('debe devolver 400 cuando el id del cliente es inválido', async () => {
     req.params.id = 'invalid';
 
     await update(req, res, next);

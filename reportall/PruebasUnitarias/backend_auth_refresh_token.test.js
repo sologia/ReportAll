@@ -49,7 +49,7 @@ describe('AuthController - refresh', () => {
     jwt.sign.mockReset();
   });
 
-  test('should return 401 when refresh token is invalid or expired', async () => {
+  test('debe devolver 401 cuando el refresh token es inválido o expiró', async () => {
     req.header.mockReturnValue('reportall_refresh=invalid_refresh_token');
     jwt.verify.mockImplementation(() => { throw new Error('invalid token'); });
 
@@ -59,7 +59,7 @@ describe('AuthController - refresh', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token inválido o expirado' });
   });
 
-  test('should return 401 when refresh token cookie is missing', async () => {
+  test('debe devolver 401 cuando falta la cookie del refresh token', async () => {
     req.header.mockReturnValue('');
 
     await refresh(req, res, next);
@@ -69,7 +69,7 @@ describe('AuthController - refresh', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token requerido' });
   });
 
-  test('should reject a malformed cookie token payload', async () => {
+  test('debe rechazar un payload de token mal formado en la cookie', async () => {
     req.header.mockReturnValue('reportall_refresh=valid_refresh_token');
     jwt.verify.mockReturnValue({ sub: '1', email: 'test@example.com', tokenId: 'token-1', type: 'refresh' });
 

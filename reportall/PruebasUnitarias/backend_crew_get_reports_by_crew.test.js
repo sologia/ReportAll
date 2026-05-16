@@ -30,7 +30,7 @@ describe('CrewController - getReportsByCrew', () => {
     mockPool.request.mockReset();
   });
 
-  test('should allow crew role to fetch their own crew reports, deny other crew', async () => {
+  test('debe permitir a la cuadrilla consultar sus propios reportes y negar otras cuadrillas', async () => {
     const mockRecords = [{ reportId: 1, title: 'Report' }];
 
     const mockRequest = {
@@ -55,7 +55,7 @@ describe('CrewController - getReportsByCrew', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'No autorizado para consultar reportes de otra cuadrilla' });
   });
 
-  test('should allow non-crew roles to query another crew', async () => {
+  test('debe permitir a roles no cuadrilla consultar otra cuadrilla', async () => {
     const mockRecords = [{ reportId: 10, title: 'Otro reporte' }];
     const mockRequest = {
       input: jest.fn().mockReturnThis(),
@@ -73,7 +73,7 @@ describe('CrewController - getReportsByCrew', () => {
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
 
-  test('should return 400 when the crew id is invalid', async () => {
+  test('debe devolver 400 cuando el id de la cuadrilla es inválido', async () => {
     req.params.id = 'invalid';
 
     await getReportsByCrew(req, res, next);

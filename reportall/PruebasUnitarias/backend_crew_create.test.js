@@ -30,7 +30,7 @@ describe('CrewController - create', () => {
     mockPool.request.mockReset();
   });
 
-  test('should create new crew and return 201 with result', async () => {
+  test('debe crear una nueva cuadrilla y devolver 201 con el resultado', async () => {
     const mockResult = { Crew_ID: 1, Name: 'New Crew' };
 
     const mockRequest = {
@@ -51,7 +51,7 @@ describe('CrewController - create', () => {
     expect(res.json).toHaveBeenCalledWith(mockResult);
   });
 
-  test('should return an empty object when procedure returns no rows', async () => {
+  test('debe devolver un objeto vacío cuando el procedimiento no retorna filas', async () => {
     const mockRequest = {
       input: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({ recordset: [] })
@@ -65,7 +65,7 @@ describe('CrewController - create', () => {
     expect(res.json).toHaveBeenCalledWith({});
   });
 
-  test('should call next when the create procedure fails', async () => {
+  test('debe llamar a next cuando falla el procedimiento de creación', async () => {
     const dbError = new Error('crew create failed');
     const mockRequest = {
       input: jest.fn().mockReturnThis(),

@@ -30,7 +30,7 @@ describe('ReportController - getAll', () => {
     mockPool.request.mockClear();
   });
 
-  test('should execute sp_SelectReport and return recordset', async () => {
+  test('debe ejecutar sp_SelectReport y devolver el recordset', async () => {
     const mockRecords = [{ id: 1, title: 'Report 1' }, { id: 2, title: 'Report 2' }];
 
     mockPool.execute.mockResolvedValue({ recordset: mockRecords });
@@ -42,7 +42,7 @@ describe('ReportController - getAll', () => {
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
 
-  test('should return an empty array when there are no reports', async () => {
+  test('debe devolver un arreglo vacío cuando no hay reportes', async () => {
     mockPool.execute.mockResolvedValue({ recordset: [] });
 
     await getAll(req, res, next);
@@ -50,7 +50,7 @@ describe('ReportController - getAll', () => {
     expect(res.json).toHaveBeenCalledWith([]);
   });
 
-  test('should call next when the reports query fails', async () => {
+  test('debe llamar a next cuando falla la consulta de reportes', async () => {
     const dbError = new Error('report query failed');
     mockPool.execute.mockRejectedValue(dbError);
 

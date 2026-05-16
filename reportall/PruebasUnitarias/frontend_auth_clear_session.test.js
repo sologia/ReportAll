@@ -9,7 +9,7 @@ describe('auth.js - clearSession', () => {
     localStorage.clear();
   });
 
-  test('should delete SESSION_KEY and TOKEN_KEY cookies, clear localStorage', () => {
+  test('debe eliminar las cookies SESSION_KEY y TOKEN_KEY y limpiar localStorage', () => {
     document.cookie = 'reportall_session=test; Path=/';
     document.cookie = 'reportall_token=test; Path=/';
     localStorage.setItem('reportall_session', 'legacy');
@@ -21,7 +21,7 @@ describe('auth.js - clearSession', () => {
     expect(localStorage.getItem('reportall_session')).toBeNull();
   });
 
-  test('should be safe to call multiple times', () => {
+  test('debe ser seguro llamarla varias veces', () => {
     clearSession();
     clearSession();
 

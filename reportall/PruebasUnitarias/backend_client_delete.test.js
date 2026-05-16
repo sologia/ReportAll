@@ -33,7 +33,7 @@ describe('ClientController - remove', () => {
     mockPool.execute.mockReset();
   });
 
-  test('should return 404 for non-existent client', async () => {
+  test('debe devolver 404 para un cliente inexistente', async () => {
     mockPool.execute.mockResolvedValue({ recordset: [] });
 
     await remove(req, res, next);
@@ -44,7 +44,7 @@ describe('ClientController - remove', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
   });
 
-  test('should delete an existing client and return 204', async () => {
+  test('debe eliminar un cliente existente y devolver 204', async () => {
     mockPool.execute.mockResolvedValue({ recordset: [{ RowsAffected: 1 }] });
 
     await remove(req, res, next);
@@ -53,7 +53,7 @@ describe('ClientController - remove', () => {
     expect(res.end).toHaveBeenCalled();
   });
 
-  test('should return 400 when the client id is invalid', async () => {
+  test('debe devolver 400 cuando el id del cliente es inválido', async () => {
     req.params.id = 'abc';
 
     await remove(req, res, next);

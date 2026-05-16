@@ -24,8 +24,8 @@ function ResetForm({ initialForm }) {
   );
 }
 
-describe('useForm Hook - onResetForm', () => {
-  test('should reset formState to initialForm values', () => {
+describe('Hook useForm - onResetForm', () => {
+  test('debe restablecer formState a los valores de initialForm', () => {
     render(<ResetForm initialForm={{ email: 'initial@example.com', password: 'pass' }} />);
 
     const input = screen.getByPlaceholderText('Email');
@@ -35,7 +35,7 @@ describe('useForm Hook - onResetForm', () => {
     expect(screen.getByTestId('value').textContent).toBe('initial@example.com');
   });
 
-  test('should restore every tracked field to its initial value', () => {
+  test('debe restaurar cada campo rastreado a su valor inicial', () => {
     render(<ResetForm initialForm={{ email: 'initial@example.com', password: 'pass' }} />);
 
     fireEvent.change(screen.getByPlaceholderText('Email'), { target: { name: 'email', value: 'changed@example.com' } });

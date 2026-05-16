@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import MultiFileUpload from '../src/app/components/MultiFileUpload';
 
-describe('MultiFileUpload Component', () => {
-  test('should accept multiple files, validate types, call onChange handler', async () => {
+describe('Componente MultiFileUpload', () => {
+  test('debe aceptar múltiples archivos, validar tipos y llamar al manejador onChange', async () => {
     const mockOnFilesSelect = jest.fn();
     const file = new File(['dummy content'], 'example.png', { type: 'image/png' });
 
@@ -24,7 +24,7 @@ describe('MultiFileUpload Component', () => {
     });
   });
 
-  test('should render selected files and remove one from the list', async () => {
+  test('debe renderizar los archivos seleccionados y eliminar uno de la lista', async () => {
     const fileA = new File(['a'], 'photo-a.png', { type: 'image/png' });
     const fileB = new File(['b'], 'video-b.mp4', { type: 'video/mp4' });
 

@@ -33,7 +33,7 @@ describe('CrewController - getById', () => {
     mockPool.execute.mockReset();
   });
 
-  test('should return 400 for non-numeric ID, 404 for non-existent ID', async () => {
+  test('debe devolver 400 para un id no numérico y 404 para un id inexistente', async () => {
     await getById(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
@@ -50,7 +50,7 @@ describe('CrewController - getById', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Not found' });
   });
 
-  test('should return the crew when a valid ID exists', async () => {
+  test('debe devolver la cuadrilla cuando existe un id válido', async () => {
     req.params.id = '5';
     const crew = { Crew_ID: 5, Sector: 'Sector Norte' };
     mockPool.execute.mockResolvedValue({ recordset: [crew] });

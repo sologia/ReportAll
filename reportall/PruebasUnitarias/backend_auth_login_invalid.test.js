@@ -36,7 +36,7 @@ describe('AuthController - login', () => {
     mockPool.execute.mockReset();
   });
 
-  test('should return 401 for invalid credentials', async () => {
+  test('debe devolver 401 para credenciales inválidas', async () => {
     mockPool.execute.mockResolvedValue({ recordset: [] });
 
     await login(req, res, next);
@@ -46,7 +46,7 @@ describe('AuthController - login', () => {
     expect(res.cookie).not.toHaveBeenCalled();
   });
 
-  test('should return 400 when email or password is missing', async () => {
+  test('debe devolver 400 cuando falta el correo o la contraseña', async () => {
     req.body = { email: '', password: '' };
 
     await login(req, res, next);
@@ -56,7 +56,7 @@ describe('AuthController - login', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'email y password son requeridos' });
   });
 
-  test('should return 401 when the user exists but is inactive', async () => {
+  test('debe devolver 401 cuando el usuario existe pero está inactivo', async () => {
     mockPool.execute.mockResolvedValue({
       recordset: [{
         User_ID: 9,

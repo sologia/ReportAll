@@ -30,7 +30,7 @@ describe('ReportController - getSummaryMap', () => {
     mockPool.request.mockReset();
   });
 
-  test('should retrieve geospatial data with filters for map visualization', async () => {
+  test('debe obtener datos geoespaciales con filtros para visualizar el mapa', async () => {
     const mockRecords = [{ lat: 10, lng: 20, count: 5 }];
 
     const mockRequest = {
@@ -49,7 +49,7 @@ describe('ReportController - getSummaryMap', () => {
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
 
-  test('should allow empty filters and return an empty collection', async () => {
+  test('debe permitir filtros vacíos y devolver una colección vacía', async () => {
     req.query = {};
 
     const mockRequest = {
@@ -66,7 +66,7 @@ describe('ReportController - getSummaryMap', () => {
     expect(res.json).toHaveBeenCalledWith([]);
   });
 
-  test('should call next when the summary map query fails', async () => {
+  test('debe llamar a next cuando falla la consulta del mapa de resumen', async () => {
     const dbError = new Error('summary map failed');
     const mockRequest = {
       input: jest.fn().mockReturnThis(),

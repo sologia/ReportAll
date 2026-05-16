@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import StateBadge from '../src/app/components/StateBadge';
 
-describe('StateBadge Component', () => {
-  test('should display correct color/text for different statuses', () => {
+describe('Componente StateBadge', () => {
+  test('debe mostrar el color y texto correctos para distintos estados', () => {
     const { rerender } = render(<StateBadge value="recibido" />);
     expect(screen.getByText('recibido')).toBeTruthy();
     expect(screen.getByText('recibido')).toHaveClass('bg-sky-100');
@@ -14,7 +14,7 @@ describe('StateBadge Component', () => {
     expect(screen.getByText('terminado')).toHaveClass('bg-green-100');
   });
 
-  test('should fallback to a neutral badge when the state is empty or unknown', () => {
+  test('debe usar una insignia neutra cuando el estado está vacío o es desconocido', () => {
     const { rerender } = render(<StateBadge value="" />);
 
     expect(screen.getByText('Sin estado')).toHaveClass('bg-gray-100');

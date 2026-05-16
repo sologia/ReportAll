@@ -39,7 +39,7 @@ describe('AuthController - login', () => {
     mockPool.input.mockClear();
   });
 
-  test('should return JWT and refresh token on successful login', async () => {
+  test('debe devolver JWT y refresh token en un inicio de sesión exitoso', async () => {
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = crypto.pbkdf2Sync('password', salt, 100000, 64, 'sha512').toString('hex');
 
@@ -74,7 +74,7 @@ describe('AuthController - login', () => {
     }));
   });
 
-  test('should call next when database lookup fails', async () => {
+  test('debe llamar a next cuando falla la consulta a la base de datos', async () => {
     const dbError = new Error('db failure');
     mockPool.execute.mockRejectedValue(dbError);
 
@@ -84,7 +84,7 @@ describe('AuthController - login', () => {
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  test('should normalize the email before querying the database', async () => {
+  test('debe normalizar el correo antes de consultar la base de datos', async () => {
     req.body.email = '  TEST@EXAMPLE.COM  ';
 
     const salt = crypto.randomBytes(16).toString('hex');

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import SimpleTable from '../src/app/components/SimpleTable';
 import { clearSession, setSession } from '../src/lib/auth';
 
-describe('SimpleTable Component', () => {
+describe('Componente SimpleTable', () => {
   beforeEach(() => {
     Object.defineProperty(document, 'cookie', {
       writable: true,
@@ -12,7 +12,7 @@ describe('SimpleTable Component', () => {
     clearSession();
   });
 
-  test('should render correct columns and rows, and show no-data message when empty', () => {
+  test('debe renderizar columnas y filas correctas y mostrar mensaje cuando no hay datos', () => {
     setSession({ role: 'administrador' });
 
     const columns = [
@@ -34,7 +34,7 @@ describe('SimpleTable Component', () => {
     expect(screen.getByText('No hay datos')).toBeTruthy();
   });
 
-  test('should hide ID and urgency columns for a cliente session', () => {
+  test('debe ocultar las columnas de ID y urgencia para una sesión de cliente', () => {
     setSession({ role: 'cliente' });
 
     render(

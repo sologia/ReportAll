@@ -1,7 +1,7 @@
 import { getDefaultRouteByRole } from '../src/lib/rbac';
 
 describe('rbac.js - getDefaultRouteByRole', () => {
-  test('should return correct default route for each role', () => {
+  test('debe devolver la ruta por defecto correcta para cada rol', () => {
     expect(getDefaultRouteByRole('cliente')).toBe('/dashboard/clientes');
     expect(getDefaultRouteByRole('administrador')).toBe('/dashboard/enacal');
     expect(getDefaultRouteByRole('director_it')).toBe('/dashboard/enacal/reports/summary');
@@ -10,7 +10,7 @@ describe('rbac.js - getDefaultRouteByRole', () => {
     expect(getDefaultRouteByRole('trabajador')).toBe('/dashboard/enacal');
   });
 
-  test('should fallback to enacal route for unknown or empty roles', () => {
+  test('debe usar la ruta de enacal para roles desconocidos o vacíos', () => {
     expect(getDefaultRouteByRole('desconocido')).toBe('/dashboard/enacal');
     expect(getDefaultRouteByRole(null)).toBe('/dashboard/enacal');
   });

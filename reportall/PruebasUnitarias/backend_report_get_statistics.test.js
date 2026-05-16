@@ -30,7 +30,7 @@ describe('ReportController - getStatistics', () => {
     mockPool.request.mockReset();
   });
 
-  test('should execute both sp_Report_GetStatisticsReports and crew stats SP, combine results', async () => {
+  test('debe ejecutar ambos procedimientos de estadísticas y combinar los resultados', async () => {
     const mockReports = [
       { State: 'State1', Urgency: 'High', Problem: 'Issue1', District: 'District1', IsAssigned: true, IsSolved: true },
       { State: 'State2', Urgency: 'Low', Problem: 'Issue2', District: 'District2', IsAssigned: false, IsSolved: false }
@@ -83,7 +83,7 @@ describe('ReportController - getStatistics', () => {
     }));
   });
 
-  test('should return zeroed statistics when there are no reports or active crews', async () => {
+  test('debe devolver estadísticas en cero cuando no hay reportes o cuadrillas activas', async () => {
     req.query = {};
 
     const mockReportRequest = {
@@ -126,7 +126,7 @@ describe('ReportController - getStatistics', () => {
     }));
   });
 
-  test('should call next when a statistics query fails', async () => {
+  test('debe llamar a next cuando falla una consulta de estadísticas', async () => {
     const dbError = new Error('statistics failed');
     const mockReportRequest = {
       input: jest.fn().mockReturnThis(),

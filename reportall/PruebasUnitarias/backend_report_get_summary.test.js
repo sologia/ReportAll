@@ -30,7 +30,7 @@ describe('ReportController - getSummary', () => {
     mockPool.request.mockReset();
   });
 
-  test('should pass query params to sp_Report_GetSummary', async () => {
+  test('debe enviar los parámetros de consulta a sp_Report_GetSummary', async () => {
     const mockRecords = [{ summary: 'data' }];
 
     const mockRequest = {
@@ -51,7 +51,7 @@ describe('ReportController - getSummary', () => {
     expect(res.json).toHaveBeenCalledWith(mockRecords);
   });
 
-  test('should execute summary without filters and return an empty list', async () => {
+  test('debe ejecutar el resumen sin filtros y devolver una lista vacía', async () => {
     req.query = {};
 
     const mockRequest = {
@@ -68,7 +68,7 @@ describe('ReportController - getSummary', () => {
     expect(res.json).toHaveBeenCalledWith([]);
   });
 
-  test('should call next when the summary query fails', async () => {
+  test('debe llamar a next cuando falla la consulta del resumen', async () => {
     const dbError = new Error('summary failed');
     const mockRequest = {
       input: jest.fn().mockReturnThis(),
