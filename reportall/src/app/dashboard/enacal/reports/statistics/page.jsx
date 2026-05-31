@@ -269,7 +269,7 @@ export default function ReportsStatisticsPage() {
         </div>
 
         <div className='flex flex-col'>
-          <label htmlFor='district'>Distrito</label>
+          <label htmlFor='district'>Sector</label>
           <select
             id='district'
             name='district'

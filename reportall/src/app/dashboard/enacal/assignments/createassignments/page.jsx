@@ -48,7 +48,7 @@ const CreateAssignments = () => {
         { header: 'Representante', field: 'Representative_Name' },
         { header: 'Numero Cuadrilla', field: 'Num_Crew' },
         { header: 'Disponibilidad', field: 'Availability_Crew' },
-        { header: 'Distrito', field: 'Name_Sector' },
+        { header: 'Sector', field: 'Name_Sector' },
         { header: 'Placa', field: 'Plate' },
     ]
 

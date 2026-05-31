@@ -1,7 +1,6 @@
 'use client'
 
 import ButtonGroup from '@/app/components/ButtonGroup '
-import SearchBar from '@/app/components/SearchBar'
 import SimpleTable from '@/app/components/SimpleTable'
 import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React, { useState, useEffect } from 'react'
@@ -44,9 +43,6 @@ const AssignmentsPage = () => {
           { label: "Menu", href: "/dashboard/enacal" },
         ]}
       /> */}
-
-      {/* <SearchBar /> */}
-
       {/* Tengo problemas con la page y que se muestren los botone */}
       <ButtonGroup
         buttons={[

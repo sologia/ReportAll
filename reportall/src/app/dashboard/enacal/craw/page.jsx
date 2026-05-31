@@ -1,7 +1,6 @@
 'use client'
 
 import ButtonGroup from '@/app/components/ButtonGroup '
-import SearchBar from '@/app/components/SearchBar'
 import SimpleTable from '@/app/components/SimpleTable'
 import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React, { useState, useEffect } from 'react'
@@ -43,8 +42,6 @@ const CrawPage = () => {
           { label: "Menu", href: "/dashboard/enacal" },
         ]}
       />
-
-      <SearchBar />
 
       <ButtonGroup
         buttons={[

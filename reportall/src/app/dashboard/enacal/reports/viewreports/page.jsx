@@ -22,7 +22,6 @@ const ViewReports = () => {
   const [savingReportId, setSavingReportId] = useState(null);
   const [filters, setFilters] = useState({
     district: '',
-    sector: '',
     date: '',
     state: '',
   });
@@ -45,7 +44,6 @@ const ViewReports = () => {
       const params = new URLSearchParams();
 
       if (activeFilters.district) params.append('district', activeFilters.district);
-      if (activeFilters.sector) params.append('sector', activeFilters.sector);
       if (activeFilters.date) params.append('date', activeFilters.date);
       if (activeFilters.state) params.append('state', activeFilters.state);
 
@@ -113,7 +111,7 @@ const ViewReports = () => {
   }
 
   const clearFilters = () => {
-    const reset = { district: '', sector: '', date: '', state: '' };
+    const reset = { district: '', date: '', state: '' };
     setFilters(reset);
     loadReports(reset);
   }
@@ -197,8 +195,8 @@ const ViewReports = () => {
       </div>
       
       <form onSubmit={handleFilter} className='flex flex-wrap gap-4 items-end mb-4'>
-        <div className='flex flex-col'>
-          <label htmlFor='district'>Distrito</label>
+        <div className='flex flex-col gap-1 ml-2'>
+          <label htmlFor='district'>Sector</label>
           <select
             id='district'
             name='district'
@@ -213,23 +211,7 @@ const ViewReports = () => {
           </select>
         </div>
 
-        <div className='flex flex-col'>
-          <label htmlFor='sector'>Sector</label>
-          <select
-            id='sector'
-            name='sector'
-            value={filters.sector}
-            onChange={handleChange}
-            className='bg-[#b2b1b1] rounded-2xl px-3 py-2'
-          >
-            <option value=''>Todos</option>
-            {sectors.map((item, idx) => (
-              <option key={`${item.Name_Sector}-sector-${idx}`} value={item.Name_Sector}>{item.Name_Sector}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className='flex flex-col'>
+        <div className='flex flex-col gap-1'>
           <label htmlFor='date'>Fecha</label>
           <input
             id='date'
@@ -241,7 +223,7 @@ const ViewReports = () => {
           />
         </div>
 
-        <div className='flex flex-col'>
+        <div className='flex flex-col gap-1'>
           <label htmlFor='state'>Estado de reporte</label>
           <select
             id='state'
