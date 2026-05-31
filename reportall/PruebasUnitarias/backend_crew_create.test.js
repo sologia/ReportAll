@@ -33,6 +33,7 @@ describe('CrewController - create', () => {
   test('debe crear una nueva cuadrilla, generar credenciales y devolver 201 con el resultado', async () => {
     const mockResult = { Crew_ID: 1, Name: 'New Crew' };
     const execute = jest.fn()
+      .mockResolvedValueOnce({ recordset: [] })
       .mockResolvedValueOnce({ recordset: [mockResult] })
       .mockResolvedValueOnce({ recordset: [] })
       .mockResolvedValueOnce({ recordset: [{ User_ID: 10, Email: 'cuadrilla.1@reportall.local' }] });
@@ -46,13 +47,10 @@ describe('CrewController - create', () => {
 
     await create(req, res, next);
 
-    expect(mockRequest.input).toHaveBeenCalledWith('Availability', mockSql.NVarChar(250), 'Available');
-    expect(mockRequest.input).toHaveBeenCalledWith('Sector', mockSql.NVarChar(250), 'Sector1');
-    expect(mockRequest.input).toHaveBeenCalledWith('Plate', mockSql.NVarChar(20), 'ABC123');
-    expect(mockRequest.input).toHaveBeenCalledWith('Num_Crew', mockSql.Int, 5);
-    expect(execute).toHaveBeenNthCalledWith(1, 'sp_InsertCrew');
-    expect(execute).toHaveBeenNthCalledWith(2, 'sp_Auth_GetUserByEmail');
-    expect(execute).toHaveBeenNthCalledWith(3, 'sp_Auth_CreateUser');
+    expect(execute).toHaveBeenNthCalledWith(1, 'sp_Auth_FindCrewByNumber');
+    expect(execute).toHaveBeenNthCalledWith(2, 'sp_InsertCrew');
+    expect(execute).toHaveBeenNthCalledWith(3, 'sp_Auth_GetUserByEmail');
+    expect(execute).toHaveBeenNthCalledWith(4, 'sp_Auth_CreateUser');
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       Crew_ID: 1,
@@ -68,6 +66,7 @@ describe('CrewController - create', () => {
   test('debe resolver el Crew_ID por número cuando el procedimiento no retorna filas', async () => {
     const execute = jest.fn()
       .mockResolvedValueOnce({ recordset: [] })
+      .mockResolvedValueOnce({ recordset: [] })
       .mockResolvedValueOnce({ recordset: [{ Crew_ID: 9 }] })
       .mockResolvedValueOnce({ recordset: [] })
       .mockResolvedValueOnce({ recordset: [{ User_ID: 22, Email: 'cuadrilla.9@reportall.local' }] });
@@ -82,7 +81,9 @@ describe('CrewController - create', () => {
     await create(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(execute).toHaveBeenNthCalledWith(2, 'sp_Auth_FindCrewByNumber');
+    expect(execute).toHaveBeenNthCalledWith(1, 'sp_Auth_FindCrewByNumber');
+    expect(execute).toHaveBeenNthCalledWith(2, 'sp_InsertCrew');
+    expect(execute).toHaveBeenNthCalledWith(3, 'sp_Auth_FindCrewByNumber');
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       access: expect.objectContaining({
         email: 'cuadrilla.9@reportall.local',
@@ -104,6 +105,24 @@ describe('CrewController - create', () => {
 
     expect(next).toHaveBeenCalledWith(dbError);
     expect(res.json).not.toHaveBeenCalled();
+  });
+
+  test('rechaza el alta cuando el número de cuadrilla ya existe', async () => {
+    const execute = jest.fn()
+      .mockResolvedValueOnce({ recordset: [{ Crew_ID: 3 }] });
+
+    const mockRequest = {
+      input: jest.fn().mockReturnThis(),
+      execute,
+    };
+
+    mockPool.request.mockReturnValue(mockRequest);
+
+    await create(req, res, next);
+
+    expect(execute).toHaveBeenCalledWith('sp_Auth_FindCrewByNumber');
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Ya existe una cuadrilla registrada con ese número' });
   });
 });
 

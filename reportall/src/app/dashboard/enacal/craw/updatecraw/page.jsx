@@ -107,6 +107,20 @@ const UpdateCraw = () => {
       return;
     }
 
+    const duplicateCrew = crews.find((crew) => (
+      Number(crew?.Num_Crew) === normalizedNumCrew && String(crew?.Crew_ID) !== String(selectedId)
+    ));
+
+    if (duplicateCrew) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Número duplicado',
+        text: 'Ya existe otra cuadrilla registrada con ese número.',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
     if (!formValues.Plate) {
       await Swal.fire({
         icon: 'warning',

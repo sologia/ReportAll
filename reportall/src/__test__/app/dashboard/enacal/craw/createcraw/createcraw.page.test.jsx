@@ -85,6 +85,55 @@ describe('dashboard/enacal/craw/createcraw/page.jsx', () => {
     });
   });
 
+  it('muestra advertencia cuando el número de cuadrilla ya existe', async () => {
+    global.fetch = jest.fn((url, options = {}) => {
+      const method = options.method || 'GET';
+
+      if (method === 'POST' && String(url).includes('/api/crews')) {
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+      }
+
+      if (String(url).includes('/api/vehicles')) {
+        return Promise.resolve({ json: async () => [{ Plate: 'MZ1234' }] });
+      }
+
+      if (String(url).includes('/api/sectors')) {
+        return Promise.resolve({ json: async () => [{ Name_Sector: 'Alejandro' }] });
+      }
+
+      if (String(url).includes('/api/crews')) {
+        return Promise.resolve({ json: async () => [{ Num_Crew: 12 }] });
+      }
+
+      return Promise.resolve({ json: async () => ({}) });
+    });
+
+    render(<CreateCraw />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'MZ1234' })).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '12' } });
+    fireEvent.change(screen.getByLabelText('Matrícula'), { target: { value: 'MZ1234' } });
+    fireEvent.change(screen.getByLabelText('Sector'), { target: { value: 'Alejandro' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Aceptar' }));
+
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith({
+        icon: 'warning',
+        title: 'Número duplicado',
+        text: 'Ya existe una cuadrilla registrada con ese número.',
+        confirmButtonText: 'Aceptar',
+      });
+    });
+
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining('/api/crews'),
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
+
   it('crea cuadrilla correctamente cuando los datos son válidos', async () => {
     render(<CreateCraw />);
 

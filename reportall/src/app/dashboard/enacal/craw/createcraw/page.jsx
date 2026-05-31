@@ -68,6 +68,17 @@ const CreateCraw = () => {
       return;
     }
 
+    const crewNumberExists = crews.some((crew) => Number(crew?.Num_Crew) === numCrewValue)
+    if (crewNumberExists) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Número duplicado',
+        text: 'Ya existe una cuadrilla registrada con ese número.',
+        confirmButtonText: 'Aceptar',
+      })
+      return
+    }
+
     if (!selectedPlate) {
       await Swal.fire({
         icon: 'warning',

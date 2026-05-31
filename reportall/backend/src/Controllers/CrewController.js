@@ -119,6 +119,11 @@ export async function create(req, res, next) {
         const { Availability, Sector, Plate, Num_Crew } = req.body;
         const pool = await poolPromise;
 
+        const existingCrewId = await findCrewIdByNumber(pool, Num_Crew);
+        if (existingCrewId) {
+            return res.status(409).json({ message: 'Ya existe una cuadrilla registrada con ese número' });
+        }
+
         const request = pool.request()
             .input('Availability', sql.NVarChar(250), Availability)
             .input('Sector', sql.NVarChar(250), Sector)
@@ -169,9 +174,16 @@ export async function update(req, res, next) {
         if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid id' });
 
         const { Availability, Sector, Plate, Num_Crew } = req.body;
-      
 
         const pool = await poolPromise;
+
+        if (Num_Crew !== undefined) {
+            const existingCrewId = await findCrewIdByNumber(pool, Num_Crew);
+            if (existingCrewId && existingCrewId !== id) {
+                return res.status(409).json({ message: 'Ya existe otra cuadrilla registrada con ese número' });
+            }
+        }
+
         const request = pool.request()
             .input('Crew_ID', sql.Int, id);
 
