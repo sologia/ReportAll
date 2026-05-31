@@ -4,6 +4,7 @@ import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
 import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React, { useState, useEffect } from 'react'
+import ButtonBack from '@/app/components/ButtonBack'
 
 const CrawPage = () => {
 
@@ -28,20 +29,12 @@ const CrawPage = () => {
 
   return (
     <section aria-label="Gestión de cuadrillas" className="w-full px-2 sm:px-4 pb-6">
+      <ButtonBack />
 
       {/* <PageHeaderCard
         title="Cuadrillas"
         description="Consulta, crea o modifica cuadrillas y revisa su estado actual."
       /> */}
-
-      <ButtonGroup
-        buttons={[
-          { label: "Resumen IT", href: "/dashboard/enacal/craw/report-summary" },
-          { label: "Reportes", href: "/dashboard/enacal/reports/viewreports" },
-          { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
-          { label: "Menu", href: "/dashboard/enacal" },
-        ]}
-      />
 
       <ButtonGroup
         buttons={[
