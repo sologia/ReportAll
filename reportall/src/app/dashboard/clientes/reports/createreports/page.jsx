@@ -16,7 +16,6 @@ const ReportFields = {
   tipoReporte: '',
   sector: '',
   direccion: '',
-  fecha: '',
 }
 
 const reportColumns = [
@@ -31,17 +30,19 @@ function getApiBase() {
   return process.env.NEXT_PUBLIC_API_URL || ''
 }
 
-function formatDateInputValue(date = new Date()) {
-  const offset = date.getTimezoneOffset()
-  const localDate = new Date(date.getTime() - offset * 60000)
-  return localDate.toISOString().slice(0, 10)
+function buildCurrentReportDateTime() {
+  return new Date().toISOString()
 }
 
 function normalizeReportRows(rows = []) {
   return rows.map((row) => ({
     ...row,
     Problem: row?.Problem || row?.Name_Problem || 'Sin problema',
-    Report_Date: row?.Report_Date ? String(row.Report_Date).slice(0, 10) : 'Sin fecha',
+    Report_Date: row?.Report_Date
+      ? String(row.Report_Date).slice(0, 10)
+      : row?.Date_Time
+        ? String(row.Date_Time).slice(0, 10)
+        : 'Sin fecha',
   }))
 }
 
@@ -64,13 +65,9 @@ const CreateReportClient = () => {
     tipoReporte,
     sector,
     direccion,
-    fecha,
     onInputChange: onReportInputChange,
     onResetForm,
-  } = useForm({
-    ...ReportFields,
-    fecha: formatDateInputValue(),
-  })
+  } = useForm(ReportFields)
 
   useEffect(() => {
     if (loadedRef.current) return
@@ -180,16 +177,6 @@ const CreateReportClient = () => {
       return
     }
 
-    if (!fecha) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Fecha requerida',
-        text: 'Debes seleccionar una fecha.',
-        confirmButtonText: 'Aceptar',
-      })
-      return
-    }
-
     if (!selectedPosition) {
       await Swal.fire({
         icon: 'warning',
@@ -219,7 +206,7 @@ const CreateReportClient = () => {
       body.append('Y', String(selectedPosition[0]))
       body.append('Adress', direccion.trim())
       body.append('Name_Sector', sector)
-      body.append('Date_Time', `${fecha}T00:00:00.000Z`)
+      body.append('Date_Time', buildCurrentReportDateTime())
       body.append('ClientID', String(session.clientId))
 
       if (files[0]?.file) {
@@ -327,18 +314,6 @@ const CreateReportClient = () => {
             />
           </div>
 
-          <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
-            <label className='w-46'>Fecha:</label>
-            <input
-              type='date'
-              name='fecha'
-              value={fecha}
-              onChange={onReportInputChange}
-              className='bg-[#b2b1b1] rounded-2xl w-full md:w-72 px-4 py-3'
-            />
-          </div>
-
-          
           <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
 
             <label className='w-46'>Subir imagenes/videos</label>

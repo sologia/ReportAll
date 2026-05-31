@@ -15,6 +15,8 @@ const TowExample = () => {
       { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
       { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
       { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
+      { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
+      { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
       { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     director_it: [
@@ -22,6 +24,8 @@ const TowExample = () => {
       { label: "Resumen cuadrillas", href: "/dashboard/enacal/craw/report-summary" },
       { label: "Mapa de Reportes", href: "/dashboard/enacal/reports/summary/map" },
       { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
+      { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
+      { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
       { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     cuadrilla: [
@@ -31,6 +35,8 @@ const TowExample = () => {
       { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
       { label: "Crear asignación", href: "/dashboard/enacal/assignments/createassignments" },
       { label: "Modificar estado", href: "/dashboard/enacal/assignments/updateassignments" },
+      { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
+      { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
     ],
   }
 

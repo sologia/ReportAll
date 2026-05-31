@@ -129,6 +129,10 @@ function hashPassword(password, saltHex) {
   return crypto.pbkdf2Sync(normalizedPassword, saltHex, 100000, 64, 'sha512').toString('hex');
 }
 
+function generateTemporaryPassword() {
+  return crypto.randomBytes(9).toString('base64url').slice(0, 12);
+}
+
 function verifyPassword(password, saltHex, expectedHash) {
   const computed = hashPassword(password, saltHex);
   return crypto.timingSafeEqual(Buffer.from(computed, 'hex'), Buffer.from(expectedHash, 'hex'));
@@ -269,6 +273,49 @@ export async function register(req, res, next) {
         leaderCrewId: created.Leader_Crew_ID,
         crewId: created.Crew_ID,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listCrewAccounts(req, res, next) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().execute('sp_Auth_GetCrewAccounts');
+    res.json(result.recordset || []);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetCrewPassword(req, res, next) {
+  try {
+    const userId = Number.parseInt(String(req.params.userId || ''), 10);
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Identificador de usuario inválido' });
+    }
+
+    const password = generateTemporaryPassword();
+    const saltHex = crypto.randomBytes(16).toString('hex');
+    const hashHex = hashPassword(password, saltHex);
+
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('User_ID', sql.Int, userId)
+      .input('Password_Hash', sql.NVarChar(256), hashHex)
+      .input('Password_Salt', sql.NVarChar(128), saltHex)
+      .execute('sp_Auth_UpdatePassword');
+
+    const updatedUser = result.recordset?.[0];
+    if (!updatedUser?.User_ID) {
+      return res.status(404).json({ message: 'Cuenta de cuadrilla no encontrada' });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      account: updatedUser,
+      password,
     });
   } catch (err) {
     next(err);

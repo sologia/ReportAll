@@ -17,7 +17,11 @@ describe('rbac.js - isPathAllowedForRole', () => {
   test('debe normalizar roles y permitir rutas exactas o por prefijo para roles especializados', () => {
     expect(isPathAllowedForRole('  DIRECTOR_IT  ', '/dashboard/enacal')).toBe(true);
     expect(isPathAllowedForRole('director_it', '/dashboard/enacal/reports/summary/map')).toBe(true);
+    expect(isPathAllowedForRole('director_it', '/dashboard/enacal/vehicles')).toBe(true);
+    expect(isPathAllowedForRole('director_it', '/dashboard/enacal/craw/accounts')).toBe(true);
     expect(isPathAllowedForRole('cuadrilla', '/dashboard/enacal/crew/reports/15')).toBe(true);
+    expect(isPathAllowedForRole('lider_cuadrilla', '/dashboard/enacal/vehicles')).toBe(true);
+    expect(isPathAllowedForRole('lider_cuadrilla', '/dashboard/enacal/craw/accounts')).toBe(true);
     expect(isPathAllowedForRole('lider_cuadrilla', '/dashboard/enacal/reports/summary')).toBe(false);
   });
 });

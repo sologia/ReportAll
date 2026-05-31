@@ -24,7 +24,7 @@ describe('dashboard/enacal/craw/createcraw/page.jsx', () => {
       const method = options.method || 'GET';
 
       if (method === 'POST' && String(url).includes('/api/crews')) {
-        return Promise.resolve({ ok: true, json: async () => ({ ok: true }) });
+        return Promise.resolve({ ok: true, json: async () => ({ ok: true, access: { email: 'cuadrilla.1@reportall.local', password: 'TmpPass1234' } }) });
       }
 
       if (String(url).includes('/api/vehicles')) {
@@ -89,7 +89,8 @@ describe('dashboard/enacal/craw/createcraw/page.jsx', () => {
     render(<CreateCraw />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Matrícula')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'MZ1234' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Alejandro' })).toBeInTheDocument();
     });
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '12' } });
@@ -98,16 +99,15 @@ describe('dashboard/enacal/craw/createcraw/page.jsx', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Aceptar' }));
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/crews'),
-        expect.objectContaining({ method: 'POST' })
-      );
-      expect(Swal.fire).toHaveBeenCalledWith({
+      expect(fetch.mock.calls.some(([url, options]) => (
+        String(url).includes('/api/crews') && options?.method === 'POST'
+      ))).toBe(true);
+      expect(Swal.fire).toHaveBeenCalledWith(expect.objectContaining({
         icon: 'success',
         title: 'Cuadrilla creada',
-        text: 'La cuadrilla se registró correctamente.',
+        html: expect.stringContaining('cuadrilla.1@reportall.local'),
         confirmButtonText: 'Aceptar',
-      });
+      }));
     });
   });
 });

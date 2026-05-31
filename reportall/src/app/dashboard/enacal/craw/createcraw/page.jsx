@@ -49,10 +49,14 @@ const CreateCraw = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = e.target;
-    const numCrewValue = parseInt(form.num_cuadrilla.value, 10);
-    const selectedPlate = form.opciones_vehiculos.value;
-    const selectedSector = form.opciones_sectores.value;
+    const form = e.currentTarget;
+    const numCrewField = form.elements.namedItem('num_cuadrilla');
+    const plateField = form.elements.namedItem('opciones_vehiculos');
+    const sectorField = form.elements.namedItem('opciones_sectores');
+
+    const numCrewValue = parseInt(numCrewField?.value || '', 10);
+    const selectedPlate = plateField?.value || '';
+    const selectedSector = sectorField?.value || '';
 
     if (!Number.isInteger(numCrewValue) || numCrewValue <= 0) {
       await Swal.fire({
@@ -103,12 +107,17 @@ const CreateCraw = () => {
         throw new Error(errorData.message || 'No se pudo crear la cuadrilla')
       }
 
+      const result = await response.json().catch(() => ({}))
+      const generatedAccess = result?.access
+
       form.reset()
       loadCrews();
       await Swal.fire({
         icon: 'success',
         title: 'Cuadrilla creada',
-        text: 'La cuadrilla se registró correctamente.',
+        html: generatedAccess?.email && generatedAccess?.password
+          ? `La cuadrilla se registró correctamente.<br><br><strong>Correo:</strong> ${generatedAccess.email}<br><strong>Contraseña:</strong> ${generatedAccess.password}`
+          : 'La cuadrilla se registró correctamente.',
         confirmButtonText: 'Aceptar',
       })
     } catch (err) {

@@ -50,6 +50,8 @@ const CrawPage = () => {
         buttons={[
           { label: "Crear", href: "/dashboard/enacal/craw/createcraw" },
           { label: "Modificar", href: "/dashboard/enacal/craw/updatecraw" },
+          { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
+          { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
         ]}
       />
 

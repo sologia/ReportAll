@@ -56,6 +56,8 @@ describe('dashboard/clientes/reports/createreports/page.jsx', () => {
       expect(screen.getByRole('button', { name: 'Aceptar' })).toBeInTheDocument();
     });
 
+    expect(screen.queryByLabelText('Fecha:')).not.toBeInTheDocument();
+
     fireEvent.submit(screen.getByRole('button', { name: 'Aceptar' }).closest('form'));
 
     await waitFor(() => {

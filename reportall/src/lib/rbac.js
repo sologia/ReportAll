@@ -25,6 +25,8 @@ const roleRules = {
       '/dashboard/enacal/reports/summary/map',
       '/dashboard/enacal/reports/statistics',
       '/dashboard/enacal/craw/report-summary',
+      '/dashboard/enacal/vehicles',
+      '/dashboard/enacal/craw/accounts',
     ],
   },
   [ROLES.CUADRILLA]: {
@@ -33,7 +35,11 @@ const roleRules = {
   },
   [ROLES.LIDER_CUADRILLA]: {
     exact: ['/dashboard/enacal'],
-    prefixes: ['/dashboard/enacal/assignments'],
+    prefixes: [
+      '/dashboard/enacal/assignments',
+      '/dashboard/enacal/vehicles',
+      '/dashboard/enacal/craw/accounts',
+    ],
   },
   [ROLES.TRABAJADOR]: {
     exact: [],

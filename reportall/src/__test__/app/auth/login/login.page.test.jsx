@@ -36,22 +36,20 @@ describe('LoginPage()', () => {
         expect(screen.getByPlaceholderText("Correo electrónico")).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Contraseña')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
+        expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     });
 
-    it('actualiza email, password y rol al escribir en el formulario', () => {
+    it('actualiza email y password al escribir en el formulario', () => {
         setup();
 
         const emailInput = screen.getByPlaceholderText('Correo electrónico');
         const passwordInput = screen.getByPlaceholderText('Contraseña');
-        const roleSelect = screen.getByRole('combobox');
 
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'password' } });
-        fireEvent.change(roleSelect, { target: { value: 'administrador' } });
 
         expect(emailInput).toHaveValue('test@example.com');
         expect(passwordInput).toHaveValue('password');
-        expect(roleSelect).toHaveValue('administrador');
     });
 
     it('muestra advertencia si faltan credenciales', async () => {
@@ -101,7 +99,7 @@ describe('LoginPage()', () => {
             expect(Swal.fire).toHaveBeenCalledWith({
                 icon: 'error',
                 title: 'Inicio de sesión fallido',
-                text: 'Credenciales inválidas o rol incorrecto.',
+                text: 'Credenciales inválidas.',
                 confirmButtonText: 'Entendido',
             });
         });
@@ -117,13 +115,12 @@ describe('LoginPage()', () => {
     ])('inicia sesión y redirecciona según rol %s', async (role, expectedRoute) => {
         fetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ role }),
+            json: async () => ({ user: { role } }),
         });
         setup();
 
         fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'user@test.com' } });
         fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: '123456' } });
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: role } });
 
         fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
@@ -131,6 +128,7 @@ describe('LoginPage()', () => {
             expect(fetch).toHaveBeenCalledWith('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email: 'user@test.com', password: '123456' }),
             });
             expect(Swal.fire).toHaveBeenCalledWith({

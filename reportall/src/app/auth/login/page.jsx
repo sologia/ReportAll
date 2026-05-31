@@ -9,15 +9,14 @@ import 'tailwindcss';
 
 const loginFormFields = {
     loginEmail: '',
-    loginPassword: '',
-    loginRole: 'cliente'
+    loginPassword: ''
 }
 
 function LoginPage() {
 
     const router = useRouter();
 
-    const { loginEmail, loginPassword, loginRole, onInputChange: onLoginInputChange } = useForm(loginFormFields);
+    const { loginEmail, loginPassword, onInputChange: onLoginInputChange } = useForm(loginFormFields);
 
     const loginSubmit = async (event) => {
         event.preventDefault();
@@ -44,13 +43,13 @@ function LoginPage() {
             return;
         }
 
-        const session = await loginUser({ email: normalizedEmail, password: loginPassword, role: loginRole });
+        const session = await loginUser({ email: normalizedEmail, password: loginPassword });
 
         if (!session) {
             await Swal.fire({
                 icon: 'error',
                 title: 'Inicio de sesión fallido',
-                text: 'Credenciales inválidas o rol incorrecto.',
+                text: 'Credenciales inválidas.',
                 confirmButtonText: 'Entendido',
             });
             return;
@@ -96,18 +95,6 @@ function LoginPage() {
                                 onChange={onLoginInputChange}
                                 className="p-3 border rounded-lg w-90 m-auto"
                             />
-                            <select
-                                name='loginRole'
-                                value={loginRole}
-                                onChange={onLoginInputChange}
-                                className="p-3 border rounded-lg w-90 m-auto"
-                            >
-                                <option value="cliente">Cliente</option>
-                                <option value="administrador">Administrador</option>
-                                <option value="director_it">Director IT</option>
-                                <option value="cuadrilla">Cuadrilla</option>
-                                <option value="lider_cuadrilla">Líder de cuadrilla</option>
-                            </select>
                             <button
                                 type="submit"
                                 className="w-90 m-auto mt-3 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"

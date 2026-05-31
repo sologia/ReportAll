@@ -75,9 +75,37 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT Plate
+    SELECT Vehicle_ID, Plate
     FROM dbo.Cat_Vehicles
     ORDER BY Plate ASC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Vehicle_Create
+    @Plate NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @NormalizedPlate NVARCHAR(20) = UPPER(LTRIM(RTRIM(@Plate)));
+
+    IF @NormalizedPlate IS NULL OR @NormalizedPlate = ''
+    BEGIN
+        THROW 50002, 'La matrícula es requerida', 1;
+    END;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Cat_Vehicles
+        WHERE UPPER(LTRIM(RTRIM(Plate))) = @NormalizedPlate
+    )
+    BEGIN
+        THROW 50003, 'La matrícula ya está registrada', 1;
+    END;
+
+    INSERT INTO dbo.Cat_Vehicles (Plate)
+    OUTPUT INSERTED.Vehicle_ID, INSERTED.Plate
+    VALUES (@NormalizedPlate);
 END;
 GO
 
@@ -682,6 +710,51 @@ BEGIN
     INSERT INTO dbo.Auth_Users (Email, Password_Hash, Password_Salt, [Role], Display_Name, Client_ID, Leader_Crew_ID, Crew_ID)
     OUTPUT INSERTED.User_ID, INSERTED.Email, INSERTED.[Role], INSERTED.Display_Name, INSERTED.Client_ID, INSERTED.Leader_Crew_ID, INSERTED.Crew_ID
     VALUES (@Email, @Password_Hash, @Password_Salt, @Role, @Display_Name, @Client_ID, @Leader_Crew_ID, @Crew_ID);
+END;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Auth_GetCrewAccounts
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.User_ID,
+        u.Email,
+        u.Display_Name,
+        u.Crew_ID,
+        c.Num_Crew,
+        u.Is_Active
+    FROM dbo.Auth_Users u
+    LEFT JOIN dbo.Crews c ON c.Crew_ID = u.Crew_ID
+    WHERE u.[Role] = 'cuadrilla'
+    ORDER BY c.Num_Crew ASC, u.Email ASC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Auth_UpdatePassword
+    @User_ID INT,
+    @Password_Hash NVARCHAR(256),
+    @Password_Salt NVARCHAR(128)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Auth_Users
+    SET Password_Hash = @Password_Hash,
+        Password_Salt = @Password_Salt
+    WHERE User_ID = @User_ID
+      AND [Role] = 'cuadrilla';
+
+    SELECT
+        User_ID,
+        Email,
+        Display_Name,
+        Crew_ID,
+        Is_Active
+    FROM dbo.Auth_Users
+    WHERE User_ID = @User_ID
+      AND [Role] = 'cuadrilla';
 END;
 GO
 

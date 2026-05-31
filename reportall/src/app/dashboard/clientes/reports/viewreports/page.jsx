@@ -23,7 +23,11 @@ function normalizeRows(rows = []) {
   return rows.map((row) => ({
     ...row,
     Problem: row?.Problem || row?.Name_Problem || 'Sin problema',
-    Report_Date: row?.Report_Date ? String(row.Report_Date).slice(0, 10) : 'Sin fecha',
+    Report_Date: row?.Report_Date
+      ? String(row.Report_Date).slice(0, 10)
+      : row?.Date_Time
+        ? String(row.Date_Time).slice(0, 10)
+        : 'Sin fecha',
   }))
 }
 

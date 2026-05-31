@@ -226,6 +226,7 @@ export async function create(req, res, next) {
         const { Name_Problem, Urgency, X, Y, Adress, Name_Sector, Date_Time, ClientID } = req.body;
         const pool = await poolPromise;
         const BINPhoto = req.file ? req.file.buffer : null;
+        const reportDate = Date_Time || new Date();
 
         const request = pool.request()
             .input('Name_Problem', sql.NVarChar(100), Name_Problem)
@@ -235,7 +236,7 @@ export async function create(req, res, next) {
             .input('BINPhoto', sql.VarBinary(sql.MAX), BINPhoto)
             .input('Adress', sql.NVarChar(200), Adress)
             .input('Name_Sector', sql.NVarChar(200), Name_Sector)
-            .input('Date_Time', sql.DateTime, Date_Time)
+            .input('Date_Time', sql.DateTime, reportDate)
             .input('ClientID', sql.Int, ClientID);
 
         const result = await request.execute('sp_InsertReport');

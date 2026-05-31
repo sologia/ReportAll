@@ -1,4 +1,41 @@
+import crypto from 'crypto';
 import { poolPromise, sql } from '../config/db.js';
+
+function hashPassword(password, saltHex) {
+    const normalizedPassword = String(password || '');
+    return crypto.pbkdf2Sync(normalizedPassword, saltHex, 100000, 64, 'sha512').toString('hex');
+}
+
+function generateTemporaryPassword() {
+    return crypto.randomBytes(9).toString('base64url').slice(0, 12);
+}
+
+async function findCrewIdByNumber(pool, numCrew) {
+    const result = await pool.request()
+        .input('Num_Crew', sql.Int, numCrew)
+        .execute('sp_Auth_FindCrewByNumber');
+
+    return result.recordset?.[0]?.Crew_ID || null;
+}
+
+async function resolveUniqueCrewEmail(pool, crewId) {
+    const candidates = [
+        `cuadrilla.${crewId}@reportall.local`,
+        `cuadrilla.${crewId}.${Date.now()}@reportall.local`,
+    ];
+
+    for (const candidate of candidates) {
+        const existingUserResult = await pool.request()
+            .input('Email', sql.NVarChar(255), candidate)
+            .execute('sp_Auth_GetUserByEmail');
+
+        if (!existingUserResult.recordset?.[0]?.User_ID) {
+            return candidate;
+        }
+    }
+
+    throw new Error('No se pudo generar un correo único para la cuadrilla');
+}
 
 // GET /api/crews
 export async function getAll(req, res, next) {
@@ -89,7 +126,37 @@ export async function create(req, res, next) {
             .input('Num_Crew', sql.Int, Num_Crew);
 
         const result = await request.execute('sp_InsertCrew');
-        res.status(201).json(result.recordset && result.recordset[0] ? result.recordset[0] : {});
+        const createdCrew = result.recordset?.[0] || {};
+        const crewId = createdCrew.Crew_ID || await findCrewIdByNumber(pool, Num_Crew);
+
+        if (!crewId) {
+            throw new Error('No se pudo identificar la cuadrilla recién creada para generar su acceso');
+        }
+
+        const email = await resolveUniqueCrewEmail(pool, crewId);
+        const password = generateTemporaryPassword();
+        const saltHex = crypto.randomBytes(16).toString('hex');
+        const hashHex = hashPassword(password, saltHex);
+
+        await pool.request()
+            .input('Email', sql.NVarChar(255), email)
+            .input('Password_Hash', sql.NVarChar(256), hashHex)
+            .input('Password_Salt', sql.NVarChar(128), saltHex)
+            .input('Role', sql.NVarChar(20), 'cuadrilla')
+            .input('Display_Name', sql.NVarChar(200), `Cuadrilla ${Num_Crew}`)
+            .input('Client_ID', sql.Int, null)
+            .input('Leader_Crew_ID', sql.Int, null)
+            .input('Crew_ID', sql.Int, crewId)
+            .execute('sp_Auth_CreateUser');
+
+        res.status(201).json({
+            ...createdCrew,
+            access: {
+                email,
+                password,
+                role: 'cuadrilla',
+            },
+        });
     } catch (err) {
         next(err);
     }
