@@ -1,7 +1,21 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "backend/**/*.js",
+    "frontend/**/*.js",
+    "frontend/**/*.jsx",
+    "PruebasUnitarias/**/*.js",
+    "*.js",
+    "*.mjs"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

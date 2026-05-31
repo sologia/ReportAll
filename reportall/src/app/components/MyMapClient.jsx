@@ -6,7 +6,7 @@ import { useLeafletContext } from '@react-leaflet/core'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-geosearch/dist/geosearch.css'
-import SearchBarControl from '../../../frontend/components/searchcontrol/search'
+import SearchBarControl from '@/app/components/SearchBarControl'
 
 function Square(props) {
   const context = useLeafletContext()

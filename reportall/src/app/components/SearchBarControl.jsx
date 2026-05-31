@@ -1,7 +1,8 @@
 'use client'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
+
 import { useEffect } from 'react'
+import { useMap } from 'react-leaflet'
+import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-geosearch/dist/geosearch.css'
 
@@ -19,7 +20,7 @@ function SearchBarControl() {
       autoClose: true,
       retainZoomLevel: false,
       animateZoom: true,
-      keepResult: true
+      keepResult: true,
     })
 
     map.addControl(searchControl)
@@ -30,4 +31,4 @@ function SearchBarControl() {
   return null
 }
 
-export default SearchBarControl;
+export default SearchBarControl
