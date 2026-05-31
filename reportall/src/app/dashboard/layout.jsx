@@ -71,7 +71,7 @@ function DashboardLayout({ children }) {
         <div className='border-[1.5] w-full min-h-[100px] flex flex-col sm:flex-row justify-between sm:items-center shadow-(--sombra1) mb-4 px-4 sm:px-0 py-3 sm:py-0 gap-3 sm:gap-0'>
 
           <div className='w-32 sm:w-40 sm:ml-9'>
-            <img src="/img/logoEnacal.png" alt="Logo Enacal" className="w-full h-auto object-contain" />
+            <img src="/img/logoENACAL.png" alt="Logo Enacal" className="w-full h-auto object-contain" />
           </div>
 
           <div className='w-full sm:w-auto sm:mr-9'>
