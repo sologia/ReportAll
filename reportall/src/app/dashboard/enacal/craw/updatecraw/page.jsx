@@ -4,9 +4,11 @@ import ButtonBack from '@/app/components/ButtonBack';
 import PageHeaderCard from '@/app/components/PageHeaderCard';
 import SectionCard from '@/app/components/SectionCard';
 import StateBadge from '@/app/components/StateBadge';
+import TablePaginationControls from '@/app/components/TablePaginationControls';
 import Swal from 'sweetalert2';
 import { getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
+import { useTablePagination } from '@/hooks/useTablePagination';
 
 const UpdateCraw = () => {
   const role = normalizeRole(getSession()?.role);
@@ -24,6 +26,17 @@ const UpdateCraw = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(crews);
 
   const base = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -342,7 +355,7 @@ const UpdateCraw = () => {
                 <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
-              crews.map((crew) => (
+              paginatedRows.map((crew) => (
                 <tr key={crew.Crew_ID} className="border-b hover:bg-blue-50 transition">
                   {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Num_Crew}</td>
@@ -363,6 +376,16 @@ const UpdateCraw = () => {
             )}
           </tbody>
         </table>
+        <TablePaginationControls
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </section>
   );

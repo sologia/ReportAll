@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import ButtonGroup from '@/app/components/ButtonGroup '
+import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
+import { useTablePagination } from '@/hooks/useTablePagination'
 
 const CrewReportSummaryPage = () => {
   const role = normalizeRole(getSession()?.role)
@@ -18,6 +20,17 @@ const CrewReportSummaryPage = () => {
     dateFrom: '',
     dateTo: '',
   })
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(data)
 
   const loadSummary = async (activeFilters = filters) => {
     try {
@@ -182,7 +195,7 @@ const CrewReportSummaryPage = () => {
                 <td colSpan={showIds ? 5 : 4} className='text-center py-4 text-gray-500'>No hay datos</td>
               </tr>
             ) : (
-              data.map((row) => (
+              paginatedRows.map((row) => (
                 <tr key={row.Crew_ID} className='border-b hover:bg-blue-50 transition'>
                   {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>{row.Crew_ID}</td> : null}
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.Num_Crew}</td>
@@ -201,6 +214,16 @@ const CrewReportSummaryPage = () => {
             )}
           </tbody>
         </table>
+        <TablePaginationControls
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   )

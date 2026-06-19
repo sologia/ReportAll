@@ -4,9 +4,11 @@ import ButtonBack from '@/app/components/ButtonBack';
 import PageHeaderCard from '@/app/components/PageHeaderCard';
 import SectionCard from '@/app/components/SectionCard';
 import StateBadge from '@/app/components/StateBadge';
+import TablePaginationControls from '@/app/components/TablePaginationControls';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
+import { useTablePagination } from '@/hooks/useTablePagination';
 
 const UpdateAssignments = () => {
   const role = normalizeRole(getSession()?.role);
@@ -27,6 +29,17 @@ const UpdateAssignments = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const base = process.env.NEXT_PUBLIC_API_URL || '';
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(assignments);
 
   const loadAssignments = () => {
     fetch(`${base}/api/assignments`)
@@ -367,7 +380,7 @@ const UpdateAssignments = () => {
                 <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
-              assignments.map((assignment) => (
+              paginatedRows.map((assignment) => (
                 <tr key={assignment.Assigment_ID} className="border-b hover:bg-blue-50 transition">
                   {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{assignment.Assigment_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Name_Leader}</td>
@@ -388,6 +401,16 @@ const UpdateAssignments = () => {
             )}
           </tbody>
         </table>
+        <TablePaginationControls
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </section>
   );

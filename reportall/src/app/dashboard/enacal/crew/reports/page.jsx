@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import SimpleTable from '@/app/components/SimpleTable'
 import StateBadge from '@/app/components/StateBadge'
+import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { buildSessionHeaders, getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
+import { useTablePagination } from '@/hooks/useTablePagination'
 
 const columns = [
   { header: 'Asignación ID', field: 'Assigment_ID' },
@@ -26,6 +28,17 @@ export default function CrewAssignedReportsPage() {
   const [states, setStates] = useState([])
   const [selectedStates, setSelectedStates] = useState({})
   const [loading, setLoading] = useState(false)
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(reports)
 
   const base = process.env.NEXT_PUBLIC_API_URL || ''
 
@@ -150,7 +163,7 @@ export default function CrewAssignedReportsPage() {
                 <td colSpan={showIds ? 4 : 2} className='text-center py-4 text-gray-500'>No tienes reportes asignados.</td>
               </tr>
             ) : (
-              reports.map((row) => (
+              paginatedRows.map((row) => (
                 <tr key={row.Assigment_ID} className='border-b hover:bg-blue-50 transition'>
                   {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>{row.Assigment_ID}</td> : null}
                   {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>#{row.Report_ID}</td> : null}
@@ -183,6 +196,16 @@ export default function CrewAssignedReportsPage() {
             )}
           </tbody>
         </table>
+        <TablePaginationControls
+          totalItems={totalItems}
+          startItem={startItem}
+          endItem={endItem}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   )

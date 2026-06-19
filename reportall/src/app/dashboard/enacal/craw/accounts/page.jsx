@@ -5,6 +5,8 @@ import ButtonBack from '@/app/components/ButtonBack'
 import PageHeaderCard from '@/app/components/PageHeaderCard'
 import SectionCard from '@/app/components/SectionCard'
 import { buildSessionHeaders } from '@/lib/auth'
+import TablePaginationControls from '@/app/components/TablePaginationControls'
+import { useTablePagination } from '@/hooks/useTablePagination'
 
 const CrewAccountsPage = () => {
   const [accounts, setAccounts] = useState([])
@@ -12,6 +14,17 @@ const CrewAccountsPage = () => {
   const [loading, setLoading] = useState(true)
   const [busyUserId, setBusyUserId] = useState(null)
   const base = process.env.NEXT_PUBLIC_API_URL || ''
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(accounts)
 
   const loadAccounts = async () => {
     const response = await fetch(`${base}/api/auth/crew-accounts`, {
@@ -90,7 +103,7 @@ const CrewAccountsPage = () => {
                   <td colSpan={6} className='text-center py-4 text-gray-500'>No hay cuentas de cuadrillas</td>
                 </tr>
               ) : (
-                accounts.map((account) => (
+                  paginatedRows.map((account) => (
                   <tr key={account.User_ID} className='border-b hover:bg-blue-50 transition'>
                     <td className='py-3 px-4 text-sm text-gray-700'>{account.Num_Crew || 'Sin número'}</td>
                     <td className='py-3 px-4 text-sm text-gray-700'>{account.Display_Name || 'Sin nombre'}</td>
@@ -118,6 +131,16 @@ const CrewAccountsPage = () => {
               )}
             </tbody>
           </table>
+          <TablePaginationControls
+            totalItems={totalItems}
+            startItem={startItem}
+            endItem={endItem}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageSizeChange={handlePageSizeChange}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </SectionCard>
     </section>

@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import ButtonGroup from '@/app/components/ButtonGroup '
+import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { getSession } from '@/lib/auth'
 import { normalizeRole } from '@/lib/rbac'
+import { useTablePagination } from '@/hooks/useTablePagination'
 
 const numberFormatter = new Intl.NumberFormat('es-NI')
 
@@ -195,6 +197,17 @@ export default function ReportsStatisticsPage() {
   }, [stats])
 
   const topCrews = useMemo(() => crewRanking.slice(0, 10), [crewRanking])
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(crewRanking)
 
   const overview = stats?.overview || {
     totalReports: 0,
@@ -360,7 +373,7 @@ export default function ReportsStatisticsPage() {
                       <td colSpan={6} className='text-center py-4 text-gray-500'>No hay datos de cuadrillas con estos filtros.</td>
                     </tr>
                   ) : (
-                    crewRanking.map((crew) => (
+                    paginatedRows.map((crew) => (
                       <tr key={crew.Crew_ID} className='border-b hover:bg-blue-50 transition'>
                         <td className='py-3 px-4 text-sm text-gray-700'>{crew.Num_Crew}</td>
                         <td className='py-3 px-4 text-sm text-gray-700'>{crew.District}</td>
@@ -373,6 +386,16 @@ export default function ReportsStatisticsPage() {
                   )}
                 </tbody>
               </table>
+              <TablePaginationControls
+                totalItems={totalItems}
+                startItem={startItem}
+                endItem={endItem}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                onPageSizeChange={handlePageSizeChange}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </div>
         </>

@@ -4,6 +4,8 @@
 import React from "react";
 import { getSession } from "@/lib/auth";
 import { canViewIds } from "@/lib/rbac";
+import { useTablePagination } from "@/hooks/useTablePagination";
+import TablePaginationControls from "@/app/components/TablePaginationControls";
 
 function isIdColumn(column) {
   const field = String(column?.field || '').toLowerCase();
@@ -50,6 +52,17 @@ export default function SimpleTable({ columns, data }) {
   const showIds = canViewIds(role);
   const visibleColumns = (showIds ? columns : columns.filter((column) => !isIdColumn(column)))
     .filter((column) => !(String(role || '').toLowerCase() === 'cliente' && isUrgencyColumn(column)));
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(data);
 
   return (
     <div className="overflow-x-auto rounded-lg shadow-md mt-6 bg-white">
@@ -78,7 +91,7 @@ export default function SimpleTable({ columns, data }) {
               </td>
             </tr>
           ) : (
-            data.map((row, index) => (
+            paginatedRows.map((row, index) => (
               <tr
                 key={index}
                 className="border-b hover:bg-blue-50 transition"
@@ -106,6 +119,16 @@ export default function SimpleTable({ columns, data }) {
           )}
         </tbody>
       </table>
+      <TablePaginationControls
+        totalItems={totalItems}
+        startItem={startItem}
+        endItem={endItem}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

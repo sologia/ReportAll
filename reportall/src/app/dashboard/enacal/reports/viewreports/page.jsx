@@ -2,10 +2,12 @@
 import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
 import StateBadge from '@/app/components/StateBadge'
+import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
 import { canViewIds, normalizeRole } from '@/lib/rbac';
+import { useTablePagination } from '@/hooks/useTablePagination';
 
 
 
@@ -27,6 +29,17 @@ const ViewReports = () => {
   });
   const [loading, setLoading] = useState(false);
   const base = process.env.NEXT_PUBLIC_API_URL || '';
+  const {
+    paginatedRows,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    startItem,
+    endItem,
+    handlePageSizeChange,
+    setCurrentPage,
+  } = useTablePagination(data);
 
   const columns = [
     { header: "ID", field: "Report_ID" },
@@ -265,7 +278,7 @@ const ViewReports = () => {
                   <tr>
                     <td colSpan={columns.length + 1} className="text-center py-4 text-gray-500">No hay datos</td>
                   </tr>
-                ) : data.map((row) => (
+                ) : paginatedRows.map((row) => (
                   <tr key={row.Report_ID} className="border-b hover:bg-blue-50 transition">
                     {columns.map((col, index) => (
                       <td key={index} className="py-3 px-4 text-sm text-gray-700">
@@ -304,6 +317,16 @@ const ViewReports = () => {
                 ))}
               </tbody>
             </table>
+            <TablePaginationControls
+              totalItems={totalItems}
+              startItem={startItem}
+              endItem={endItem}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageSizeChange={handlePageSizeChange}
+              onPageChange={setCurrentPage}
+            />
           </div>
         ) : <SimpleTable columns={ columns } data={data}/>}
       </div>
