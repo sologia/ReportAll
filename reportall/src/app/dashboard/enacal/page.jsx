@@ -17,7 +17,7 @@ const TowExample = () => {
       { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
       { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
       { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
-      { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
+      // { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     director_it: [
       { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
@@ -26,7 +26,7 @@ const TowExample = () => {
       { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
       { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
       { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
-      { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
+      // { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
     cuadrilla: [
       { label: "Mis reportes asignados", href: "/dashboard/enacal/crew/reports" },
