@@ -35,22 +35,31 @@ function DashboardLayout({ children }) {
     router.replace('/auth/login');
   }
 
-  // convertir ruta → nombre bonito
+  // convertir ruta -> nombre visible en la barra superior
   const getLabel = () => {
-    if (pathname.includes("/dashboard/enacal/reports/viewreports"))
-      return "Reportes";
+    const routeLabels = [
+      { path: "/dashboard/enacal/reports/summary/map", label: "Mapa de reportes" },
+      { path: "/dashboard/enacal/reports/statistics", label: "Estadisticas" },
+      { path: "/dashboard/enacal/reports/summary", label: "Resumen IT" },
+      { path: "/dashboard/enacal/reports/viewreports", label: "Reportes" },
+      { path: "/dashboard/enacal/craw/report-summary", label: "Resumen por cuadrilla" },
+      { path: "/dashboard/enacal/craw/accounts", label: "Accesos de cuadrillas" },
+      { path: "/dashboard/enacal/craw/createcraw", label: "Crear cuadrilla" },
+      { path: "/dashboard/enacal/craw/updatecraw", label: "Editar cuadrilla" },
+      { path: "/dashboard/enacal/craw", label: "Cuadrillas" },
+      { path: "/dashboard/enacal/assignments/createassignments", label: "Crear asignacion" },
+      { path: "/dashboard/enacal/assignments/updateassignments", label: "Actualizar asignacion" },
+      { path: "/dashboard/enacal/assignments", label: "Asignaciones" },
+      { path: "/dashboard/enacal/crew/reports", label: "Mis reportes asignados" },
+      { path: "/dashboard/enacal/vehicles", label: "Matriculas" },
+      { path: "/dashboard/clientes/reports/createreports", label: "Crear reporte" },
+      { path: "/dashboard/clientes/reports/viewreports", label: "Mis reportes" },
+      { path: "/dashboard/clientes", label: "Panel de cliente" },
+      { path: "/dashboard/enacal", label: "Menu principal" },
+    ];
 
-    if (pathname.includes("/dashboard/enacal/assignments"))
-      return "Asignaciones";
-
-    if (pathname.includes("/dashboard/enacal/craw"))
-      return "Cuadrillas";
-    if (pathname.includes("/dashboard/enacal/crew/reports"))
-      return "Mis Reportes Asignados";
-    if (pathname.includes("/dashboard/enacal/path"))
-      return "Path";
-
-    return "Menu Principal"; // default
+    const match = routeLabels.find((route) => pathname.includes(route.path));
+    return match?.label || "Menu principal";
   };
 
   const getStyle = () => {

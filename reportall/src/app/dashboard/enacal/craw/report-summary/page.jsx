@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import ButtonBack from '@/app/components/ButtonBack'
 import TablePaginationControls from '@/app/components/TablePaginationControls'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 import { useTablePagination } from '@/hooks/useTablePagination'
@@ -89,7 +90,10 @@ const CrewReportSummaryPage = () => {
     <div>
       <ButtonBack />
 
-      <h2 className='text-2xl font-semibold mb-4'>Resumen de Reportes Atendidos por Cuadrilla</h2>
+      <PageHeaderCard
+        title='Resumen de Reportes Atendidos por Cuadrilla'
+        description='Visualiza un resumen detallado de los reportes atendidos por cada cuadrilla.'
+      />
 
       <form onSubmit={handleFilter} className='flex flex-wrap gap-4 items-end'>
         <div className='flex flex-col'>

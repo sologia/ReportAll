@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import ButtonBack from '@/app/components/ButtonBack'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
@@ -36,7 +37,10 @@ const SummaryMapPage = () => {
     <div>
       <ButtonBack />
 
-      <h2 className='text-2xl font-semibold mb-4'>Mapa de Reportes (Director IT)</h2>
+      <PageHeaderCard
+        title='Mapa de Reportes'
+        description='Visualización geográfica de todos los reportes registrados.'
+      />
 
       {loading ? (
         <p>Cargando mapa de reportes...</p>

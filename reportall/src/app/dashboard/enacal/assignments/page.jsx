@@ -30,10 +30,10 @@ const AssignmentsPage = () => {
     <section aria-label="Gestión de asignaciones" className="w-full px-2 sm:px-4 pb-6">
       <ButtonBack />
 
-      {/* <PageHeaderCard
-        title="Asignaciones"
-        description="Gestiona las asignaciones de reportes para cada cuadrilla."
-      /> */}
+      <PageHeaderCard
+        title="Gestión de Asignaciones"
+        description="Visualiza y gestiona las asignaciones de reportes para cada cuadrilla."
+      />
 
       {/* <ButtonGroup
         buttons={[

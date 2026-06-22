@@ -5,6 +5,7 @@ import Swal from 'sweetalert2'
 import SimpleTable from '@/app/components/SimpleTable'
 import StateBadge from '@/app/components/StateBadge'
 import TablePaginationControls from '@/app/components/TablePaginationControls'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import { buildSessionHeaders, getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 import { useTablePagination } from '@/hooks/useTablePagination'
@@ -141,7 +142,10 @@ export default function CrewAssignedReportsPage() {
 
   return (
     <div className='space-y-6'>
-      <h2 className='text-2xl font-semibold'>Mis reportes asignados</h2>
+      <PageHeaderCard
+        title='Mis Reportes Asignados'
+        description='Visualiza los reportes que te han sido asignados y su estado.'
+      />
       {loading ? <p>Cargando reportes...</p> : <SimpleTable columns={columns} data={reports} />}
 
       <div className='rounded-xl border bg-white p-4 shadow-sm overflow-x-auto'>

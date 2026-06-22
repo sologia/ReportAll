@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import ButtonBack from '@/app/components/ButtonBack'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import SimpleTable from '@/app/components/SimpleTable'
 import Swal from 'sweetalert2'
 import { useRouter } from 'next/navigation'
@@ -85,8 +86,12 @@ const ViewReportClient = () => {
     <div className='rounded-2xl'>
       <ButtonBack />
 
+      <PageHeaderCard
+        title='Mis Reportes'
+        description='Visualiza el estado de tus reportes registrados en el sistema.'
+      />
+
       <div className='rounded-2xl w-full p-3 md:p-6'>
-        <h1 className='text-2xl md:text-3xl font-semibold mb-6'>Mis reportes y estados</h1>
         {loading ? <p>Cargando reportes...</p> : <SimpleTable columns={columns} data={reports} />}
       </div>
 

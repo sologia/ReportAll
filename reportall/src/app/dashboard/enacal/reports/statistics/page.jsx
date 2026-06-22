@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import ButtonBack from '@/app/components/ButtonBack'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { useTablePagination } from '@/hooks/useTablePagination'
 
@@ -237,7 +238,10 @@ export default function ReportsStatisticsPage() {
         <ButtonBack />
       </div>
 
-      <h2 className='text-2xl font-semibold'>Estadísticas de Reportes y Cuadrillas</h2>
+      <PageHeaderCard
+        title='Estadísticas de Reportes y Cuadrillas'
+        description='Visualiza análisis y estadísticas detalladas de todos los reportes y cuadrillas.'
+      />
 
       <form onSubmit={handleApplyFilters} className='flex flex-wrap gap-4 items-end no-print'>
         <div className='flex flex-col'>

@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import SimpleTable from '@/app/components/SimpleTable'
 import ButtonBack from '@/app/components/ButtonBack'
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
@@ -85,7 +86,10 @@ const SummaryReportsPage = () => {
     <div>
       <ButtonBack />
 
-      <h2 className='text-2xl font-semibold mb-4'>Resumen General de Reportes (Director IT)</h2>
+      <PageHeaderCard
+        title='Resumen General de Reportes'
+        description='Análisis consolidado de todos los reportes en el sistema.'
+      />
 
       <form onSubmit={handleFilter} className='flex flex-wrap gap-4 items-end'>
         <div className='flex flex-col'>

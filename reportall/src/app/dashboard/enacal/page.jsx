@@ -1,6 +1,7 @@
 "use client"
 
 import ButtonGroup from '@/app/components/ButtonGroup '
+import PageHeaderCard from '@/app/components/PageHeaderCard'
 import React from 'react'
 import { getSession } from '@/lib/auth'
 import { normalizeRole } from '@/lib/rbac'
@@ -44,10 +45,10 @@ const TowExample = () => {
 
   return (
     <div className='space-y-6'>
-      <section className='rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-[0_8px_20px_rgba(15,23,42,0.06)]'>
-        <h2 className='text-2xl sm:text-3xl font-bold text-slate-900'>Acciones principales</h2>
-        <p className='mt-2 text-slate-600'>Selecciona una opcion para continuar. Las rutas disponibles dependen de tu rol.</p>
-      </section>
+      <PageHeaderCard
+        title='Menú Principal'
+        description='Selecciona una opción para continuar. Las rutas disponibles dependen de tu rol.'
+      />
 
       <ButtonGroup
         containerClass="md:grid-cols-2"

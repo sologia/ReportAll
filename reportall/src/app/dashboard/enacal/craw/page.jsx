@@ -31,10 +31,10 @@ const CrawPage = () => {
     <section aria-label="Gestión de cuadrillas" className="w-full px-2 sm:px-4 pb-6">
       <ButtonBack />
 
-      {/* <PageHeaderCard
-        title="Cuadrillas"
+      <PageHeaderCard
+        title="Gestión de Cuadrillas"
         description="Consulta, crea o modifica cuadrillas y revisa su estado actual."
-      /> */}
+      />
 
       <ButtonGroup
         buttons={[
