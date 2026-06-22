@@ -20,8 +20,6 @@ const CrewReportsDetailPage = () => {
   const [dateFilter, setDateFilter] = useState('')
 
   const columns = [
-    { header: 'Asignación ID', field: 'Assigment_ID' },
-    { header: 'Reporte ID', field: 'Report_ID' },
     { header: 'Problema', field: 'Name_Problem' },
     { header: 'Urgencia', field: 'Urgency' },
     { header: 'Dirección', field: 'Adress' },
@@ -30,9 +28,7 @@ const CrewReportsDetailPage = () => {
     { header: 'Fecha', field: 'Assignment_Date' },
   ]
 
-  const visibleColumns = showIds
-    ? columns
-    : columns.filter((column) => column.field !== 'Assigment_ID' && column.field !== 'Report_ID')
+  const visibleColumns = columns
 
   const problemOptions = [...new Set(data.map((row) => row.Name_Problem).filter(Boolean))]
   const stateOptions = [...new Set(data.map((row) => row.State).filter(Boolean))]

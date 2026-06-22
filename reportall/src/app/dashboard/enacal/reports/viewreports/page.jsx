@@ -42,7 +42,6 @@ const ViewReports = () => {
   } = useTablePagination(data);
 
   const columns = [
-    { header: "ID", field: "Report_ID" },
     { header: "Problema", field: "Name_Problem" },
     { header: "Urgencia", field: "Urgency" },
     { header: "Dirección", field: "Adress" },

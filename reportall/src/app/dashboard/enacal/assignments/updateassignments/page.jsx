@@ -366,7 +366,6 @@ const UpdateAssignments = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-blue-600 text-white">
             <tr>
-              {showIds ? <th className="py-3 px-4 text-left text-sm font-medium">Asignación ID</th> : null}
               <th className="py-3 px-4 text-left text-sm font-medium">Líder</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Cuadrilla</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Reporte</th>
@@ -377,15 +376,14 @@ const UpdateAssignments = () => {
           <tbody>
             {assignments.length === 0 ? (
               <tr>
-                <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
+                <td colSpan={5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
               paginatedRows.map((assignment) => (
                 <tr key={assignment.Assigment_ID} className="border-b hover:bg-blue-50 transition">
-                  {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{assignment.Assigment_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Name_Leader}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{assignment.Num_Crew}</td>
-                  <td className="py-3 px-4 text-sm text-gray-700">{showIds ? `#${assignment.Report_ID}` : (assignment.Report_Adress || 'Reporte asignado')}</td>
+                  <td className="py-3 px-4 text-sm text-gray-700">{assignment.Report_Adress || 'Reporte asignado'}</td>
                   <td className="py-3 px-4 text-sm text-gray-700"><StateBadge value={assignment.StateAs} /></td>
                   <td className="py-3 px-4 text-sm text-gray-700">
                     <button

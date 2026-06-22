@@ -36,7 +36,6 @@ const CreateAssignments = () => {
         : unassignedReports
 
     const unassignedReportsColumns = [
-        { header: 'Reporte ID', field: 'Report_ID' },
         { header: 'Direccion', field: 'Adress' },
         { header: 'Problema', field: 'Name_Problem' },
         { header: 'Urgencia', field: 'Urgency' },
@@ -44,7 +43,6 @@ const CreateAssignments = () => {
     ]
 
     const crewInfoColumns = [
-        { header: 'Crew ID', field: 'Crew_ID' },
         { header: 'Representante', field: 'Representative_Name' },
         { header: 'Numero Cuadrilla', field: 'Num_Crew' },
         { header: 'Disponibilidad', field: 'Availability_Crew' },

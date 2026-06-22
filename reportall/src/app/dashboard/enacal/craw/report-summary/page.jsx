@@ -163,7 +163,6 @@ const CrewReportSummaryPage = () => {
         <table className='min-w-full border-collapse'>
           <thead className='bg-blue-600 text-white'>
             <tr>
-              {showIds ? <th className='py-3 px-4 text-left text-sm font-medium'>Crew ID</th> : null}
               <th className='py-3 px-4 text-left text-sm font-medium'>Número Cuadrilla</th>
               <th className='py-3 px-4 text-left text-sm font-medium'>Distrito</th>
               <th className='py-3 px-4 text-left text-sm font-medium'>Reportes Atendidos</th>
@@ -173,16 +172,15 @@ const CrewReportSummaryPage = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={showIds ? 5 : 4} className='text-center py-4 text-gray-500'>Cargando...</td>
+                <td colSpan={4} className='text-center py-4 text-gray-500'>Cargando...</td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={showIds ? 5 : 4} className='text-center py-4 text-gray-500'>No hay datos</td>
+                <td colSpan={4} className='text-center py-4 text-gray-500'>No hay datos</td>
               </tr>
             ) : (
               paginatedRows.map((row) => (
                 <tr key={row.Crew_ID} className='border-b hover:bg-blue-50 transition'>
-                  {showIds ? <td className='py-3 px-4 text-sm text-gray-700'>{row.Crew_ID}</td> : null}
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.Num_Crew}</td>
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.District}</td>
                   <td className='py-3 px-4 text-sm text-gray-700'>{row.Reports_Attended}</td>

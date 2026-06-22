@@ -10,8 +10,6 @@ import { canViewIds, normalizeRole } from '@/lib/rbac'
 import { useTablePagination } from '@/hooks/useTablePagination'
 
 const columns = [
-  { header: 'Asignación ID', field: 'Assigment_ID' },
-  { header: 'Reporte ID', field: 'Report_ID' },
   { header: 'Problema', field: 'Name_Problem' },
   { header: 'Urgencia', field: 'Urgency' },
   { header: 'Dirección', field: 'Adress' },

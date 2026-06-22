@@ -341,7 +341,6 @@ const UpdateCraw = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-blue-600 text-white">
             <tr>
-              {showIds ? <th className="py-3 px-4 text-left text-sm font-medium">Crew ID</th> : null}
               <th className="py-3 px-4 text-left text-sm font-medium">N° Cuadrilla</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Sector</th>
               <th className="py-3 px-4 text-left text-sm font-medium">Estado</th>
@@ -352,12 +351,11 @@ const UpdateCraw = () => {
           <tbody>
             {crews.length === 0 ? (
               <tr>
-                <td colSpan={showIds ? 6 : 5} className="text-center py-4 text-gray-500">No hay datos</td>
+                <td colSpan={5} className="text-center py-4 text-gray-500">No hay datos</td>
               </tr>
             ) : (
               paginatedRows.map((crew) => (
                 <tr key={crew.Crew_ID} className="border-b hover:bg-blue-50 transition">
-                  {showIds ? <td className="py-3 px-4 text-sm text-gray-700">{crew.Crew_ID}</td> : null}
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Num_Crew}</td>
                   <td className="py-3 px-4 text-sm text-gray-700">{crew.Name_Sector}</td>
                   <td className="py-3 px-4 text-sm text-gray-700"><StateBadge value={crew.Availability_Crew} /></td>

@@ -111,7 +111,6 @@ const VehiclesPage = () => {
 
       <SimpleTable
         columns={[
-          { header: 'Vehicle ID', field: 'Vehicle_ID' },
           { header: 'Matrícula', field: 'Plate' },
         ]}
         data={vehicles}

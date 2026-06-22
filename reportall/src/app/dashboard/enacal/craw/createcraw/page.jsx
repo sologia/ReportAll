@@ -15,7 +15,6 @@ const CreateCraw = () => {
   const base = process.env.NEXT_PUBLIC_API_URL || '';
 
   const crewColumns = [
-    { header: 'Crew ID', field: 'Crew_ID' },
     { header: 'N° Cuadrilla', field: 'Num_Crew' },
     { header: 'Sector', field: 'Name_Sector' },
     { header: 'Estado', field: 'Availability_Crew' },

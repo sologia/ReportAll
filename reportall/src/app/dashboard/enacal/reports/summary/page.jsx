@@ -18,7 +18,6 @@ const SummaryReportsPage = () => {
   })
 
   const columns = [
-    { header: 'ID Reporte', field: 'Report_ID' },
     { header: 'Problema', field: 'Name_Problem' },
     { header: 'Urgencia', field: 'Urgency' },
     { header: 'Dirección', field: 'Adress' },
@@ -27,9 +26,7 @@ const SummaryReportsPage = () => {
     { header: 'Fecha', field: 'Report_Date' },
   ]
 
-  const visibleColumns = canViewIds(role)
-    ? columns
-    : columns.filter((column) => column.field !== 'Report_ID')
+  const visibleColumns = columns
 
   const stateOptions = useMemo(() => {
     const values = Array.from(new Set(data.map(item => item.State).filter(Boolean)))
