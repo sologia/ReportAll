@@ -7,6 +7,16 @@ import PageHeaderCard from '@/app/components/PageHeaderCard'
 import SectionCard from '@/app/components/SectionCard'
 import { buildSessionHeaders } from '@/lib/auth'
 
+const PLATE_PATTERN = /^[A-Z0-9-]{3,20}$/
+
+function normalizePlate(value) {
+  return String(value || '').trim().toUpperCase()
+}
+
+function isValidPlate(value) {
+  return PLATE_PATTERN.test(value)
+}
+
 const VehiclesPage = () => {
   const [vehicles, setVehicles] = useState([])
   const [plate, setPlate] = useState('')
@@ -27,13 +37,22 @@ const VehiclesPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const normalizedPlate = String(plate || '').trim().toUpperCase()
+    const normalizedPlate = normalizePlate(plate)
 
     if (!normalizedPlate) {
       await Swal.fire({
         icon: 'warning',
         title: 'Matrícula requerida',
         text: 'Debes escribir una matrícula válida.',
+        confirmButtonText: 'Aceptar',
+      })
+      return
+    }
+    if (!isValidPlate(normalizedPlate)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Matrícula inválida',
+        text: 'Usa solo letras, números o guion (3-20 caracteres).',
         confirmButtonText: 'Aceptar',
       })
       return
@@ -82,13 +101,22 @@ const VehiclesPage = () => {
   }
 
   const handleEditSubmit = async () => {
-    const normalizedPlate = String(editingPlate || '').trim().toUpperCase()
+    const normalizedPlate = normalizePlate(editingPlate)
 
     if (!normalizedPlate) {
       await Swal.fire({
         icon: 'warning',
         title: 'Matrícula requerida',
         text: 'Debes escribir una matrícula válida.',
+        confirmButtonText: 'Aceptar',
+      })
+      return
+    }
+    if (!isValidPlate(normalizedPlate)) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Matrícula inválida',
+        text: 'Usa solo letras, números o guion (3-20 caracteres).',
         confirmButtonText: 'Aceptar',
       })
       return
@@ -132,51 +160,6 @@ const VehiclesPage = () => {
     }
   }
 
-  const handleDelete = async (vehicleId, plateName) => {
-    const result = await Swal.fire({
-      icon: 'warning',
-      title: '¿Eliminar matrícula?',
-      text: `¿Deseas eliminar la matrícula ${plateName}? Esta acción no se puede deshacer.`,
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#dc2626',
-    })
-
-    if (!result.isConfirmed) return
-
-    try {
-      setSaving(true)
-      const response = await fetch(`${base}/api/vehicles/${vehicleId}`, {
-        method: 'DELETE',
-        headers: buildSessionHeaders(),
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}))
-        throw new Error(body.message || body.error || 'No se pudo eliminar la matrícula')
-      }
-
-      await loadVehicles()
-      await Swal.fire({
-        icon: 'success',
-        title: 'Matrícula eliminada',
-        text: `La matrícula ${plateName} se eliminó correctamente.`,
-        confirmButtonText: 'Aceptar',
-      })
-    } catch (error) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error al eliminar',
-        text: error.message || 'No se pudo eliminar la matrícula',
-        confirmButtonText: 'Entendido',
-      })
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const cancelEdit = () => {
     setEditingId(null)
     setEditingPlate('')
@@ -188,7 +171,7 @@ const VehiclesPage = () => {
 
       <PageHeaderCard
         title='Gestión de matrículas'
-        description='Agrega, edita y elimina las matrículas disponibles para asignarlas a las cuadrillas.'
+        description='Agrega y edita las matrículas disponibles para asignarlas a las cuadrillas.'
       />
 
       <SectionCard>
@@ -252,6 +235,7 @@ const VehiclesPage = () => {
                     {editingId === vehicle.Vehicle_ID ? (
                       <div className='flex gap-2'>
                         <button
+                          type='button'
                           onClick={handleEditSubmit}
                           disabled={saving}
                           className='px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-70 text-xs'
@@ -259,6 +243,7 @@ const VehiclesPage = () => {
                           Guardar
                         </button>
                         <button
+                          type='button'
                           onClick={cancelEdit}
                           disabled={saving}
                           className='px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition disabled:opacity-70 text-xs'
@@ -269,16 +254,11 @@ const VehiclesPage = () => {
                     ) : (
                       <div className='flex gap-2'>
                         <button
+                          type='button'
                           onClick={() => startEdit(vehicle)}
                           className='px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs'
                         >
                           Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(vehicle.Vehicle_ID, vehicle.Plate)}
-                          className='px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-xs'
-                        >
-                          Eliminar
                         </button>
                       </div>
                     )}

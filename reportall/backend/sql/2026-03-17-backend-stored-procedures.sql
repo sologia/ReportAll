@@ -103,9 +103,59 @@ BEGIN
         THROW 50003, 'La matrícula ya está registrada', 1;
     END;
 
-    INSERT INTO dbo.Cat_Vehicles (Plate)
-    OUTPUT INSERTED.Vehicle_ID, INSERTED.Plate
-    VALUES (@NormalizedPlate);
+    DECLARE @NextNumVehicle INT;
+
+    SELECT @NextNumVehicle = ISNULL(MAX(Num_Vehicle), 0) + 1
+    FROM dbo.Cat_Vehicles WITH (UPDLOCK, HOLDLOCK);
+
+    INSERT INTO dbo.Cat_Vehicles (Num_Vehicle, Plate)
+    OUTPUT INSERTED.Vehicle_ID, INSERTED.Num_Vehicle, INSERTED.Plate
+    VALUES (@NextNumVehicle, @NormalizedPlate);
+END;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Vehicle_Update
+    @Vehicle_ID INT,
+    @Plate NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @NormalizedPlate NVARCHAR(20) = UPPER(LTRIM(RTRIM(@Plate)));
+
+    IF @Vehicle_ID IS NULL OR @Vehicle_ID <= 0
+    BEGIN
+        THROW 50004, 'El ID de vehículo no es válido', 1;
+    END;
+
+    IF @NormalizedPlate IS NULL OR @NormalizedPlate = ''
+    BEGIN
+        THROW 50002, 'La matrícula es requerida', 1;
+    END;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.Cat_Vehicles
+        WHERE Vehicle_ID = @Vehicle_ID
+    )
+    BEGIN
+        THROW 50005, 'La matrícula no existe', 1;
+    END;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Cat_Vehicles
+        WHERE UPPER(LTRIM(RTRIM(Plate))) = @NormalizedPlate
+          AND Vehicle_ID <> @Vehicle_ID
+    )
+    BEGIN
+        THROW 50003, 'La matrícula ya está registrada', 1;
+    END;
+
+    UPDATE dbo.Cat_Vehicles
+    SET Plate = @NormalizedPlate
+    OUTPUT INSERTED.Vehicle_ID, INSERTED.Num_Vehicle, INSERTED.Plate
+    WHERE Vehicle_ID = @Vehicle_ID;
 END;
 GO
 
