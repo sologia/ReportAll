@@ -38,10 +38,10 @@ const CrawPage = () => {
 
       <ButtonGroup
         buttons={[
-          { label: "Crear", href: "/dashboard/enacal/craw/createcraw" },
-          { label: "Modificar", href: "/dashboard/enacal/craw/updatecraw" },
-          { label: "Accesos cuadrillas", href: "/dashboard/enacal/craw/accounts" },
-          { label: "Matrículas", href: "/dashboard/enacal/vehicles" },
+          { label: "Crear cuadrilla", href: "/dashboard/enacal/craw/createcraw" },
+          { label: "Editar cuadrilla", href: "/dashboard/enacal/craw/updatecraw" },
+          { label: "Gestionar accesos de cuadrillas", href: "/dashboard/enacal/craw/accounts" },
+          { label: "Gestionar matriculas", href: "/dashboard/enacal/vehicles" },
         ]}
       />
 

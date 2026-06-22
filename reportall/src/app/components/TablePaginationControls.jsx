@@ -12,37 +12,37 @@ export default function TablePaginationControls({
   onPageChange,
 }) {
   return (
-    <div className='flex flex-col gap-3 border-t bg-white px-4 py-3 text-sm text-gray-700 sm:flex-row sm:items-center sm:justify-between'>
+    <div className='flex flex-col gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 md:flex-row md:items-center md:justify-between'>
       <div className='flex flex-wrap items-center gap-2'>
-        <label htmlFor='page-size' className='text-gray-600'>Registros por página:</label>
+        <label htmlFor='page-size' className='text-slate-600 font-medium'>Registros por pagina:</label>
         <select
           id='page-size'
           value={pageSize}
           onChange={onPageSizeChange}
-          className='rounded-md border px-2 py-1'
+          className='rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-700'
         >
           {TABLE_PAGE_SIZE_OPTIONS.map((option) => (
             <option key={option} value={option}>{option}</option>
           ))}
         </select>
-        <span className='text-gray-500'>Mostrando {startItem}-{endItem} de {totalItems}</span>
+        <span className='text-slate-500'>Mostrando {startItem}-{endItem} de {totalItems}</span>
       </div>
 
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 justify-start md:justify-end'>
         <button
           type='button'
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className='rounded-md border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50'
+          className='rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-45'
         >
           Anterior
         </button>
-        <span className='text-gray-600'>Hoja {currentPage} de {totalPages}</span>
+        <span className='text-slate-600 min-w-28 text-center'>Pagina {currentPage} de {totalPages}</span>
         <button
           type='button'
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className='rounded-md border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50'
+          className='rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-45'
         >
           Siguiente
         </button>

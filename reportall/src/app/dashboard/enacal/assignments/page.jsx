@@ -46,8 +46,8 @@ const AssignmentsPage = () => {
       {/* Tengo problemas con la page y que se muestren los botone */}
       <ButtonGroup
         buttons={[
-          { label: "Crear Asignacion", href: "/dashboard/enacal/assignments/createassignments" },
-          { label: "Modificar Asignacion", href: "/dashboard/enacal/assignments/updateassignments" },
+          { label: "Crear una asignacion", href: "/dashboard/enacal/assignments/createassignments" },
+          { label: "Actualizar estado de asignacion", href: "/dashboard/enacal/assignments/updateassignments" },
           // { label: "Menu", href: "/dashboard/enacal" },
 
         ]}

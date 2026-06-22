@@ -11,16 +11,15 @@ const ButtonBack = () => {
   };
 
   return (
-    <div className="mt-4 ml-4 mb-6 w-24 max-w-full">
+    <div className="mt-2 ml-1 sm:ml-2 mb-5 w-28 max-w-full">
       <button
         type="button"
-        className="w-full flex items-center bg-[#b0b0b0] rounded-full px-3 py-2 shadow-sm cursor-pointer hover:bg-[#E0D8E5] transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 rounded-xl px-3 py-2 shadow-sm cursor-pointer hover:bg-sky-50 hover:border-sky-200"
         onClick={handleGoBack}
         aria-label="Volver a la vista anterior"
       >
-        <IoMdArrowRoundBack className="text-gray-600 mr-2 text-lg" />
-
-        <span className="cursor-pointer text-sm">Atrás</span>
+        <IoMdArrowRoundBack className="text-slate-600 text-lg" />
+        <span className="text-sm font-medium">Volver</span>
       </button>
     </div>
   );

@@ -15,10 +15,10 @@ function isIdColumn(column) {
 
 function getUrgencyClasses(value) {
   const normalized = String(value || '').trim().toLowerCase();
-  if (normalized.includes('alta')) return 'bg-red-100 text-red-700';
-  if (normalized.includes('media')) return 'bg-yellow-100 text-yellow-800';
-  if (normalized.includes('baja')) return 'bg-green-100 text-green-700';
-  return 'bg-gray-100 text-gray-700';
+  if (normalized.includes('alta')) return 'bg-rose-100 text-rose-700 border border-rose-200';
+  if (normalized.includes('media')) return 'bg-amber-100 text-amber-800 border border-amber-200';
+  if (normalized.includes('baja')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+  return 'bg-slate-100 text-slate-700 border border-slate-200';
 }
 
 function isUrgencyColumn(column) {
@@ -40,11 +40,11 @@ function getStateLabel(value) {
 
 function getStateClasses(value) {
   const normalized = getStateLabel(value).toLowerCase();
-  if (normalized.includes('recibido')) return 'bg-sky-100 text-sky-700';
-  if (normalized.includes('proceso')) return 'bg-yellow-100 text-yellow-800';
-  if (normalized.includes('problema')) return 'bg-red-100 text-red-700';
-  if (normalized.includes('terminado')) return 'bg-green-100 text-green-700';
-  return 'bg-gray-100 text-gray-700';
+  if (normalized.includes('recibido')) return 'bg-sky-100 text-sky-700 border border-sky-200';
+  if (normalized.includes('proceso')) return 'bg-amber-100 text-amber-800 border border-amber-200';
+  if (normalized.includes('problema')) return 'bg-rose-100 text-rose-700 border border-rose-200';
+  if (normalized.includes('terminado')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+  return 'bg-slate-100 text-slate-700 border border-slate-200';
 }
 
 export default function SimpleTable({ columns, data }) {
@@ -65,14 +65,14 @@ export default function SimpleTable({ columns, data }) {
   } = useTablePagination(data);
 
   return (
-    <div className="overflow-x-auto rounded-lg shadow-md mt-6 bg-white">
-      <table className="min-w-full border-collapse">
-        <thead className="bg-blue-600 text-white">
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-[0_8px_20px_rgba(15,23,42,0.06)] mt-6 bg-white">
+      <table className="min-w-full border-collapse text-sm">
+        <thead className="bg-slate-800 text-white">
           <tr>
             {visibleColumns.map((col, index) => (
               <th
                 key={index}
-                className="py-3 px-4 text-left text-sm font-medium"
+                className="py-3 px-4 text-left text-xs sm:text-sm font-semibold whitespace-nowrap"
               >
                 {col.header}
               </th>
@@ -85,7 +85,7 @@ export default function SimpleTable({ columns, data }) {
             <tr>
               <td
                 colSpan={visibleColumns.length}
-                className="text-center py-4 text-gray-500"
+                className="text-center py-8 text-slate-500"
               >
                 No hay datos
               </td>
@@ -94,19 +94,19 @@ export default function SimpleTable({ columns, data }) {
             paginatedRows.map((row, index) => (
               <tr
                 key={index}
-                className="border-b hover:bg-blue-50 transition"
+                className="border-b border-slate-100 hover:bg-sky-50/70 transition"
               >
                 {visibleColumns.map((col, cIndex) => (
                   <td
                     key={cIndex}
-                    className="py-3 px-4 text-sm text-gray-700"
+                    className="py-3 px-4 text-slate-700 align-top"
                   >
                     {isUrgencyColumn(col) ? (
-                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${getUrgencyClasses(row[col.field])}`}>
                         {row[col.field] || 'Sin urgencia'}
                       </span>
                     ) : isStateColumn(col) ? (
-                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStateClasses(row[col.field])}`}>
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap ${getStateClasses(row[col.field])}`}>
                         {getStateLabel(row[col.field])}
                       </span>
                     ) : (

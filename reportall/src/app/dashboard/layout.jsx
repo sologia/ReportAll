@@ -65,47 +65,46 @@ function DashboardLayout({ children }) {
   }
 
   return (
-    <div className={`min-h-screen w-full flex justify-center bg-[#42B8EA] px-2 sm:px-4 ${getStyle()}`}>
-      <div className='w-full max-w-[1050px] min-h-screen bg-white shadow-(--sombra2) flex flex-col overflow-visible'>
+    <div className={`min-h-screen w-full flex justify-center app-shell px-2 sm:px-4 py-3 sm:py-5 ${getStyle()}`}>
+      <div className='w-full max-w-[1140px] min-h-screen rounded-2xl glass-card flex flex-col overflow-hidden'>
 
-        <div className='border-[1.5] w-full min-h-[100px] flex flex-col sm:flex-row justify-between sm:items-center shadow-(--sombra1) mb-4 px-4 sm:px-0 py-3 sm:py-0 gap-3 sm:gap-0'>
-
-          <div className='w-32 sm:w-40 sm:ml-9'>
-            <img src="/img/logoENACAL.png" alt="Logo Enacal" className="w-full h-auto object-contain" />
+        <header className='w-full min-h-24 flex flex-col md:flex-row justify-between md:items-center border-b border-slate-200 px-4 md:px-8 py-4 gap-4 bg-white/90'>
+          <div className='flex items-center gap-4'>
+            <div className='w-28 sm:w-36'>
+              <img src="/img/logoENACAL.png" alt="Logo Enacal" className="w-full h-auto object-contain" />
+            </div>
+            <div>
+              <h1 className='text-lg sm:text-xl font-bold text-slate-900'>ReportALL</h1>
+              <p className='text-xs uppercase tracking-[0.2em] text-slate-500'>Panel de gestion</p>
+            </div>
           </div>
 
-          <div className='w-full sm:w-auto sm:mr-9'>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <span className="truncate">{session?.displayName || 'Usuario'}</span>
+          <div className='w-full md:w-auto'>
+            <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+              <span className="truncate text-slate-700 font-medium">{session?.displayName || 'Usuario'}</span>
               <button
                 type="button"
                 onClick={onLogout}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto text-sm sm:text-base"
+                className="btn-primary w-full md:w-auto text-sm"
               >
-                Cerrar sesión
+                Cerrar sesion
               </button>
             </div>
-
           </div>
+        </header>
 
-        </div>
-
-        <div className='w-full max-w-[1000px] mx-auto bg-(--fondo1) flex-1 min-h-0 rounded-md'>
-          <div>
-
-            <div className="bg-(--fondo3) rounded-md min-h-[42px] flex items-center px-4 sm:pl-8 py-1">
-              <h3 className="text-xl sm:text-2xl">{getLabel()}</h3>
+        <main className='w-full max-w-[1080px] mx-auto flex-1 min-h-0 p-3 sm:p-5'>
+          <section className='bg-(--fondo1) rounded-xl border border-slate-200 overflow-hidden'>
+            <div className="bg-(--fondo3) min-h-[52px] flex items-center px-4 sm:px-6 py-2 border-b border-slate-200">
+              <h3 className="text-lg sm:text-2xl font-semibold text-slate-900">{getLabel()}</h3>
             </div>
 
-            <div>
+            <div className='p-3 sm:p-4 md:p-5'>
               {children}
             </div>
-
-          </div>
-        </div>
-
+          </section>
+        </main>
       </div>
-
     </div>
   )
 }

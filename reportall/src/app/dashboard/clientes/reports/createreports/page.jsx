@@ -256,7 +256,7 @@ const CreateReportClient = () => {
 
 
   return (
-    <div className='rounded-2xl'>
+    <div className='rounded-2xl space-y-5'>
       
       <div>
         <ButtonBack/>
@@ -264,19 +264,19 @@ const CreateReportClient = () => {
 
       <form onSubmit={ReportSubmit} className="flex flex-col gap-6" noValidate>
 
-        <div className='flex flex-col gap-4 ml-4 md:ml-8 lg:ml-15'>
-          
-          <div className='flex'>
-            <p className='m-auto text-[32px] font-bold'>Datos del problema</p>
+        <section className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-[0_8px_20px_rgba(15,23,42,0.06)]'>
+          <div className='text-center mb-6'>
+            <h1 className='text-2xl sm:text-3xl font-bold text-slate-900'>Crear reporte</h1>
+            <p className='mt-2 text-slate-600'>Completa los datos y marca la ubicacion para registrar la incidencia.</p>
           </div>
 
-          <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
-            <label className='w-46'>Selecciona un problema</label>
+          <div className='grid grid-cols-1 lg:grid-cols-[220px_1fr] items-center gap-3 mb-4'>
+            <label className='field-label'>Selecciona un problema</label>
             <select 
               name="tipoReporte" 
               value={ tipoReporte } 
               onChange={ onReportInputChange }
-              className='bg-[#b2b1b1] rounded-2xl w-full md:w-72 px-4 py-3'
+              className='field-control'
             >
               <option value="">Seleccione</option>
               {problems.map((problem, index) => (
@@ -287,13 +287,13 @@ const CreateReportClient = () => {
             </select>
           </div>
 
-          <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
-            <label className='w-46'>Sector</label>
+          <div className='grid grid-cols-1 lg:grid-cols-[220px_1fr] items-center gap-3 mb-4'>
+            <label className='field-label'>Sector</label>
             <select
               name='sector'
               value={sector}
               onChange={onReportInputChange}
-              className='bg-[#b2b1b1] rounded-2xl w-full md:w-72 px-4 py-3'
+              className='field-control'
             >
               <option value="">Seleccione</option>
               {sectors.map((item, index) => (
@@ -304,47 +304,48 @@ const CreateReportClient = () => {
             </select>
           </div>
 
-          <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
-            <label className='w-46'>Dirección:</label>
+          <div className='grid grid-cols-1 lg:grid-cols-[220px_1fr] items-start gap-3 mb-4'>
+            <label className='field-label pt-2'>Direccion</label>
             <textarea
               name='direccion'
               value={direccion}
               onChange={onReportInputChange}
-              className='bg-[#b2b1b1] rounded-2xl w-full md:w-72 px-4 py-3 min-h-16 resize-none'
+              className='field-control min-h-24 resize-y'
+              placeholder='Escribe una referencia clara de direccion'
             />
           </div>
 
-          <div className='flex flex-col gap-2 md:flex-row md:gap-6'>
-
-            <label className='w-46'>Subir imagenes/videos</label>
-            <div>
+          <div className='grid grid-cols-1 lg:grid-cols-[220px_1fr] items-start gap-3'>
+            <label className='field-label pt-2'>Adjuntos</label>
+            <div className='w-full'>
               <MultiFileUpload key={uploadKey} onFilesSelect={setFiles} />
             </div>
           </div>
+        </section>
 
-        </div>
-
-        <div className=''>
-          <p className='ml-6 text-[20px]'>Seleccione la ubicacion del problema</p>
+        <section className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-[0_8px_20px_rgba(15,23,42,0.06)]'>
+          <p className='text-lg sm:text-xl font-semibold text-slate-900'>Selecciona la ubicacion del problema</p>
           {geoDenied && (
-            <p className='ml-6 text-sm text-amber-700'>No se pudo obtener tu ubicación actual. Selecciona manualmente el punto en el mapa.</p>
+            <p className='mt-1 text-sm text-amber-700'>No se pudo obtener tu ubicacion actual. Selecciona manualmente el punto en el mapa.</p>
           )}
-          <MyMap onSelect={setSelectedPosition} selectedPosition={selectedPosition} currentLocation={currentLocation} />
-        </div>
+          <div className='mt-3 rounded-xl overflow-hidden border border-slate-200'>
+            <MyMap onSelect={setSelectedPosition} selectedPosition={selectedPosition} currentLocation={currentLocation} />
+          </div>
+        </section>
 
-        <div className='flex mb-6'>
+        <div className='flex mb-2'>
           <button
                 type="submit"
                 disabled={sending || loading}
-                className="w-70 ml-8 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-60"
+                className="btn-primary w-full sm:w-auto px-8 disabled:opacity-60"
             >
-                {sending ? 'Guardando...' : 'Aceptar'}
+                {sending ? 'Enviando reporte...' : 'Enviar reporte'}
           </button>
         </div>
       </form>
 
-      <section className='px-3 md:px-6 pb-8'>
-        <h2 className='text-2xl font-semibold mt-8'>Reportes ya creados</h2>
+      <section className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-[0_8px_20px_rgba(15,23,42,0.06)]'>
+        <h2 className='text-2xl font-semibold'>Reportes ya creados</h2>
         {loading ? <p className='mt-4'>Cargando reportes...</p> : <SimpleTable columns={reportColumns} data={reports} />}
       </section>
       

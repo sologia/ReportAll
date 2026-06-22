@@ -1,17 +1,143 @@
 @import "tailwindcss";
 
 .fondo{
-  background-color: #EEF2F5;
+  background: radial-gradient(circle at top right, #d9f1ff 0%, #eaf4fb 30%, #f4f7fb 100%);
 }
 
 :root {
-  --sombra1: 0 4px 4px rgba(0,0,0,0.25);
-  --sombra2: 0 4px 90px 20px rgb(255, 255, 255, 1);
-  --fondo1: #f2f2f2;
-  --fondo2: #ea4444;
-  --fondo3: #B1C9E2;
-  /* --background: #ffffff; */
-  /* --foreground: #171717; */
+  --sombra1: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --sombra2: 0 20px 60px rgba(15, 23, 42, 0.12);
+  --fondo1: #f8fbff;
+  --fondo2: #dd4b39;
+  --fondo3: #d8ebff;
+  --brand-50: #edf7ff;
+  --brand-100: #d8ebff;
+  --brand-500: #1f82d8;
+  --brand-600: #176eb8;
+  --ink-900: #0f172a;
+  --ink-700: #334155;
+  --ink-500: #64748b;
+  --line-200: #dbe4ee;
+  --surface-0: #ffffff;
+  --surface-1: #f8fbff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-manrope), "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--line-200);
+  background: #fff;
+  color: var(--ink-900);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-500);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(31, 130, 216, 0.25);
+  outline-offset: 2px;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(219, 228, 238, 0.9);
+  box-shadow: var(--sombra1);
+}
+
+.app-shell {
+  background: linear-gradient(165deg, #e6f3ff 0%, #f6f9fc 44%, #eaf5ff 100%);
+}
+
+.app-section-title {
+  color: var(--ink-900);
+  font-weight: 700;
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.field-control {
+  width: 100%;
+  border-radius: 0.8rem;
+  padding: 0.7rem 0.95rem;
+  background: #fff;
+  border: 1px solid var(--line-200);
+}
+
+.btn-primary {
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0.8rem;
+  padding: 0.72rem 1rem;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  border: 1px solid var(--line-200);
+  background: var(--surface-0);
+  color: var(--ink-700);
+  font-weight: 600;
+  border-radius: 0.8rem;
+  padding: 0.72rem 1rem;
+}
+
+.btn-secondary:hover {
+  background: var(--brand-50);
+  border-color: #c8ddf2;
 }
 
 /* Objetivo tactil minimo para controles interactivos en movil */
@@ -32,25 +158,4 @@
     justify-content: center;
   }
 }
-
-/*
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
 

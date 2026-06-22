@@ -195,27 +195,32 @@ const ViewReports = () => {
   return (
     <>
 
-      <div>
+      <section className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)] mb-5'>
+        <h2 className='text-2xl sm:text-3xl font-bold text-slate-900'>Gestion de reportes</h2>
+        <p className='mt-1 text-slate-600'>Filtra reportes y, si tienes permisos, actualiza su nivel de urgencia.</p>
+      </section>
+
+      <div className='mb-4'>
           <ButtonGroup
           buttons={[
             { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
             { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
             { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
             { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
-            { label: "Menu", href: "/dashboard/enacal" },
+            { label: "Volver al menu principal", href: "/dashboard/enacal" },
           ]}
           />
       </div>
       
-      <form onSubmit={handleFilter} className='flex flex-wrap gap-4 items-end mb-4'>
-        <div className='flex flex-col gap-1 ml-2'>
-          <label htmlFor='district'>Sector</label>
+      <form onSubmit={handleFilter} className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end mb-4'>
+        <div className='flex flex-col gap-1'>
+          <label htmlFor='district' className='field-label'>Sector</label>
           <select
             id='district'
             name='district'
             value={filters.district}
             onChange={handleChange}
-            className='bg-[#b2b1b1] rounded-2xl px-3 py-2'
+            className='field-control'
           >
             <option value=''>Todos</option>
             {sectors.map((item, idx) => (
@@ -225,25 +230,25 @@ const ViewReports = () => {
         </div>
 
         <div className='flex flex-col gap-1'>
-          <label htmlFor='date'>Fecha</label>
+          <label htmlFor='date' className='field-label'>Fecha</label>
           <input
             id='date'
             name='date'
             type='date'
             value={filters.date}
             onChange={handleChange}
-            className='bg-[#b2b1b1] rounded-2xl px-3 py-2'
+            className='field-control'
           />
         </div>
 
         <div className='flex flex-col gap-1'>
-          <label htmlFor='state'>Estado de reporte</label>
+          <label htmlFor='state' className='field-label'>Estado de reporte</label>
           <select
             id='state'
             name='state'
             value={filters.state}
             onChange={handleChange}
-            className='bg-[#b2b1b1] rounded-2xl px-3 py-2'
+            className='field-control'
           >
             <option value=''>Todos</option>
             {states.map((item, idx) => (
@@ -252,38 +257,40 @@ const ViewReports = () => {
           </select>
         </div>
 
-        <button type='submit' className='bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition'>
-          Filtrar
-        </button>
+        <div className='flex gap-2'>
+          <button type='submit' className='btn-primary flex-1'>
+            Filtrar
+          </button>
 
-        <button type='button' onClick={clearFilters} className='bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition'>
-          Limpiar
-        </button>
+          <button type='button' onClick={clearFilters} className='btn-secondary flex-1'>
+            Limpiar
+          </button>
+        </div>
       </form>
 
       <div>
         {loading ? <p>Cargando reportes...</p> : isAdmin ? (
-          <div className="overflow-x-auto rounded-lg shadow-md mt-6 bg-white">
-            <table className="min-w-full border-collapse">
-              <thead className="bg-blue-600 text-white">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-[0_8px_20px_rgba(15,23,42,0.06)] mt-6 bg-white">
+            <table className="min-w-full border-collapse text-sm">
+              <thead className="bg-slate-800 text-white">
                 <tr>
                   {columns.map((col, index) => (
-                    <th key={index} className="py-3 px-4 text-left text-sm font-medium">{col.header}</th>
+                    <th key={index} className="py-3 px-4 text-left text-xs sm:text-sm font-semibold">{col.header}</th>
                   ))}
-                  <th className="py-3 px-4 text-left text-sm font-medium">Editar urgencia</th>
+                  <th className="py-3 px-4 text-left text-xs sm:text-sm font-semibold">Editar urgencia</th>
                 </tr>
               </thead>
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + 1} className="text-center py-4 text-gray-500">No hay datos</td>
+                    <td colSpan={columns.length + 1} className="text-center py-8 text-slate-500">No hay datos</td>
                   </tr>
                 ) : paginatedRows.map((row) => (
-                  <tr key={row.Report_ID} className="border-b hover:bg-blue-50 transition">
+                  <tr key={row.Report_ID} className="border-b border-slate-100 hover:bg-sky-50/70 transition">
                     {columns.map((col, index) => (
-                      <td key={index} className="py-3 px-4 text-sm text-gray-700">
+                      <td key={index} className="py-3 px-4 text-slate-700">
                         {col.field === 'Urgency' ? (
-                          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getUrgencyClasses(row[col.field])}`}>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold border ${getUrgencyClasses(row[col.field])}`}>
                             {row[col.field] || 'Sin urgencia'}
                           </span>
                         ) : col.field === 'State' ? (
@@ -291,12 +298,12 @@ const ViewReports = () => {
                         ) : row[col.field]}
                       </td>
                     ))}
-                    <td className="py-3 px-4 text-sm text-gray-700">
+                    <td className="py-3 px-4 text-slate-700">
                       <div className="flex items-center gap-2">
                         <select
                           value={draftUrgencies[row.Report_ID] || ''}
                           onChange={(event) => handleUrgencyChange(row.Report_ID, event.target.value)}
-                          className="rounded-md border px-2 py-1"
+                          className="rounded-lg border border-slate-200 px-3 py-1.5"
                         >
                           <option value="">Seleccione</option>
                           {urgencies.map((item) => (
@@ -307,7 +314,7 @@ const ViewReports = () => {
                           type="button"
                           onClick={() => saveUrgency(row.Report_ID)}
                           disabled={savingReportId === row.Report_ID}
-                          className="bg-blue-600 text-white py-1 px-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+                          className="btn-primary py-1.5 px-3 disabled:bg-slate-400"
                         >
                           {savingReportId === row.Report_ID ? 'Guardando...' : 'Guardar'}
                         </button>
