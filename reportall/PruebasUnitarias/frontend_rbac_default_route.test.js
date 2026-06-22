@@ -4,7 +4,7 @@ describe('rbac.js - getDefaultRouteByRole', () => {
   test('debe devolver la ruta por defecto correcta para cada rol', () => {
     expect(getDefaultRouteByRole('cliente')).toBe('/dashboard/clientes');
     expect(getDefaultRouteByRole('administrador')).toBe('/dashboard/enacal');
-    expect(getDefaultRouteByRole('director_it')).toBe('/dashboard/enacal/reports/summary');
+    expect(getDefaultRouteByRole('director_it')).toBe('/dashboard/enacal');
     expect(getDefaultRouteByRole('cuadrilla')).toBe('/dashboard/enacal/crew/reports');
     expect(getDefaultRouteByRole('lider_cuadrilla')).toBe('/dashboard/enacal/assignments');
     expect(getDefaultRouteByRole('trabajador')).toBe('/dashboard/enacal');

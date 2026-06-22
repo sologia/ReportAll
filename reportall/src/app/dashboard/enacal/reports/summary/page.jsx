@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
+import ButtonBack from '@/app/components/ButtonBack'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
@@ -84,26 +84,9 @@ const SummaryReportsPage = () => {
     loadSummary(reset)
   }
 
-  const navButtons = role === 'director_it'
-    ? [
-      { label: 'Resumen cuadrillas', href: '/dashboard/enacal/craw/report-summary' },
-      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
-      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-    : [
-      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
-      { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
-      { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-
   return (
     <div>
-      <ButtonGroup
-        buttons={navButtons}
-      />
+      <ButtonBack />
 
       <h2 className='text-2xl font-semibold mb-4'>Resumen General de Reportes (Director IT)</h2>
 

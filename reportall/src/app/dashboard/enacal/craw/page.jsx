@@ -41,7 +41,7 @@ const CrawPage = () => {
           { label: "Crear cuadrilla", href: "/dashboard/enacal/craw/createcraw" },
           { label: "Editar cuadrilla", href: "/dashboard/enacal/craw/updatecraw" },
           { label: "Gestionar accesos de cuadrillas", href: "/dashboard/enacal/craw/accounts" },
-          { label: "Gestionar matriculas", href: "/dashboard/enacal/vehicles" },
+          // { label: "Gestionar matriculas", href: "/dashboard/enacal/vehicles" },
         ]}
       />
 

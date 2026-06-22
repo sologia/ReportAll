@@ -1,8 +1,8 @@
 'use client'
-import ButtonGroup from '@/app/components/ButtonGroup '
 import SimpleTable from '@/app/components/SimpleTable'
 import StateBadge from '@/app/components/StateBadge'
 import TablePaginationControls from '@/app/components/TablePaginationControls'
+import ButtonBack from '@/app/components/ButtonBack'
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { buildSessionHeaders, getSession } from '@/lib/auth';
@@ -194,24 +194,14 @@ const ViewReports = () => {
 
   return (
     <>
+      <ButtonBack />
 
       <section className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)] mb-5'>
         <h2 className='text-2xl sm:text-3xl font-bold text-slate-900'>Gestion de reportes</h2>
         <p className='mt-1 text-slate-600'>Filtra reportes y, si tienes permisos, actualiza su nivel de urgencia.</p>
       </section>
 
-      <div className='mb-4'>
-          <ButtonGroup
-          buttons={[
-            { label: "Estadísticas", href: "/dashboard/enacal/reports/statistics" },
-            { label: "Resumen IT", href: "/dashboard/enacal/reports/summary" },
-            { label: "Cuadrillas", href: "/dashboard/enacal/craw" },
-            { label: "Asignaciones", href: "/dashboard/enacal/assignments" },
-            { label: "Volver al menu principal", href: "/dashboard/enacal" },
-          ]}
-          />
-      </div>
-      
+
       <form onSubmit={handleFilter} className='rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end mb-4'>
         <div className='flex flex-col gap-1'>
           <label htmlFor='district' className='field-label'>Sector</label>

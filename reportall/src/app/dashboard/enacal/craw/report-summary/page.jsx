@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import ButtonGroup from '@/app/components/ButtonGroup '
+import ButtonBack from '@/app/components/ButtonBack'
 import TablePaginationControls from '@/app/components/TablePaginationControls'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
@@ -85,24 +85,9 @@ const CrewReportSummaryPage = () => {
     loadSummary(reset)
   }
 
-  const navButtons = role === 'director_it'
-    ? [
-      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
-      { label: 'Mapa de Reportes', href: '/dashboard/enacal/reports/summary/map' },
-      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-    : [
-      { label: 'Cuadrillas', href: '/dashboard/enacal/craw' },
-      { label: 'Asignaciones', href: '/dashboard/enacal/assignments' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-
   return (
     <div>
-      <ButtonGroup
-        buttons={navButtons}
-      />
+      <ButtonBack />
 
       <h2 className='text-2xl font-semibold mb-4'>Resumen de Reportes Atendidos por Cuadrilla</h2>
 

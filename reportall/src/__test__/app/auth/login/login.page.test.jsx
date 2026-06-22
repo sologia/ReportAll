@@ -33,17 +33,17 @@ describe('LoginPage()', () => {
 
     it('renderiza el formulario de inicio de sesión', () => {
         setup();
-        expect(screen.getByPlaceholderText("Correo electrónico")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Contraseña')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('usuario@correo.com')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Tu contrasena')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Iniciar sesion' })).toBeInTheDocument();
         expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     });
 
     it('actualiza email y password al escribir en el formulario', () => {
         setup();
 
-        const emailInput = screen.getByPlaceholderText('Correo electrónico');
-        const passwordInput = screen.getByPlaceholderText('Contraseña');
+        const emailInput = screen.getByPlaceholderText('usuario@correo.com');
+        const passwordInput = screen.getByPlaceholderText('Tu contrasena');
 
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'password' } });
@@ -55,7 +55,7 @@ describe('LoginPage()', () => {
     it('muestra advertencia si faltan credenciales', async () => {
         setup();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesion' }));
 
         await waitFor(() => {
             expect(Swal.fire).toHaveBeenCalledWith({
@@ -71,9 +71,9 @@ describe('LoginPage()', () => {
     it('muestra advertencia si el correo tiene formato inválido', async () => {
         setup();
 
-        fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'user.test.com' } });
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: '123456' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+        fireEvent.change(screen.getByPlaceholderText('usuario@correo.com'), { target: { value: 'user.test.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Tu contrasena'), { target: { value: '123456' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesion' }));
 
         await waitFor(() => {
             expect(Swal.fire).toHaveBeenCalledWith({
@@ -91,9 +91,9 @@ describe('LoginPage()', () => {
         fetch.mockResolvedValueOnce({ ok: false });
         setup();
 
-        fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'user@test.com' } });
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: '123456' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+        fireEvent.change(screen.getByPlaceholderText('usuario@correo.com'), { target: { value: 'user@test.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Tu contrasena'), { target: { value: '123456' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesion' }));
 
         await waitFor(() => {
             expect(Swal.fire).toHaveBeenCalledWith({
@@ -109,7 +109,7 @@ describe('LoginPage()', () => {
     it.each([
         ['cliente', '/dashboard/clientes'],
         ['administrador', '/dashboard/enacal'],
-        ['director_it', '/dashboard/enacal/reports/summary'],
+        ['director_it', '/dashboard/enacal'],
         ['cuadrilla', '/dashboard/enacal/crew/reports'],
         ['lider_cuadrilla', '/dashboard/enacal/assignments'],
     ])('inicia sesión y redirecciona según rol %s', async (role, expectedRoute) => {
@@ -119,10 +119,10 @@ describe('LoginPage()', () => {
         });
         setup();
 
-        fireEvent.change(screen.getByPlaceholderText('Correo electrónico'), { target: { value: 'user@test.com' } });
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: '123456' } });
+        fireEvent.change(screen.getByPlaceholderText('usuario@correo.com'), { target: { value: 'user@test.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Tu contrasena'), { target: { value: '123456' } });
 
-        fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesion' }));
 
         await waitFor(() => {
             expect(fetch).toHaveBeenCalledWith('/api/auth/login', {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import ButtonGroup from '@/app/components/ButtonGroup '
+import ButtonBack from '@/app/components/ButtonBack'
 import { getSession } from '@/lib/auth'
 import { canViewIds, normalizeRole } from '@/lib/rbac'
 
@@ -32,25 +32,9 @@ const SummaryMapPage = () => {
     loadMapReports()
   }, [base])
 
-  const navButtons = role === 'director_it'
-    ? [
-      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
-      { label: 'Resumen cuadrillas', href: '/dashboard/enacal/craw/report-summary' },
-      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-    : [
-      { label: 'Estadísticas', href: '/dashboard/enacal/reports/statistics' },
-      { label: 'Resumen IT', href: '/dashboard/enacal/reports/summary' },
-      { label: 'Ver Reportes', href: '/dashboard/enacal/reports/viewreports' },
-      { label: 'Menu', href: '/dashboard/enacal' },
-    ]
-
   return (
     <div>
-      <ButtonGroup
-        buttons={navButtons}
-      />
+      <ButtonBack />
 
       <h2 className='text-2xl font-semibold mb-4'>Mapa de Reportes (Director IT)</h2>
 

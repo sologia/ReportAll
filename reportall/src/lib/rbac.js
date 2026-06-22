@@ -59,7 +59,7 @@ export function getDefaultRouteByRole(role) {
   const normalized = normalizeRole(role);
   if (normalized === ROLES.CLIENTE) return '/dashboard/clientes';
   if (normalized === ROLES.ADMINISTRADOR) return '/dashboard/enacal';
-  if (normalized === ROLES.DIRECTOR_IT) return '/dashboard/enacal/reports/summary';
+  if (normalized === ROLES.DIRECTOR_IT) return '/dashboard/enacal';
   if (normalized === ROLES.CUADRILLA) return '/dashboard/enacal/crew/reports';
   if (normalized === ROLES.LIDER_CUADRILLA) return '/dashboard/enacal/assignments';
   return '/dashboard/enacal';
