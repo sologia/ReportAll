@@ -17,6 +17,7 @@ const TowExample = () => {
       { label: "Gestionar cuadrillas", href: "/dashboard/enacal/craw" },
       { label: "Gestionar asignaciones", href: "/dashboard/enacal/assignments" },
       { label: "Gestionar matriculas", href: "/dashboard/enacal/vehicles" },
+      { label: "Ver mapa de reportes", href: "/dashboard/enacal/reports/summary/map" },
       // { label: "Gestionar accesos de cuadrillas", href: "/dashboard/enacal/craw/accounts" },
       // { label: "Pruebas RNF", href: "/dashboard/enacal/security-tests" },
     ],
