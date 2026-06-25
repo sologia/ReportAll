@@ -14,6 +14,7 @@ const TowExample = () => {
       { label: "Ver todos los reportes", href: "/dashboard/enacal/reports/viewreports" },
       { label: "Ver resumen IT", href: "/dashboard/enacal/reports/summary" },
       { label: "Ver estadisticas", href: "/dashboard/enacal/reports/statistics" },
+      { label: "Ver resumen por cuadrilla", href: "/dashboard/enacal/craw/report-summary" },
       { label: "Gestionar cuadrillas", href: "/dashboard/enacal/craw" },
       { label: "Gestionar asignaciones", href: "/dashboard/enacal/assignments" },
       { label: "Gestionar matriculas", href: "/dashboard/enacal/vehicles" },
