@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\src",
+    "\\backend\\src\\Controllers",
+    "\\backend\\src\\Routes",
+    "\\frontend",
+    "\\frontend\\src",
+    "\\src",
+    "\\src\\app"
+  ],
+  "SelectedNode": "\\backend\\src\\Controllers",
+  "PreviewInSolutionExplorer": false
+}
